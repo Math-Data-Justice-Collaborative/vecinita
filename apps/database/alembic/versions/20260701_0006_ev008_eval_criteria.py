@@ -25,7 +25,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Add eval_criteria registry (no PII columns — ADR-004)."""
-    op.create_table(
+    _ = op.create_table(
         "eval_criteria",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("slug", sa.String(length=64), nullable=False),

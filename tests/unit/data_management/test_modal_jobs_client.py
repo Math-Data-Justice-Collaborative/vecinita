@@ -28,11 +28,45 @@ def test_modal_jobs_client_requires_url_and_proxy_key(
     monkeypatch.delenv("VECINITA_MODAL_DATA_MGMT_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
     with pytest.raises(ModalJobsEnqueueError, match="required"):
-        ModalJobsEnqueueClient()
+        _ = ModalJobsEnqueueClient()
 
     monkeypatch.setenv("VECINITA_MODAL_DATA_MGMT_URL", "https://dm.example")
     with pytest.raises(ModalJobsEnqueueError, match="required"):
-        ModalJobsEnqueueClient()
+        _ = ModalJobsEnqueueClient()
+
+
+def test_modal_jobs_client_defaults_service_authorization_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Schedule/self-enqueue uses VECINITA_INTERNAL_API_KEY when Authorization omitted.
+
+    POST /jobs requires proxy key + admin JWT or internal service key when
+    VECINITA_AUTH_REQUIRED=true (F79 / resolve_operator_or_service).
+    [Corpus: feature-list.md §F75 §F76]
+    """
+    monkeypatch.setenv("VECINITA_MODAL_DATA_MGMT_URL", "https://dm.example")
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-secret")
+    monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", "internal-service-key")
+    job_id = uuid4()
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
+
+    transport = httpx.MockTransport(handler)
+    http_client = httpx.Client(transport=transport, base_url="https://dm.example")
+    client = ModalJobsEnqueueClient(http_client=http_client)
+    try:
+        result = client.enqueue_freshness_refresh(DOC_ID, force=False)
+    finally:
+        client.close()
+        http_client.close()
+
+    assert result == job_id
+    assert len(seen) == 1
+    assert seen[0].headers["X-Vecinita-Proxy-Key"] == "proxy-secret"
+    assert seen[0].headers["Authorization"] == "Bearer internal-service-key"
 
 
 def test_modal_jobs_client_enqueue_success_and_auth_header(
@@ -89,7 +123,7 @@ def test_modal_jobs_client_enqueue_http_error_raises() -> None:
     )
     try:
         with pytest.raises(ModalJobsEnqueueError, match="503"):
-            client.enqueue_automation_catchup(
+            _ = client.enqueue_automation_catchup(
                 DOC_ID,
                 revision="1",
                 embed_status="failed",
@@ -216,7 +250,7 @@ def test_modal_jobs_client_enqueue_freshness_http_error_raises() -> None:
     )
     try:
         with pytest.raises(ModalJobsEnqueueError, match="enqueue_freshness_refresh"):
-            client.enqueue_freshness_refresh(DOC_ID, force=True)
+            _ = client.enqueue_freshness_refresh(DOC_ID, force=True)
     finally:
         client.close()
         http_client.close()

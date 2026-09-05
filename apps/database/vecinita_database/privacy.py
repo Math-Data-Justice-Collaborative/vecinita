@@ -48,6 +48,27 @@ EVAL_CONFIG_TABLES: Final[frozenset[str]] = frozenset(
     }
 )
 
+METRICS_TABLES: Final[frozenset[str]] = frozenset(
+    {
+        "operation_metrics",
+        "metrics_hourly",
+    }
+)
+
+FORBIDDEN_METRICS_CONTENT_COLUMNS: Final[frozenset[str]] = frozenset(
+    {
+        "question",
+        "answer",
+        "prompt",
+        "message",
+        "messages",
+        "transcript",
+        "body",
+        "text",
+        "content",
+    }
+)
+
 FORBIDDEN_EV002_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
     {
         "created_by",
@@ -92,6 +113,8 @@ FORBIDDEN_TAG_IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
 FORBIDDEN_EVAL_IDENTITY_COLUMNS: Final[frozenset[str]] = FORBIDDEN_EV002_IDENTITY_COLUMNS
 
 FORBIDDEN_EVAL_CONFIG_IDENTITY_COLUMNS: Final[frozenset[str]] = FORBIDDEN_EV002_IDENTITY_COLUMNS
+
+FORBIDDEN_METRICS_IDENTITY_COLUMNS: Final[frozenset[str]] = FORBIDDEN_EV002_IDENTITY_COLUMNS
 
 
 def _normalize_database_url(url: str) -> str:
@@ -209,6 +232,46 @@ def find_identity_columns_on_eval_config_tables(database_url: str) -> dict[str, 
             for col in columns
             if col in FORBIDDEN_EVAL_CONFIG_IDENTITY_COLUMNS or col.startswith("auth_")
         )
+        if forbidden:
+            violations[table] = forbidden
+    return violations
+
+
+def find_missing_metrics_tables(database_url: str) -> set[str]:
+    """Return F84 metrics table names absent from the public schema."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    return set(METRICS_TABLES - present)
+
+
+def find_identity_columns_on_metrics_tables(database_url: str) -> dict[str, list[str]]:
+    """Return forbidden identity column names per metrics table (ADR-055)."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    violations: dict[str, list[str]] = {}
+    for table in sorted(METRICS_TABLES & present):
+        columns = {col["name"] for col in inspector.get_columns(table, schema="public")}
+        forbidden = sorted(
+            col
+            for col in columns
+            if col in FORBIDDEN_METRICS_IDENTITY_COLUMNS or col.startswith("auth_")
+        )
+        if forbidden:
+            violations[table] = forbidden
+    return violations
+
+
+def find_metrics_content_columns(database_url: str) -> dict[str, list[str]]:
+    """Return forbidden chat-content column names per metrics table (ADR-004 / ADR-055)."""
+    engine = create_engine(_normalize_database_url(database_url))
+    inspector = inspect(engine)
+    present = set(inspector.get_table_names(schema="public"))
+    violations: dict[str, list[str]] = {}
+    for table in sorted(METRICS_TABLES & present):
+        columns = {col["name"] for col in inspector.get_columns(table, schema="public")}
+        forbidden = sorted(col for col in columns if col in FORBIDDEN_METRICS_CONTENT_COLUMNS)
         if forbidden:
             violations[table] = forbidden
     return violations

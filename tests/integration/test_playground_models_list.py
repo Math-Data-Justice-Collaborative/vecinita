@@ -54,7 +54,7 @@ def playground_models_client(
     monkeypatch.setenv("DATABASE_URL", database_url)
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
-    seed_eval_corpus(database_url=database_url)
+    _ = seed_eval_corpus(database_url=database_url)
     mock_client = MockPlaygroundModelsClient()
     mock_library = MockPlaygroundLibraryClient()
     app = create_app(

@@ -14,6 +14,7 @@ members = [
     "vecinita-internal-write-api",
     "vecinita-llm-client",
     "vecinita-rag",
+    "vecinita-rerank-client",
     "vecinita-shared-schemas",
     "vecinita-tagging",
 ]
@@ -2138,6 +2139,7 @@ dev = [
     { name = "vecinita-internal-write-api" },
     { name = "vecinita-llm-client" },
     { name = "vecinita-rag" },
+    { name = "vecinita-rerank-client" },
     { name = "vecinita-shared-schemas" },
     { name = "vecinita-tagging" },
 ]
@@ -2164,6 +2166,7 @@ dev = [
     { name = "vecinita-internal-write-api", editable = "apps/internal-write-api" },
     { name = "vecinita-llm-client", editable = "packages/llm-client" },
     { name = "vecinita-rag", editable = "packages/rag" },
+    { name = "vecinita-rerank-client", editable = "packages/rerank-client" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
     { name = "vecinita-tagging", editable = "packages/tagging" },
 ]
@@ -2180,6 +2183,7 @@ dependencies = [
     { name = "vecinita-embedding-client" },
     { name = "vecinita-llm-client" },
     { name = "vecinita-rag" },
+    { name = "vecinita-rerank-client" },
     { name = "vecinita-shared-schemas" },
     { name = "vecinita-tagging" },
 ]
@@ -2193,6 +2197,7 @@ requires-dist = [
     { name = "vecinita-embedding-client", editable = "packages/embedding-client" },
     { name = "vecinita-llm-client", editable = "packages/llm-client" },
     { name = "vecinita-rag", editable = "packages/rag" },
+    { name = "vecinita-rerank-client", editable = "packages/rerank-client" },
     { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
     { name = "vecinita-tagging", editable = "packages/tagging" },
 ]
@@ -2353,6 +2358,21 @@ requires-dist = [
     { name = "llama-index-vector-stores-postgres", specifier = ">=0.2,<0.9" },
     { name = "psycopg", specifier = ">=3.3.4" },
     { name = "sqlalchemy", specifier = ">=2.0.49" },
+]
+
+[[package]]
+name = "vecinita-rerank-client"
+version = "0.1.0"
+source = { editable = "packages/rerank-client" }
+dependencies = [
+    { name = "httpx" },
+    { name = "vecinita-shared-schemas" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27,<1" },
+    { name = "vecinita-shared-schemas", editable = "packages/shared-schemas" },
 ]
 
 [[package]]

@@ -107,7 +107,7 @@ def test_uj073_post_feedback_stores_anonymous_row(write_client: TestClient, engi
     assert row["locale"] == "en"
 
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": feedback_id})
+        _ = conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": feedback_id})
 
 
 def test_uj073_post_feedback_rejects_email_field(write_client: TestClient) -> None:
@@ -265,7 +265,7 @@ def test_uj073_admin_lists_feedback(
     assert viewer.status_code == HTTPStatus.FORBIDDEN
 
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": UUID(feedback_id)})
+        _ = conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": UUID(feedback_id)})
 
 
 def test_uj073_feedback_purge_removes_rows_older_than_90_days(
@@ -281,7 +281,7 @@ def test_uj073_feedback_purge_removes_rows_older_than_90_days(
     fresh_created = datetime.now(UTC) - timedelta(days=1)
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO feedback (id, created_at, category, message, locale)
@@ -290,7 +290,7 @@ def test_uj073_feedback_purge_removes_rows_older_than_90_days(
             ),
             {"id": old_id, "created_at": old_created},
         )
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO feedback (id, created_at, category, message, locale)
@@ -335,5 +335,5 @@ def test_uj073_feedback_purge_removes_rows_older_than_90_days(
         assert fresh_count == 1
     finally:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": old_id})
-            conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": fresh_id})
+            _ = conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": old_id})
+            _ = conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": fresh_id})

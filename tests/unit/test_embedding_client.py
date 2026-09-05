@@ -85,7 +85,7 @@ def test_embed_raises_on_wrong_dimension() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
     )
     with pytest.raises(EmbeddingClientError, match="384"):
-        client.embed("x")
+        _ = client.embed("x")
     client.close()
 
 
@@ -102,7 +102,7 @@ def test_embed_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
     )
     with pytest.raises(EmbeddingClientError, match="503"):
-        client.embed("x")
+        _ = client.embed("x")
     client.close()
 
 
@@ -113,7 +113,7 @@ def test_embedding_client_requires_base_url_or_env(
     monkeypatch.delenv("VECINITA_MODAL_EMBED_URL", raising=False)
 
     with pytest.raises(EmbeddingClientError, match="VECINITA_MODAL_EMBED_URL"):
-        EmbeddingClient(base_url=None)
+        _ = EmbeddingClient(base_url=None)
 
 
 def test_embedding_client_context_manager_closes_owned_client(
@@ -143,7 +143,7 @@ def test_embedding_client_context_manager_closes_owned_client(
             closed.append(True)
             original_close()
 
-        client.close = tracked_close  # type: ignore[method-assign]
+        client.close = tracked_close
         return client
 
     monkeypatch.setattr(httpx, "Client", client_factory)
@@ -165,7 +165,7 @@ def test_embed_raises_when_embedding_field_missing() -> None:
     )
 
     with pytest.raises(EmbeddingClientError, match="embedding"):
-        client.embed("x")
+        _ = client.embed("x")
     client.close()
 
 
@@ -189,7 +189,7 @@ def test_embed_batch_raises_on_http_error(
     )
 
     with pytest.raises(EmbeddingClientError, match="502"):
-        client.embed_batch(["a"])
+        _ = client.embed_batch(["a"])
     assert calls["n"] == _RETRY_ATTEMPTS_WITH_MAX_2  # initial + 2 retries
     client.close()
 
@@ -270,7 +270,7 @@ def test_embed_batch_dim_mismatch_does_not_retry(
         http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
     )
     with pytest.raises(EmbeddingClientError, match="384"):
-        client.embed_batch(["a"])
+        _ = client.embed_batch(["a"])
     assert calls["n"] == 1
     client.close()
 
@@ -286,7 +286,7 @@ def test_embed_batch_raises_when_embeddings_field_missing() -> None:
     )
 
     with pytest.raises(EmbeddingClientError, match="embeddings"):
-        client.embed_batch(["a"])
+        _ = client.embed_batch(["a"])
     client.close()
 
 
@@ -303,7 +303,7 @@ def test_embed_raises_on_non_numeric_value() -> None:
     )
 
     with pytest.raises(EmbeddingClientError, match="numeric"):
-        client.embed("x")
+        _ = client.embed("x")
     client.close()
 
 
@@ -324,7 +324,7 @@ def test_embedding_client_does_not_close_injected_http_client() -> None:
         closed.append(True)
         original_close()
 
-    http.close = tracked_close  # type: ignore[method-assign]
+    http.close = tracked_close
     client = EmbeddingClient("http://embed.test", http_client=http)
     client.close()
 
@@ -452,5 +452,5 @@ def test_embed_batch_transport_error_exhausts_retries(
         http_client=httpx.Client(transport=transport, base_url="http://embed.test"),
     )
     with pytest.raises(EmbeddingClientError, match="transport error"):
-        client.embed_batch(["a"])
+        _ = client.embed_batch(["a"])
     client.close()

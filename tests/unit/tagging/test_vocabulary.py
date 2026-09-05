@@ -39,7 +39,7 @@ def test_default_seed_path_uses_env_when_file_exists(
 ) -> None:
     """Test default seed path uses env when file exists."""
     seed_file = tmp_path / "custom_tags.json"
-    seed_file.write_text('{"tags": []}', encoding="utf-8")
+    _ = seed_file.write_text('{"tags": []}', encoding="utf-8")
     monkeypatch.setenv("VECINITA_TAG_SEED_PATH", str(seed_file))
 
     assert default_seed_path() == seed_file
@@ -60,7 +60,7 @@ def test_default_seed_path_falls_back_to_repo_fixture(
 def test_load_seed_vocabulary_from_custom_path(tmp_path: Path) -> None:
     """Test load seed vocabulary from custom path."""
     seed_path = tmp_path / "seed_tags.json"
-    seed_path.write_text(
+    _ = seed_path.write_text(
         json.dumps(
             {
                 "tags": [
@@ -91,10 +91,10 @@ def test_load_seed_vocabulary_loads_repo_fixture() -> None:
 def test_load_seed_vocabulary_requires_tags_array(tmp_path: Path) -> None:
     """Test load seed vocabulary requires tags array."""
     seed_path = tmp_path / "bad.json"
-    seed_path.write_text('{"tags": "not-a-list"}', encoding="utf-8")
+    _ = seed_path.write_text('{"tags": "not-a-list"}', encoding="utf-8")
 
     with pytest.raises(TypeError, match="tags"):
-        load_seed_vocabulary(seed_path)
+        _ = load_seed_vocabulary(seed_path)
 
 
 def test_vocabulary_slugs_deduplicates_in_order() -> None:

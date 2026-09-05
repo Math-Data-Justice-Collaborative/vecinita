@@ -2,13 +2,12 @@ import type { TagFacet } from "../api/browse";
 import type { Conversation } from "../hooks/useConversationStore";
 import type { Locale } from "../hooks/useLocale.types";
 import type { Theme } from "../hooks/useTheme";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import { LanguageToggle } from "./LanguageToggle";
 import { PreviousChatsList } from "./PreviousChatsList";
 import { TagFilterChips } from "./TagFilterChips";
 import { ThemeToggle } from "./ThemeToggle";
 import { ActionIcon, Tooltip } from "vecinita-frontend-ui";
-import { t as i18nT } from "vecinita-frontend-i18n";
 
 type SidebarProps = {
   open: boolean;
@@ -62,11 +61,11 @@ export function Sidebar({
       className="sidebar"
       data-testid="sidebar"
       data-open={open}
-      aria-label={t(locale, "menuLabel")}
+      aria-label={t(locale, "chat.menuLabel")}
     >
-      <div className="sidebar-brand">{t(locale, "appTitle")}</div>
+      <div className="sidebar-brand">{t(locale, "chat.appTitle")}</div>
 
-      <Tooltip content={i18nT(locale, "chat.tooltip.newChat")}>
+      <Tooltip content={t(locale, "chat.tooltip.newChat")}>
         <button
           type="button"
           className="sidebar-new-chat"
@@ -77,7 +76,7 @@ export function Sidebar({
           <ActionIcon motion="press" pending={false} aria-hidden="true">
             <span>+ </span>
           </ActionIcon>
-          {t(locale, "newChat")}
+          {t(locale, "chat.newChat")}
         </button>
       </Tooltip>
 
@@ -94,7 +93,7 @@ export function Sidebar({
             onNavigate("/");
           }}
         >
-          {t(locale, "navChat")}
+          {t(locale, "chat.navChat")}
         </button>
         <button
           type="button"
@@ -104,7 +103,7 @@ export function Sidebar({
             onNavigate("/corpus");
           }}
         >
-          {t(locale, "navCorpus")}
+          {t(locale, "chat.navCorpus")}
         </button>
         <button
           type="button"
@@ -117,13 +116,13 @@ export function Sidebar({
             onNavigate("/feedback");
           }}
         >
-          {t(locale, "navFeedback")}
+          {t(locale, "chat.navFeedback")}
         </button>
       </nav>
 
       {tags.length > 0 ? (
         <section className="sidebar-section">
-          <h2 className="sidebar-heading">{t(locale, "topicsHeading")}</h2>
+          <h2 className="sidebar-heading">{t(locale, "chat.topicsHeading")}</h2>
           <TagFilterChips
             tags={tags}
             selected={selectedTags}

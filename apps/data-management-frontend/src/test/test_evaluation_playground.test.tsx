@@ -1816,10 +1816,30 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
     vi.spyOn(adminApi, "fetchPlaygroundCatalogFamilies").mockReturnValue(
       catalogPromise,
     );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (
+          url.includes("/internal/v1/models/ollama/catalog") &&
+          !url.includes("/catalog/")
+        ) {
+          return catalogPromise.then((body) => ({
+            ok: true,
+            json: async () => body,
+          }));
+        }
+        return Promise.resolve(defaultPlaygroundFetch(url));
+      }),
+    );
 
     await renderSuperAdminAppRoutesReady("/evaluation?tab=models");
     expect(screen.getByTestId("eval-models-catalog")).toBeInTheDocument();
-    expect(screen.getAllByText(/loading|cargando/i).length).toBeGreaterThan(0);
+    await waitFor(() => {
+      expect(screen.getAllByText(/loading|cargando/i).length).toBeGreaterThan(
+        0,
+      );
+    });
 
     resolveCatalog?.({ families: [{ slug: DOWNLOAD_FAMILY }] });
     await waitFor(() => {

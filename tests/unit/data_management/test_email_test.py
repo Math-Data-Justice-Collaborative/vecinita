@@ -37,7 +37,7 @@ def test_resend_client_raises_on_http_error() -> None:
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ResendError) as excinfo:
-        client.send_test_email("ops@example.org")
+        _ = client.send_test_email("ops@example.org")
     assert excinfo.value.status_code == HTTPStatus.BAD_REQUEST
 
 
@@ -58,7 +58,7 @@ def test_resend_client_parses_provider_error_body() -> None:
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ResendError) as excinfo:
-        client.send_test_email("ops@example.org")
+        _ = client.send_test_email("ops@example.org")
     err = excinfo.value
     assert err.status_code == HTTPStatus.FORBIDDEN
     assert err.provider_name == "validation_error"
@@ -117,7 +117,7 @@ def test_resend_client_ignores_non_string_provider_fields() -> None:
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ResendError) as excinfo:
-        client.send_test_email("ops@example.org")
+        _ = client.send_test_email("ops@example.org")
     err = excinfo.value
     assert err.provider_name == ""
     assert err.provider_message == ""
@@ -133,7 +133,7 @@ def test_resend_client_handles_non_json_error_body() -> None:
         http_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     with pytest.raises(ResendError) as excinfo:
-        client.send_test_email("ops@example.org")
+        _ = client.send_test_email("ops@example.org")
     err = excinfo.value
     assert err.provider_name == ""
     assert err.provider_message == ""

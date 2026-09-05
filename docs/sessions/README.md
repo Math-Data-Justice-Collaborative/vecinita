@@ -43,10 +43,12 @@ Then invoke stages from the approved plan (e.g. `@10-e2e`, `@16-evolve`).
 | S024 | feature | completed | Website scrape & crawl pipeline (epic #185 → #69/#71/#70) | `evolve/EV-022-website-scrape-crawl` | 2026-08-03 | 2026-08-03 |
 | S025 | feature | completed | CI / local quality + release automation (#194 → #182/#103; F62/F63) | `evolve/EV-023-ci-release-automation` | 2026-08-03 | 2026-08-04 |
 | S026 | feature | in_progress | ChatRAG + Admin UX polish epic (#193 → #87/#93/#104/#106/#186/#170) | `evolve/EV-024-frontend-ux-polish` | 2026-08-04 | — |
+| S030 | feature | completed | Corpus automations + freshness + LoRA FT (F75–F77); cutover deferred | `evolve/EV-027-corpus-automations` (PR #238) | 2026-08-07 | 2026-08-13 |
+| S031 | feature | in_progress | Brownfield docs/corpus gap-fill (standard) | `feat/S031-docs-gapfill` | 2026-08-18 | — |
 
 ## Active session
 
-**S026-frontend-ux-polish** / **EV-024** — epic [#193](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/193). Branch `evolve/EV-024-frontend-ux-polish`. Predecessor S025/EV-023 closed 2026-08-04.
+**S031-docs-gapfill** — brownfield standard-scale docs/corpus gap-fill (orchestrator `brownfield`). Branch `feat/S031-docs-gapfill` (based on EV-027 tip; PR [#238](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/238) left as-is). Prior closed: S030/EV-027.
 
 ## Folder layout
 

@@ -27,7 +27,7 @@ def test_backfill_defaults_to_rescrape_source() -> None:
 def test_backfill_from_chunks_requires_ack_flag() -> None:
     """Reconstruct-from-chunks backfill is rejected without operator ack."""
     with pytest.raises(ValidationError) as exc_info:
-        JobOptions.model_validate(
+        _ = JobOptions.model_validate(
             {
                 "job_type": "rebuild",
                 "mode": "rechunk",

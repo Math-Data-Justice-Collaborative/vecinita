@@ -1177,3 +1177,620 @@ post–EV-029/EV-218 corpus coverage. Content-only i18n change in `messages.ts` 
 | EV216-D3 | Out of scope | Dynamic chips; backend query rewrite; coldstart facts copy |
 | EV216-D4 | Success | Issue #216 acceptance criteria; TC-259 / UJ-081 |
 | EV216-D5 | Spec gate | Spec-first; Build blocked until operator approves gate |
+
+---
+
+## Session S031 — Brownfield docs gap-fill (2026-08-18)
+
+**Orchestrator:** brownfield (standard) — **not** an evolve cycle  
+**Session:** S031-docs-gapfill  
+**Branch:** `feat/S031-docs-gapfill` (rebased onto `main` after PR #238 merge)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S031-D0 | Proceed gate | Open S031 → documenting → verify → HANDOFF → implement; local only; S030 closed; PR #238 left as-is |
+| S031-D1 | Gap-fill batch | **feature-list** F78–F80 status → Implemented (in-tree; live cutover deferred); **rewrite** plan-adherence / constraint-enforcement / template-conformance to ChatRAG |
+| S031-D2 | Branch base | Rebased onto `main` after PR #238 merge (was `evolve/EV-027-corpus-automations`) |
+| S031-D3 | Expand gap-fill | Draft inventory items **2–12** (staging-runbook, architecture FT, schema, data-flow, deploy-checklist, CHANGELOG, spec overview, CORPUS satellites, eval-golden F77 note, maps-mock waiver) |
+| S031-D4 | Documenting→implementing gate | **Open** + leftover rules (`open_leftover`) — rewrite `domain-vocabulary.mdc` ChatRAG-first; no maps product; no live mutation |
+| S031-D5 | `test_fast.sh` bash 3.2 | **Portable rewrite** (replace bash-4-only builtins) so implementing `tests` pack / `make test-fast` works on macOS stock bash |
+| S031-D6 | Close session | **Close** then commit on `feat/S031-docs-gapfill` (`close_then_commit`) |
+
+### Ship path close (2026-08-23)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S030-D67 | Final ship close | **Close EV-027 ship path** — #238 merged `32d94c9b`; #247 merged `d84162ea`; `overall_status=idle`; skip 17-retrospective this session; cutover/enable/FT promote remain deferred (S030-D64) |
+
+## Cycle EV-028 — Scope (S032 / #181)
+
+**Title:** ChatRAG performance regression gate  
+**Session:** S032-rag-regression-gate (local store: `EV-028-rag-regression-gate`)  
+**Issue:** [#181](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/181)  
+**Milestone:** Retrieval and answer quality  
+**Branch:** `evolve/EV-028-rag-regression-gate`  
+**Status:** **closed (merged)** — PR [#258](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/258) @ `b977599d`; CI + deploy-preflight green on `main`. Operator: add `rag-regression` required check on branch protection.
+
+### Ship close (2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S032-D7 | EV-028 close | **Closed** — #181 closed; `rag-regression` green on `main`; session `EV-028-rag-regression-gate` archived |
+| S032-D6 | Spec→Build gate | **Closed** — shipped on `evolve/EV-028-rag-regression-gate`, merged `b977599d` |
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S032-D1 | Goal | Full #181 — baseline store + CI regression compare + reviewable bump |
+| S032-D2 | Gate scope | PRs to `main` + pushes to `main` |
+| S032-D3 | Corpus / runtime | Fixture golden + mocked judge + CI postgres (no Modal GPU on PR) |
+| S032-D4 | Tolerances | Quality ≤0.02 abs drop (with floors); retrieval ≤2pp drop; latency p95 max(+10%, +500ms) vs baseline, 15s ceiling |
+| S032-D5 | Scale / angles | Standard + all v1 documenting packs |
+| S032-D6 | Spec→Build gate | **Closed** — merged `b977599d` |
+
+## Cycle EV-029 — Scope (S033 / #83 #82)
+
+**Title:** Smart retrieval + reranking ship + LLM query refinement  
+**Session:** EV-029-smart-retrieval-rerank (local store)  
+**Issues:** [#83](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/83),
+[#82](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/82)  
+**Milestone:** Retrieval and answer quality  
+**Branch:** `evolve/EV-029-smart-retrieval-rerank`  
+**Status:** **completed** — 11-verify-impl + 13-deploy-smoke 2026-08-24
+
+### Close-out (2026-08-24)
+
+| Item | Result |
+|------|--------|
+| PR #260 | Merged `c69f8646` |
+| Hotfix #261 | Merged `9d95133e` (starlette image + rerank-client proxy header) |
+| Staging H3 ask | PASS (AC-SR3 / UJ-059) |
+| AC-SR1–SR7 | PASS — see `docs/acceptance-criteria.md` |
+| F81 staging enable | Deferred (`VECINITA_RAG_QUERY_REFINE=false`) |
+| Reports | session `reports/verify-impl.md`, `reports/deploy-smoke.md` |
+
+### Intake (S033-D1 — 2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S033-D1 | Goal | Full #83 ship — Modal CE + ChatRAG wiring + staging enable; include #82 F81 |
+| S033-D2 | #82 | **In scope** — F81 LLM query refinement (not deferred) |
+| S033-D3 | Prod CE | **Deferred** — staging flag on; prod AskQuestion at deploy (AC-FO4) |
+| S033-D4 | Success | AC-BB9 met + CE wired + staging on + UJ-059 green + `rag-regression` passes |
+| S033-D5 | Scale / angles | Standard + all v1 documenting packs |
+| S033-D6 | Spec→Build gate | **Closed** — pending operator approval at HANDOFF |
+
+**Cites:** [Corpus: feature-list.md §F45] [Corpus: feature-list.md §F81] [Corpus: acceptance §AC-BB9]
+[Spec: docs/config-spec.md §VECINITA_RAG_RERANK_CE] [Spec: docs/test-plan.md §TC-280]
+
+## Cycle EV-030 — Scope (S034 / #84)
+
+**Title:** Output verification (groundedness) + inline citations  
+**Session:** EV-030-groundedness-answer-formatting (local store)  
+**Issue:** [#84](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/84)  
+**Milestone:** Retrieval and answer quality (last open item)  
+**Branch:** `evolve/EV-030-groundedness-answer-formatting`  
+**Status:** **closed (merged + live)** — PR [#262](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/262) @ `17c5b631`; DO deploy `357f3e4a` ACTIVE; live `VECINITA_RAG_OUTPUT_VERIFY=true`; #84 closed
+
+### Closeout (2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S034-D8 | EV-030 close | F82 live; post-deploy smoke PASS (hedge + `[1]`…`[N]`); golden sweep non-regression |
+| S034-D9 | DO outage | Apps API 503/504 ~17:30–18:59 UTC; recovered; manual sync+deploy succeeded |
+| S034-D10 | Live verify (AC-FO4) | Operator approved `VECINITA_RAG_OUTPUT_VERIFY=true` on live ChatRAG (ADR-049 staging-as-live); H1–H3b smoke PASS 2026-08-24 |
+
+### Intake (S034-D1 — 2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S034-D1 | Verifier | Self-hosted LLM YES/NO (`score_faithfulness` on `vecinita-llm`) |
+| S034-D2 | Fail action | Hedge — prepend bilingual disclaimer; keep answer body |
+| S034-D3 | Streaming | Buffer full answer → verify+cite → emit (sync + SSE) |
+| S034-D4 | Formatting | Inline `[1]`…`[N]` citations mapped to `sources[]` |
+| S034-D5 | Rollout | Flag default-off; staging enable after F36 / `rag-regression` |
+| S034-D6 | Scale / angles | Standard + all v1 documenting packs |
+| S034-D7 | Spec→Build gate | **Closed** — pending operator approval at HANDOFF |
+
+**Feature:** F82  
+**Cites:** [Corpus: feature-list.md §F82] [Spec: docs/acceptance-criteria.md §AC-OV1–OV7]
+[Spec: docs/adr/ADR-033-ev008-rag-evaluation-implementation.md §9]
+
+## Cycle EV-031 — Live enable F78/F79 + F80 eval (S035)
+
+**Title:** Corpus automations live enable + FT playground eval path  
+**Session:** EV-031-corpus-automations-live-enable (local store)  
+**Prior:** EV-027 (S030-D64 deferred cutover)  
+**Branch:** `evolve/EV-031-corpus-automations-live-enable`  
+**Status:** **complete** (2026-08-26) — M133–M135 signed off; post-enable hotfix [#267](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/267) merged (Refresh now internal key auth on Modal DM `POST /jobs`; prod verified)
+
+### Intake (S035-D1 — 2026-08-24)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| S035-D1 | Scope | F78 + F79 live enable + F80 playground eval (no prod promote) |
+| S035-D2 | Enable order | F78 + F79 together in one deploy |
+| S035-D3 | Kill-switch | ON until post-enable smoke, then off |
+| S035-D4 | Scale | Full evolve band |
+
+**Features:** F78, F79, F80  
+**Cites:** [Corpus: feature-list.md §F78–F80] [Spec: ADR-052] [Spec: ADR-053]
+[Spec: docs/staging-runbook.md §EV-031 live enable sequence]
+
+### Intake (S032-D1 — 2026-08-23)
+
+**Waivers**
+
+- `[Corpus: WAIVED — community maps/alerts mock; reason: non-normative HTML mock, no Fn; decided: S031]`
+- `[Corpus: WAIVED — research-brief.md; reason: antibody leftover; decided: S031]`
+
+**Cites:** [Corpus: product] [Corpus: orchestrators] [Corpus: feature-list.md §F78–F80] [Corpus: staging] [Corpus: architecture] [Corpus: data] [Corpus: data-flow] [Corpus: deploy]
+
+---
+
+## Cycle EV-staging-do-supabase — Distinct staging (F83)
+
+**Title:** Distinct staging on DO + Supabase + Modal Environment  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-staging-do-supabase`  
+**Status:** implementing (Build gate open; Modal Environments amend)  
+**Date:** 2026-08-28
+
+### Intake / context
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-STG-D0 | Naming | Keep current stack as **prod**; new `*-staging` resources |
+| EV-STG-D1 | Modal | **Amended:** same workspace **`vecinita`**; native Modal Environment **`staging`** (web suffix `staging`) — not a second workspace |
+| EV-STG-D2 | Corpus | Staging migrations + seed only |
+| EV-STG-D3 | Merge gate | Ruleset on `main`: CI + staging deploy/H1–H5 smoke |
+| EV-STG-D4 | Modal CLI | After Spec→Build gate (not during Spec) |
+| EV-STG-D5 | Feature | **F83**; ADR-054 |
+| EV-STG-D6 | Modal auth | Reuse `vecinita` token; `modal environment create staging` + web suffix `staging` |
+
+### Provision closeout (2026-08-28)
+
+- Staging DO apps + `vecinita-staging-db` + Modal Environment + Supabase `camkatfbjguwvymfgdme`
+- H1–H5 PASS; ruleset `21766359`; ADR-049 interim banner flipped in runbook
+- **EV-STG-D7 (2026-08-28):** Destroy orphan DO DB `vecinita-staging` only; keep
+  `vecinita-staging-db` + prod `vecinita-staging-restored-20260701` as separate clusters.
+  One-cluster/two-DB merge deferred. Orphan deleted (`cb528db3-…`).
+
+**Cites:** [Corpus: product] §F83 [Corpus: staging] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Spec: docs/adr/ADR-049-single-env-staging-as-live.md]
+
+---
+
+## Cycle EV-033-stage-before-main — Stage before Main rule + GH tracking
+
+**Title:** Enforce Stage→Main via agent rule and GitHub ticket alignment  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-033-stage-before-main`  
+**Status:** implementing (Build gate open; rule + #288/#289 shipped)  
+**Date:** 2026-08-29
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-033-D0 | Goal | Align docs + always-applied rule + #212 to ADR-054 (not `stage` branch) |
+| EV-033-D1 | GH tracking | Rewrite #212; children (A) rule (B) docs/CORPUS |
+| EV-033-D2 | Acceptance | AC-ST8 + TC-298 |
+| EV-033-D3 | Rule | `.cursor/rules/stage-before-main.mdc` alwaysApply |
+| EV-033-D4 | Model | PR tip → `staging-smoke` → merge `main` → prod CD |
+| EV-033-D5 | Out | No new DO/Modal; keep ruleset `21766359`; no live corpus mutate |
+| EV-033-D6 | Verify waiver | `inline-documentation` FAIL waived — pre-existing repo-wide; not introduced by EV-033 |
+
+**Cites:** [Corpus: feature-list.md §F83] [Corpus: staging] [Corpus: acceptance] [Corpus: tests] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Spec: docs/adr/ADR-050-ci-cd-blocks-live-deploy.md]
+
+### Build closeout (2026-08-29)
+
+- Rule + TC-298 + #212 rewrite; children #288/#289 closed
+- Implementing verify: **ACCEPTED WITH WAIVER** — `inline-documentation` FAIL is repo-wide pre-existing (341 missing); not introduced by EV-033 (EV-033-D6, mirrors EV-staging waiver)
+- PR: pending on `evolve/EV-033-stage-before-main`
+
+---
+
+## Cycle EV-036-admin-monitoring-grafana — Monitoring + staging Grafana/Loki (#114)
+
+**Title:** Admin Monitoring dashboard (privacy-safe) + staging Grafana/Loki/alerts  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-036-admin-monitoring-grafana`  
+**Status:** documenting (draft-docs complete; feasibility next)  
+**Date:** 2026-08-29  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/114
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-036-D1 | Path | Hybrid: admin Monitoring (#114) + staging Grafana/Loki/alerts |
+| EV-036-D2 | Scale | standard (+ tech-plan / verify-tech) |
+| EV-036-D3 | Grafana | Staging-only micro compose `infra/observability/` on small Droplet |
+| EV-036-D4 | Fn | Single **F84** |
+| EV-036-D5 | Alerts | Alertmanager → generic webhook (staging secret) |
+| EV-036-D6 | Route | Dedicated `/monitoring` (F25 stays corpus-only) |
+| EV-036-D7 | Manifest | Feature/Spec/UJ/TC + API/Config/ADR-055/AC/runbook/deps |
+| EV-036-D8 | UI preview | No — interview from docs/#114 |
+| EV-036-D9 | Metrics API host | **internal-write-api** (DO holds `DATABASE_URL`) |
+| EV-036-D10 | Chat emit | Fire-and-forget HTTP after `/ask` — no question/answer |
+| EV-036-D11 | Prod Grafana | Deferred until cost AskQuestion (ADR-004 ≤$50) |
+| EV-036-D12 | Tech plan | **Approve TP-EV-036** — M136–M140; Droplet s-1vcpu-1gb; no chart npm lib; Modal `metrics_rollup`; defer Modal→Loki ship |
+| EV-036-D13 | Staging Droplet | **Approve create** `s-1vcpu-1gb` (~$6/mo) for Grafana/Loki/Alertmanager (2026-08-30) — blocked until doctl has Droplet scopes |
+| EV-036-D14 | Verify waive | **WAIVE** implementing `inline-documentation` — 348 missing repo-wide; **0** in F84 metrics/monitoring paths (2026-08-30) |
+| EV-036-D15 | PR base | **Always PR into `stage` first** when `origin/stage` exists; promote via second PR `stage`→`main` after CI + `staging-smoke`. If `stage` missing: AskQuestion to create (do not silently PR to `main`). Hotfix→`main` only via AskQuestion. Supersedes prior “no stage branch” guidance in EV-033 docs. |
+
+### Build progress (2026-08-30)
+
+| Milestone | Status | Commit / notes |
+|-----------|--------|----------------|
+| M136 | done | `fc3338d8` metrics schema + events |
+| M137 | done | `7ee8f83c` summary/timeseries + emitters |
+| M138 | done | `0664ae04` admin `/monitoring` UI |
+| M139 | done | `0e4261f6` `infra/observability/` compose + TC-305/306 |
+| M140 | done | verify band PASS+waive (D14); `18baaa3a` Droplet follow-ups; `701955a0` typecheck tests |
+| Droplet | **live** | `vecinita-staging-obs` `159.203.137.236` nyc3; TC-306 webhook drill PASS (2026-08-30) |
+
+### Cross-project Neo4j checkpoint (documenting)
+
+Retrieve for monitoring/Grafana/privacy returned **no_matches** / sparse advisory only
+(`reports/memory-context.md`). Disposition: **waive** cross-project Pattern adoption this
+cycle; **keep-local** Vecinita ADR-004 / F17 / #114 constraints. Re-check at implementing
+verify with HANDOFF dispositions if new Patterns appear.
+
+**Cites:** [Corpus: product] §F84 [Corpus: ADR-004] [Corpus: journeys] [Corpus: api] [Corpus: tests] [Corpus: staging] [Spec: docs/adr/ADR-055-operational-monitoring-grafana-loki.md]
+
+---
+
+## Cycle EV-037-staff-ux-maintainability — Staff UX maintainability review (#199)
+
+**Title:** Non-technical staff maintainability review of ChatRAG + Admin UX polish  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-037-staff-ux-maintainability`  
+**Status:** completed (Build closed 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/199 (CLOSED)
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-037-D1 | Deliverable | Session report + #199 comment; follow-on issues; no standing staff CMS doc |
+| EV-037-D2 | Follow-ons | Dual-i18n consolidation; staff copy runbook issue; extend/link #214 |
+| EV-037-D3 | Energy | Env for numeric knobs; advisory prose needs PR |
+| EV-037-D4 | Scale | micro |
+| EV-037-D5 | Out | CMS; polish rewrites |
+| EV-037-D6 | Surfaces | #87 #93 #104 #106 #186 #170 |
+
+### Build outputs
+
+| Output | Ref |
+|--------|-----|
+| Session review | `{session}/reports/staff-ux-maintainability-review.md` |
+| Consolidate ChatRAG → frontend-i18n | #296 |
+| Staff copy-change runbook | #297 |
+| Feedback notice/notify (existing) | #214 |
+| Gate | Open Build (operator **a**) |
+| Implementing verify | 5/5 PASS |
+
+**Cites:** [Corpus: product] [Corpus: ADR-004] #199 #193 #214 #296 #297
+
+---
+
+## Cycle EV-296-chatrag-frontend-i18n — Consolidate ChatRAG messages (#296)
+
+**Title:** Move ChatRAG visitor UI strings into `packages/frontend-i18n`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-296-chatrag-frontend-i18n`  
+**Status:** documenting (gate closed)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/296  
+**Parent:** EV-037-D2 / #199
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-296-R1 | Key shape | `chat.<camelCase>` (e.g. `chat.welcomeHeading`) |
+| EV-296-R2 | Call sites | Update all ChatRAG call sites to package `t(locale, "chat.*")` in the same PR (operator `B:B` → option 2) |
+| EV-296-R3 | Pairing guard | Full package EN/ES string-key set equality (TC-307) |
+| EV-296-R4 | Pagination | Use existing `shared.pagination` (do not invent `chat.pagination`) |
+| EV-296-R5 | Out | CMS; polish rewrites; `coldstart/facts.ts`; #297 runbook body; #214 polish |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/feature-list.md` §F31 | ChatRAG catalog ownership bullet |
+| `docs/CORPUS.md` | `[Corpus: frontend-i18n]` satellite path |
+| `docs/test-plan.md` | TC-307; TC-067/069 cross-links |
+| Session `reports/requirements-delta.md` | Full AC |
+
+**Cites:** [Corpus: product] [Corpus: feature-list.md §F31] [Corpus: frontend-i18n] [Corpus: tests] #296 #297
+
+---
+
+## Cycle EV-297-staff-copy-runbook — Staff copy-change runbook (#297)
+
+**Title:** Standing staff/ops checklist for ChatRAG + Admin UX copy changes  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-297-staff-copy-runbook`  
+**Status:** completed (merged PR #300 → `stage` 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/297 (CLOSED)  
+**Parent:** EV-037-D1 / #199 (waiver lifted)  
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/300
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-297-R1 | Path + CORPUS | `docs/runbooks/staff-copy-change.md` + `[Corpus: staff-copy]`; lift EV-037-D1 waiver |
+| EV-297-R2 | Feedback triage owner | Role placeholder + Admin Feedback + #214 |
+| EV-297-R3 | i18n home | `packages/frontend-i18n`; cold-start facts stay in `coldstart/facts.ts` |
+| EV-297-R4 | Proceed | Spec → draft-docs → feasibility → documenting verify |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/runbooks/staff-copy-change.md` | **New** staff/ops checklist |
+| `docs/CORPUS.md` | `[Corpus: staff-copy]` row; waiver lift note |
+| `docs/feature-list.md` §F31 | Point staff path at runbook |
+| `docs/decisions/evolve-decisions.md` | This cycle |
+
+**Cites:** [Corpus: staff-copy] [Corpus: frontend-i18n] [Corpus: ADR-004] [Corpus: ADR-046] [Corpus: ADR-047] #297 #199 #214 #296
+
+---
+
+## Cycle EV-214-feedback-polish-notify — Feedback polish + operator notify (#214)
+
+**Title:** Stronger bilingual no-PII/sensitive notice, Feedback UI polish, webhook + Resend email notify  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-214-feedback-polish-notify`  
+**Status:** completed (merged PR #303 → `stage` 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/214 (CLOSED)  
+**Branch:** `feat/feedback-polish-notify-214`  
+**PR:** https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/303  
+**Parent:** EV-037-D2 / staff runbook pointer
+
+### Requirements decisions
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-214-D1 | Notify host | After successful insert on internal-write |
+| EV-214-D2 | Webhook | Non-empty `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` |
+| EV-214-D3 | Email | **In cycle** — Resend + `VECINITA_FEEDBACK_NOTIFY_EMAIL` (independent of webhook) |
+| EV-214-D4 | Payload | id, category, locale, created_at, message only |
+| EV-214-D5 | Fail-open | Notify errors must not roll back store |
+| EV-214-D6 | Privacy copy | Expand EN/ES in `packages/frontend-i18n` |
+| EV-214-D7 | UI | Callout + intro above form |
+| EV-214-D8 | AC/TC | AC-UX18–19; TC-308–311; extend UJ-073 |
+| EV-214-D9 | Docs | F68 / ADR-046 / config / secrets / api-contract |
+| EV-214-D10 | Out | Visitor PII; thumbs; transcripts; retention; live prod without AskQuestion |
+
+### Spec deltas
+
+| Doc | Change |
+|-----|--------|
+| `docs/feature-list.md` §F68 | #214 notice + notify |
+| `docs/adr/ADR-046-…` | §6 operator notify; notice consequence |
+| `docs/user-journeys.md` §UJ-073 | Notice + notify steps |
+| `docs/acceptance-criteria.md` | AC-UX18–19 |
+| `docs/test-plan.md` | TC-308–311 + UJ map |
+| `docs/api-contract.md` | Public + internal notify detail |
+| `docs/config-spec.md` | `VECINITA_FEEDBACK_NOTIFY_EMAIL` + Resend reuse |
+| `docs/staging-secrets-matrix.md` | Internal-write notify secrets |
+| `docs/dependency-inventory.md` | No new deps (httpx + Resend) |
+| `docs/decisions/evolve-decisions.md` | This cycle |
+
+**Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: ADR-004] [Corpus: tests] #214 #186
+
+---
+
+## Cycle EV-212-stage-promote — Promote `stage` → `main` + close #212
+
+**Title:** Land deferred Stage→Main promote; align #212; flip staging write-api to `main`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-212-stage-promote`  
+**Status:** implementing (Build gate open 2026-08-31)  
+**Date:** 2026-08-31  
+**Issue:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/212
+
+### Intake / requirements
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-212-D0 | Goal | Promote PR `stage`→`main`; close #212; flip staging write-api to `main` |
+| EV-212-D1 | Scale | micro (no tech-plan / qa / e2e) |
+| EV-212-D2 | AC | Approve AC-1…AC-6 (promote + checks + merge + DO flip + close #212 + no secret leaks) |
+| EV-212-D3 | Out | Redesign Stage→Main; live prod corpus mutate; flip apps already on `main` |
+| EV-212-D4 | Merge | AskQuestion before merge; no force-push |
+| EV-212-D5 | Gate | Open Build — commit docs → promote PR → CI + staging-smoke → merge AskQuestion |
+
+### Spec deltas (draft-docs)
+
+| Artifact | Change |
+|----------|--------|
+| GitHub #212 | Body rewritten to EV-036-D15 two-hop + EV-212 closeout |
+| `docs/staging-runbook.md` | Post-promote DO staging branch flip-back note |
+| Session AC | `reports/requirements.md` |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Decision: EV-036-D15] ADR-054 / ADR-050
+
+---
+
+## EV-feedback-notify-secrets — Staging Resend notify enable (2026-08-31)
+
+**Title:** Enable feedback Resend notify secrets on staging write-api  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-feedback-notify-secrets`  
+**Status:** in_progress (Build)  
+**Date:** 2026-08-31  
+**Parent:** EV-214 HANDOFF leftover
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-FNS-D1 | Channel | Resend email (webhook deferred) |
+| EV-FNS-D2 | Target | Staging `vecinita-staging-write-api` only |
+| EV-FNS-D3 | To inbox | GitHub account email (`joseph.c.mcg@gmail.com`) — `.env` had no To |
+| EV-FNS-D4 | Prod | Deferred — separate AskQuestion |
+| EV-FNS-D5 | Infra | YAML SECRET placeholders + `do_apps.py` sync keys |
+
+**Cites:** [Corpus: feature-list.md §F68] [Corpus: ADR-046] [Corpus: staging]
+
+---
+
+## EV-305-staging-resend — Dual Resend path (same account) (2026-08-31)
+
+**Title:** Separate staging Resend path from prod (isolated key + sender)  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-305-staging-resend`  
+**Status:** documenting (Spec band)  
+**Date:** 2026-08-31  
+**Epic:** [#305](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/305) · children #306–#309
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-305-D1 | Resend account | Same account/environment OK — not a second Resend org |
+| EV-305-D2 | Isolation | Distinct API key + staging From under that account |
+| EV-305-D3 | Staging From | Same verified domain, local-part `noreply+staging@josephcmcg.com` (A1) |
+| EV-305-D4 | Secret names | Keep `RESEND_API_KEY` / `RESEND_SENDER_EMAIL` / `SUPABASE_SMTP_PASS`; distinct values per GH/Modal/Supabase env (B1) |
+| EV-305-D5 | Soft epic | Independent PRs per child #306–#309; no mega-PR |
+| EV-305-D6 | New Fn | None — F35/F68 hardening under F83 / ADR-054 |
+| EV-305-D7 | Out | Prod key rotate; prod feedback notify; visitor PII |
+
+**Docs delta:** `staging-secrets-matrix.md` §Dual Resend · `staging-runbook.md` feedback · `config-spec.md` F35 Resend rows · `infra/resend/.env.example`
+
+**Cites:** [Corpus: ADR-054] [Corpus: feature-list.md §F35] [Corpus: feature-list.md §F68] [Corpus: staging] #305
+
+
+---
+
+## EV-313-prod-gpu-snapshots — Prod-only GPU snapshots (#313) (2026-08-31)
+
+**Title:** Re-enable Modal GPU memory snapshots on pinned prod `vecinita-llm`  
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-313-prod-gpu-snapshots`  
+**Status:** closed (Build + staging TC-313-02 + prod enable)  
+**Date:** 2026-08-31  
+**Epic:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311) · slice [#313](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/313)  
+**Merge:** [#321](https://github.com/Math-Data-Justice-Collaborative/vecinita/pull/321) → `stage` @ `0b08fbeb`
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-313-D1 | Kill-switch | `VECINITA_LLM_GPU_SNAPSHOT`; unset = false until staging green |
+| EV-313-D2 | LoRA | Minimal post-restore resolve in #313 Build (cite #316); base-only snapshot |
+| EV-313-D3 | New Fn | None — ADR-022 amendment; not F40/F64 |
+| EV-313-D4 | Playground | Snapshots remain off |
+| EV-313-D5 | SLO | Honest Useful/Green/Red bands; no silent “sub-second” claim |
+| EV-313-D6 | Prod enable | Staging evidence + AskQuestion |
+| EV-313-D7 | Staging cutover | `MODAL_ENVIRONMENT=staging` secret sync (`vecinita-llm-gpu`) + deploy with `VECINITA_LLM_GPU_SNAPSHOT=true`; TC-313-02 PASS (restore log + H1/H3) |
+| EV-313-D8 | Prod cutover | Operator approved option 1; `main` sync + deploy with snapshot **true**; logs show create + restore |
+
+**Evidence:** session `reports/tc-313-02-staging.md`, `reports/tc-313-02-prod-enable.md`  
+**Docs delta:** ADR-022 amendment · `config-spec.md` · `infra/modal/README.md` · `adr/README.md` · `CORPUS.md` cite · `test-plan.md` TC-313-01/02 · this log
+
+**Cites:** [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Corpus: ADR-037] [Corpus: ADR-004] [Corpus: ADR-053] [Corpus: config] #313 #311 #316
+
+### PR review advisories addressed (2026-08-31)
+
+| Advisory | Fix |
+|----------|-----|
+| Misleading “Secret + redeploy” | Docs/comments: kill-switch is **deploy-time** `modal deploy` env |
+| Silent sleep/wake skip | Fail closed with `TypeError` when `sleep`/`wake_up` missing |
+| Proxy key on GPU workers | Prod `LlmService` mounts `vecinita-llm-gpu` only; ASGI keeps `vecinita-llm` |
+
+**Ops note:** CD does not auto-export `VECINITA_LLM_GPU_SNAPSHOT`; operators must set it in the deploy shell (or extend CD later). Staging + prod Environments were enabled manually 2026-08-31.
+
+**Next #311 child (recommended):** [#316](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/316) LoRA-after-restore completeness (ready metadata + promote matrix). Alternates: [#314](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/314) latency harness · [#318](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/318) async GPU `/warm` prewarm.
+
+---
+
+## EV-316-lora-post-restore — LoRA after snapshot restore (#316) (2026-08-31)
+
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-316-lora-post-restore`  
+**Ticket:** [#316](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/316) (child of #311)  
+**Intake:** option 2 (RAG preset angles); context option 1; requirements option 1 + **SHA-256** integrity
+
+| ID | Topic | Decision |
+|----|-------|----------|
+| EV-316-D1 | Resolve mode | Default `VECINITA_LLM_LORA_RESOLVE=post_restore`; `snapshot_bound` legacy/debug only |
+| EV-316-D2 | Integrity | **SHA-256** canonical adapter-dir digest; `VECINITA_FINETUNE_ADAPTER_HASH`; `hmac.compare_digest`; reject symlink escape; no MD5/SHA-1/CRC |
+| EV-316-D3 | Fail closed | Mismatch / missing dir → raise before ready |
+| EV-316-D4 | Ready metadata | Extend prod `GET /health` with base_model_id, adapter_id, adapter_hash, snapshot_schema, git_commit |
+| EV-316-D5 | Tests / AC | TC-316-01, TC-316-02; AC-FT11 |
+| EV-316-D6 | Out of scope | UI; baking LoRA into snapshot; #314/#318; F77 promote UX |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-316] [Spec: ADR-053] [Corpus: feature-list.md §F80] [Corpus: config] [Corpus: api] [Corpus: tests] [Corpus: acceptance]
+
+---
+
+## EV-314 + EV-318 — Layer E harness + async GPU prewarm (2026-09-02)
+
+**Sessions:** `EV-314-cold-start-latency-harness`, `EV-318-async-gpu-prewarm` (parallel)  
+**Tickets:** [#314](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/314), [#318](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/318) (children of #311)  
+**Intake:** operator **A** + recommended parallel; context **Proceed with recommended** (1+4+7+10)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-314-D1 | Samples | Staged N≈20 smoke → ≥100 for publishable p95 |
+| EV-314-D2 | Stamps | Modal-only first; DO-receive deferred |
+| EV-314-D3 | Metrics surface | Structured logs + harness JSON; F84 dimensions deferred |
+| EV-314-D4 | Feature id | No new Fn — ADR-022 Layer E |
+| EV-318-D1 | Predictors | Mount-only this cycle |
+| EV-318-D2 | Modal warm | `.spawn()` / detach (mirror embedding); not health-only |
+| EV-318-D3 | F40/F64 | Keep residual wait UX |
+| EV-318-D4 | Feature id | No new Fn — ADR-022 prewarm lever / S001 T11 |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-314/EV-318] [Corpus: api] [Corpus: tests] [Corpus: acceptance] [Corpus: feature-list.md §F40]
+
+---
+
+## EV-315 + EV-317 + EV-319 — Seed snapshots, thin ingress, scaledown (2026-09-02)
+
+**Sessions:** `EV-315-seed-gpu-snapshots`, `EV-317-thin-cpu-ingress`, `EV-319-scaledown-window` (parallel)  
+**Tickets:** [#315](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/315), [#317](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/317), [#319](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/319) (children of #311)  
+**Intake:** operator **1** parallel packaging; requirements **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-315-D1 | Delivery | Staging script + runbook; optional advisory CI — not hard CD gate |
+| EV-315-D2 | Done signal | `#314` `cold_kind` → `snapshot_restore`; fail closed on create |
+| EV-315-D3 | Prod | AskQuestion-gated prime |
+| EV-317-D1 | Depth | Lazy-import + thin ASGI first; CPU snap only if profile warrants |
+| EV-317-D2 | Image | Prefer same image + lazy imports; defer second image |
+| EV-319-D1 | Evidence | Timestamp-only gaps; thin traffic → default **120s** + env revert |
+| EV-319-D2 | Config | `VECINITA_LLM_SCALEDOWN_WINDOW` at deploy-import; no min/buffer containers |
+| EV-*-D0 | Feature id | No new Fn — ADR-022 Layers A/B/C under #311 |
+
+**Cites:** [Spec: ADR-022 §Amendment EV-315/EV-317/EV-319] [Corpus: config] [Corpus: tests] [Corpus: acceptance] [Corpus: staging] [Corpus: ADR-004]
+
+---
+
+## EV-320 — FAQ fast-path Layer D (F85) (2026-09-02)
+
+**Session:** `EV-320-chat-rag-wire-faq-fast-path-into-cold-start-late`  
+**Tickets:** [#320](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/320), [#79](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/79) (parent [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311))  
+**Intake / context / requirements:** operator **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-320-D1 | Feature id | **F85** (not F79 freshness) |
+| EV-320-D2 | Match | Exact + normalized; same-language only |
+| EV-320-D3 | Metadata | `answer_path` faq_bypass \| rag_llm; keep `cold_kind` GPU-only |
+| EV-320-D4 | Kill-switch | `VECINITA_FAQ_FASTPATH_ENABLED` default true |
+| EV-320-D5 | UI | No #81 admin editor this cycle; API e2e required |
+| EV-320-D6 | Seed content | In-repo bilingual YAML from #79 topics; replaceable |
+| EV-320-D7 | Ops | Spec first; staging seed+scaledown after gate; prod AskQuestion |
+
+**Cites:** [Corpus: feature-list.md §F85] [Spec: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: config] [Corpus: tests] [Corpus: ADR-004]
+
+
+---
+
+## EV-338 — Staging corpus re-seed from prod (2026-09-03)
+
+**Session:** `EV-338-staging-reseed-from-prod`  
+**Ticket:** [#338](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/338)  
+**Intake / context / requirements:** operator **all recommended**
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-338-D1 | Feature id | **F83 / ADR-054** ops — no new Fn |
+| EV-338-D2 | Method | Selective `pg_dump`/`pg_restore` corpus tables (prod read-only → staging) |
+| EV-338-D3 | Tables | Include documents/chunks/embeddings/tags/document_tags/chunk_tags; exclude jobs/metrics/eval/shadow |
+| EV-338-D4 | Docs | staging-runbook §Prod → staging corpus mirror; UJ-094; TC-321–324 |
+| EV-338-D5 | Safety | Staging write AskQuestion + corpus-db-safety ack; never mutate prod |
+| EV-338-D6 | Done | Non-empty staging corpus + alembic heads + H3 + zero test-artifact URLs |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push] [Spec: ADR-054]
+

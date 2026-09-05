@@ -34,6 +34,6 @@ def main() -> None:
     out = root / ".tmp" / f"modal-{BUNDLE_NAME}.env"
     out.parent.mkdir(parents=True, exist_ok=True)
     lines = [f"{key}={value}" for key, value in sorted(data.items())]
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _ = out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     out.chmod(0o600)
     print(f"Wrote {out} keys={sorted(data)}")

@@ -14,7 +14,7 @@ def test_modal_ensure_workspace_uses_token_auth_without_named_profile(
 ) -> None:
     """MODAL_TOKEN_* env auth has no vecinita profile in ~/.modal.toml (GitHub Actions)."""
     fake_modal = tmp_path / "modal"
-    fake_modal.write_text(
+    _ = fake_modal.write_text(
         """#!/usr/bin/env bash
 set -euo pipefail
 if [[ "$1" == "token" && "$2" == "info" ]]; then

@@ -40,7 +40,7 @@ def _postgres_reachable(url: str) -> bool:
     engine = create_engine(url)
     try:
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            _ = conn.execute(text("SELECT 1"))
     except (OperationalError, OSError):
         return False
     finally:

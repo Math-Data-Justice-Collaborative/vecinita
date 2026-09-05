@@ -36,6 +36,10 @@ promote-to-prod must not regress chat quality.
 7. **Serve:** Load adapter on **prod `vecinita-llm`** (`llm_app.py` `@modal.enter`)
    **only after promote** (`VECINITA_FINETUNE_ADAPTER_ID`); **playground** may load
    candidates for pre-promote eval (S030-D21). Do not auto-load latest adapter on prod.
+8. **GPU memory snapshots (ADR-022 / #316):** When prod snapshots are on, **do not** bake
+   mutable adapter volume weights into the snapshot. After restore, resolve the current pin
+   and verify **SHA-256** content hash (`VECINITA_FINETUNE_ADAPTER_HASH`) before ready
+   (AC-FT11). Default resolve mode `VECINITA_LLM_LORA_RESOLVE=post_restore`.
 
 ## Consequences
 

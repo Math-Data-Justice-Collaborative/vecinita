@@ -88,7 +88,7 @@ def test_jobs_events_emits_sse_framed_job_snapshot() -> None:
     """Stream emits id/event/data framed Job JSON for existing jobs (TC-148)."""
     store = InMemoryJobStore()
     record = store.create_job(urls=["https://example.com/a"])
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     client = _client_with_principal(store, _ADMIN)
 
     with client.stream("GET", "/jobs/events") as response:
@@ -122,7 +122,7 @@ def test_jobs_events_reconnect_skips_seen_ids() -> None:
     """Last-Event-ID reconnect omits already-delivered event ids (TC-148)."""
     store = InMemoryJobStore()
     first = store.create_job(urls=["https://example.com/a"])
-    store.update_job(first.job_id, status="running")
+    _ = store.update_job(first.job_id, status="running")
     client = _client_with_principal(store, _ADMIN)
 
     with client.stream("GET", "/jobs/events") as response:
@@ -141,7 +141,7 @@ def test_jobs_events_reconnect_skips_seen_ids() -> None:
     assert last_id is not None
 
     second = store.create_job(urls=["https://example.com/b"])
-    store.update_job(second.job_id, status="pending")
+    _ = store.update_job(second.job_id, status="pending")
 
     with client.stream("GET", "/jobs/events", headers={"Last-Event-ID": last_id}) as response:
         assert response.status_code == HTTPStatus.OK

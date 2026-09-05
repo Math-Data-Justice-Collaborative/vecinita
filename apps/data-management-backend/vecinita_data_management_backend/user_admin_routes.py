@@ -236,7 +236,7 @@ def register_user_admin_routes(  # noqa: C901, PLR0913, PLR0915  # FastAPI regis
         try:
             target = client.get_user_by_id(user_id)
             redirect_to = _require_auth_redirect("accept-invite")
-            client.invite_user_by_email(target.email, redirect_to=redirect_to)
+            _ = client.invite_user_by_email(target.email, redirect_to=redirect_to)
         except SupabaseAdminError as err:
             raise _map_admin_error(err) from err
         _audit("user.invited", user_id, actor, {"resend": True})

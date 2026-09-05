@@ -18,4 +18,4 @@ def test_as_json_object_accepts_dict() -> None:
 def test_as_json_object_rejects_non_object() -> None:
     """Test as json object rejects non object."""
     with pytest.raises(TypeError, match="JSON object"):
-        as_json_object(["not", "an", "object"])
+        _ = as_json_object(["not", "an", "object"])

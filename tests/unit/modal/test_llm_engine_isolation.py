@@ -46,8 +46,8 @@ def _import_playground_app() -> object:
     if not _PLAYGROUND_APP_PATH.is_file():
         pytest.fail(
             "infra/modal/llm_playground_app.py missing "
-            "(T80.2 / TP-S010-25 / RD-169 / TC-145): "
-            "deploy vecinita-llm-playground as a second Modal app sharing llm-models"
+            + "(T80.2 / TP-S010-25 / RD-169 / TC-145): "
+            + "deploy vecinita-llm-playground as a second Modal app sharing llm-models"
         )
     try:
         return importlib.import_module("infra.modal.llm_playground_app")
@@ -70,8 +70,8 @@ def test_prod_disallows_model_reload_flag() -> None:
     allow = getattr(llm_app, "ALLOW_MODEL_RELOAD", None)
     assert allow is False, (
         "infra.modal.llm_app.ALLOW_MODEL_RELOAD must be False "
-        "(T80.3 / RD-169 / TP-S010-25 / TC-145 / AC-E38): "
-        "prod class must ignore playground model_id reloads"
+        + "(T80.3 / RD-169 / TP-S010-25 / TC-145 / AC-E38): "
+        + "prod class must ignore playground model_id reloads"
     )
 
 
@@ -85,7 +85,7 @@ def test_prod_resolve_vllm_model_arg_ignores_playground_tag() -> None:
     resolved = _resolve_vllm_model_arg(_ALT_PLAYGROUND_TAG)
     assert resolved == MODEL_ID, (
         f"prod _resolve_vllm_model_arg({_ALT_PLAYGROUND_TAG!r}) must return pinned "
-        f"{MODEL_ID!r}, got {resolved!r} (T80.3 / RD-169 / TC-145)"
+        + f"{MODEL_ID!r}, got {resolved!r} (T80.3 / RD-169 / TC-145)"
     )
     assert _resolve_vllm_model_arg(None) == MODEL_ID
     assert _resolve_vllm_model_arg(DEFAULT_PLAYGROUND_MODEL_ID) == MODEL_ID
@@ -108,7 +108,7 @@ def test_playground_app_allows_model_reload() -> None:
     allow = getattr(playground, "ALLOW_MODEL_RELOAD", None)
     assert allow is True, (
         "infra.modal.llm_playground_app.ALLOW_MODEL_RELOAD must be True "
-        "(T80.2 / RD-169 / TP-S010-25): sandbox eval/list-pull may switch model_id"
+        + "(T80.2 / RD-169 / TP-S010-25): sandbox eval/list-pull may switch model_id"
     )
 
 
@@ -117,8 +117,8 @@ def test_resolve_llm_http_config_accepts_purpose_parameter() -> None:
     params = inspect.signature(resolve_llm_http_config).parameters
     assert "purpose" in params, (
         "resolve_llm_http_config must accept purpose='prod'|'playground' "
-        "(T80.4 / TP-S010-27 / TC-145): route list/pull/eval via "
-        "VECINITA_MODAL_LLM_PLAYGROUND_URL"
+        + "(T80.4 / TP-S010-27 / TC-145): route list/pull/eval via "
+        + "VECINITA_MODAL_LLM_PLAYGROUND_URL"
     )
 
 
@@ -158,7 +158,7 @@ def test_chat_rag_config_does_not_read_playground_url() -> None:
     source = _CHAT_RAG_CONFIG.read_text(encoding="utf-8")
     assert _ENV_PLAYGROUND not in source, (
         "chat-rag config must not reference VECINITA_MODAL_LLM_PLAYGROUND_URL "
-        "(TP-S010-27 / ADR-037): ChatRAG stays on prod vecinita-llm"
+        + "(TP-S010-27 / ADR-037): ChatRAG stays on prod vecinita-llm"
     )
     tree = ast.parse(source)
     string_literals = {

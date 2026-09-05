@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — UJ-080–082; prior S028 UJ-077–079)
+> **Last updated**: 2026-09-03 (EV-338 / #338 — UJ-094 staging corpus mirror; prior EV-036 UJ-088–089)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -84,6 +84,15 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-082 | Enable automations + view run history | Admin operator | DM Automations UI + write-API | F78 EV-027 #73 | local |
 | UJ-083 | Refresh stale sources / schedule freshness | Admin operator | DM freshness + Modal schedule | F79 EV-027 #219 | local |
 | UJ-084 | Approve FT train + human promote | Admin / super-admin | FT job + eval report + llm promote | F80 EV-027 #72 | local |
+| UJ-085 | LLM query refinement gated ask | Community member | ChatRAG ask with F81 enabled | F81 EV-029 #82 | local |
+| UJ-086 | Verified answer with citations | Community member | ChatRAG ask/stream with F82 enabled | F82 EV-030 #84 | local |
+| UJ-088 | View Monitoring success rates (ingest/chat/embed) | Admin operator | DM UI `/monitoring` → write-API metrics | F84 EV-036 #114 | local |
+| UJ-089 | View staging Grafana/Loki + webhook alert | Operator | Staging obs Droplet Grafana/Loki/Alertmanager | F84 EV-036 #114 | staging |
+| UJ-090 | Mount prewarm races ahead of first ask | Community member | ChatRAG FE mount → `POST /api/v1/warm` → Modal `/warm` spawn | ADR-022 EV-318 #318 | local |
+| UJ-091 | Seed GPU snapshots after LLM deploy | Operator | Staging Modal deploy → seed script → restore-kind samples | ADR-022 EV-315 #315 | staging |
+| UJ-092 | Tune LLM scaledown_window from gaps | Operator | Env + staging evidence → AskQuestion prod flip | ADR-022 EV-319 #319 | staging |
+| UJ-093 | FAQ fast-path canned answer (skip LLM) | Community member | ChatRAG ask/stream → FAQ match → faq_bypass | F85 EV-320 #320 / #79 | local |
+| UJ-094 | Re-seed staging corpus from prod mirror | Operator | Prod read-only dump → staging restore → H2/H3 | F83 EV-338 #338 | staging |
 
 ## Visual journey maps
 
@@ -1162,19 +1171,23 @@ localized tooltip; locale toggle switches tooltip language.
 **Actor**: Community visitor; Admin reviewer
 
 **Goal**: Visitor submits category + message via Feedback page; admin lists it; no email
-field; rows purge after 90 days.
+field; rows purge after 90 days. Stronger bilingual no-PII/sensitive notice (#214); optional
+operator webhook and/or email notify without inventing visitor identity.
 
 **Steps**:
 
 1. ChatRAG: open Feedback from chrome → `/feedback`.
-2. Choose category; enter message; submit — success state.
-3. Confirm request rejects `email` / identity fields.
-4. Admin: open Feedback page; see new row (admin/super-admin).
-5. Retention job deletes rows older than 90 days.
+2. See privacy/sensitive-data notice (callout) and short intro **above** the form (EN/ES).
+3. Choose category; enter message; submit — success state.
+4. Confirm request rejects `email` / identity fields.
+5. When notify env is set, operators receive webhook and/or Resend email with id/category/
+   locale/created_at/message only; when unset or notify fails, submit still succeeds.
+6. Admin: open Feedback page; see new row (admin/super-admin).
+7. Retention job deletes rows older than 90 days.
 
-**Acceptance**: AC-UX10–UX13; TC-225–228.
+**Acceptance**: AC-UX10–UX13, AC-UX18–UX19; TC-225–228, TC-308–311.
 
-**E2E tier**: API e2e + Vitest UI journeys + privacy tests.
+**E2E tier**: API e2e + Vitest UI journeys + privacy tests + notify unit/integration.
 
 ---
 
@@ -1550,6 +1563,118 @@ evidence (EV-017 lesson).
 **Automated tests**: Spike harness + gate doc (TC-184); not a CI Modal live requirement.
 
 **E2E tier**: local (+ staging spike).
+
+---
+
+### UJ-085: LLM query refinement gated ask (F81, #82)
+
+**Actor**: Community member (no account)
+
+**Goal**: When F81 is enabled, the ask path calls **`vecinita-llm`** to produce 1–2
+same-locale retrieval query variants before pgvector retrieve, improving recall without
+translating the user's language away.
+
+**Preconditions**: `VECINITA_RAG_QUERY_REFINE=true`; LLM URL available (mocked in CI).
+
+**Steps**:
+
+1. User asks a question in `en` or `es`.
+2. Backend optionally refines → runs F42 H7 multi-query (if on) → retrieve → F45 CE (if on) → P1 pack → synthesize.
+3. On LLM/parse failure, retrieve uses the raw question only.
+
+**Acceptance**: AC-SR4–SR5; default refine **off**; no API schema break vs UJ-001.
+
+**Automated tests**: `tests/e2e/test_uj085_query_refine.py` (TC-282–283); unit refine parser.
+
+**E2E tier**: local.
+
+---
+
+### UJ-087: Operator uses distinct staging before merge to main (F83)
+
+**Actor**: Operator / maintainer
+
+**Goal**: Deploy and smoke a **true staging** stack (DO + Supabase + Modal Environment
+`staging` in workspace `vecinita`), then merge to `main` only when CI and staging smoke are green.
+
+**Features**: F83 — EV-staging-do-supabase; EV-033 Stage→Main rule; ADR-054
+
+**Preconditions**: Staging resources provisioned (or being provisioned in Build band);
+prod stack treated as `prod`; no live corpus mutation without AskQuestion.
+Agents follow `.cursor/rules/stage-before-main.mdc` (always-applied).
+
+**Steps**:
+
+1. Confirm `env_role` target is staging for this deploy (not prod / not staging_as_live).
+2. Deploy or update staging DO apps + migrate/seed staging DB.
+3. Deploy Modal apps with `MODAL_ENVIRONMENT=staging` (same workspace `vecinita`); wire
+   Environment-scoped staging secrets only.
+4. Point staging admin FE at staging Supabase project; run H1–H5.
+5. Open PR to `main`; observe required checks: CI + staging smoke for tip SHA.
+6. Merge only when both green; prod CD runs post-merge on Environment `production`.
+7. Do **not** use a GitHub `stage` branch as the promotion path (ADR-054 / EV-033-D4).
+
+**Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298.
+
+**Automated tests**: smoke/live gated (`tests/smoke/…`); ruleset + rule file checks (TC-297/298).
+
+**E2E tier**: staging (T2/T3) after provision.
+
+---
+
+### UJ-088: View Monitoring success rates (ingest/chat/embed) (F84, #114)
+
+**Actor**: Admin operator
+
+**Goal**: Open the admin **Monitoring** tab and see privacy-safe success rates and trends
+for ingest, chat, and embed for at least 24h and 7d windows; drill failed ingest to Jobs.
+
+**Features**: F84 — EV-036; ADR-055; complements F25/F26/F32
+
+**Preconditions**: Operator authenticated (F34); metrics tables migrated; sample job and
+chat outcome events present (fixtures in local e2e).
+
+**Steps**:
+
+1. Navigate to `/monitoring` from admin nav (en/es labels).
+2. Select window `24h` — summary cards show success % + counts for ingest, chat, embed.
+3. Select window `7d` — cards and time-series update from server aggregates (survive nav).
+4. Open failure breakdown — top `error_code` counts only (no message bodies).
+5. Click through to `/jobs` for a failed ingest job (F32).
+6. Confirm no chat question/answer text appears anywhere on the page or in API responses.
+
+**Acceptance**: AC-MON1–AC-MON5; TC-299–TC-304.
+
+**Automated tests**: `tests/e2e/test_uj088_monitoring_metrics.py`; Vitest Monitoring page.
+
+**E2E tier**: local.
+
+---
+
+### UJ-089: View staging Grafana/Loki + webhook alert (F84)
+
+**Actor**: Operator / maintainer
+
+**Goal**: On **staging only**, open Grafana dashboards for Modal + DO health, search Loki
+without PII, and confirm ≥1 Alertmanager rule can notify a configured webhook.
+
+**Features**: F84 — EV-036; ADR-055; ADR-004 log allow-list
+
+**Preconditions**: Staging obs Droplet with `infra/observability/` compose up; webhook
+secret set; no prod Grafana this cycle.
+
+**Steps**:
+
+1. Open staging Grafana URL (auth via platform secret / basic auth — no visitor PII).
+2. View Modal + DO panels (latency/error proxies from scraped metrics or log-derived rates).
+3. Query Loki for recent structured logs — assert no prompt/answer fields in samples.
+4. Trigger or simulate alert condition → Alertmanager posts to staging webhook URL.
+
+**Acceptance**: AC-MON6–AC-MON8; TC-305–TC-306.
+
+**Automated tests**: runbook checklist + optional smoke; privacy unit for log redaction.
+
+**E2E tier**: staging.
 
 ---
 
@@ -2216,3 +2341,135 @@ Postgres (EV-012 RD-174/RD-175). Click → `/jobs/:id` summary + link to `/evalu
 **Automated tests**: Unit + integration (TC-142); optional API E2E if wired through internal-write-api.
 
 **E2E tier**: local.
+
+### UJ-090: Mount prewarm races ahead of first ask (EV-318 / #318)
+
+**Actor**: Community member opening ChatRAG
+
+**Goal**: On SPA mount, fire async GPU prewarm so a normal open→type→ask often hits a ready
+(or restoring) GPU before first token; residual cold still shows F40/F64 wait UX.
+
+**Preconditions**: ChatRAG SPA; Modal embed + prod LLM URLs configured; proxy key on LLM warm.
+
+**Steps**:
+
+1. User loads ChatRAG (ChatPanel mounts).
+2. Client calls `prewarmChatServices` → `POST /api/v1/warm` (not `/health`).
+3. ChatRAG returns `{"status":"warming"}` immediately; background POSTs Modal embed+LLM `/warm`.
+4. LLM Modal `/warm` spawns GPU warm and returns promptly (does not hold ASGI for full load).
+5. User types and asks (UJ-001). If prewarm won: warm path ~0.5–1.1s historically. If lost:
+   F40/F64 ColdStartWait may appear (UJ-052).
+
+**Acceptance**: Mount never uses health as prewarm; spawn semantics on LLM warm; wait UX retained.
+
+**Automated tests**: Vitest mount warm (TC-318-02); unit LLM warm spawn (TC-318-01); API e2e warm.
+
+**E2E tier**: local (+ staging smoke optional).
+
+**Refs**: [Corpus: ADR-022 §Amendment EV-318] [Corpus: api] [Corpus: feature-list.md §F40]
+
+### UJ-091: Seed GPU snapshots after LLM deploy (EV-315 / #315)
+
+**Actor**: Operator
+
+**Goal**: After staging LLM deploy, prime authenticated GPU `/warm` so the first monitored
+cold path is `snapshot_restore`, not ~70s `snapshot_create`.
+
+**Preconditions**: `VECINITA_LLM_GPU_SNAPSHOT=true` at deploy; proxy key; #314 stamps available.
+
+**Steps**:
+
+1. Deploy `infra/modal/llm_app.py` to staging with snapshots on.
+2. Run `scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop).
+3. Observe `cold_kind` until samples are `snapshot_restore` (fail closed if create persists).
+4. Optionally run `#314` bench smoke; document create latency separately from restore p50/p95.
+5. Prod prime only after AskQuestion (same script, Environment `main`).
+
+**Acceptance**: First monitored restore is restore-kind for expected worker types; CD hard gate
+deferred; no raw prompts in logs.
+
+**Automated tests**: TC-315-01 (unit); TC-315-02 (manual/live).
+
+**E2E tier**: staging (ops).
+
+**Refs**: [Corpus: ADR-022 §Amendment EV-315] [Corpus: staging] [Corpus: ADR-004]
+
+### UJ-092: Tune LLM scaledown_window from inter-ask gaps (EV-319 / #319)
+
+**Actor**: Operator
+
+**Goal**: Choose `scaledown_window` (60/120/300) that cuts idle T4 cost while preserving
+follow-up hit rate; easy env revert.
+
+**Preconditions**: Staging Modal; privacy-safe timestamps only (no prompts).
+
+**Steps**:
+
+1. Collect anonymized inter-ask gaps on staging (or note thin traffic).
+2. Document T4 $/s formula; pick candidate (thin traffic → recommend 120).
+3. Deploy with `VECINITA_LLM_SCALEDOWN_WINDOW=<n>`; validate bounds.
+4. Measure follow-up cold rate (optional #314); AskQuestion before prod default flip.
+5. Revert by setting env back to `300` if needed. No `min_containers`.
+
+**Acceptance**: Formula + chosen window in ADR/runbook; unit parse tests green; prod gated.
+
+**Automated tests**: TC-319-01; TC-319-02 (doc/evidence).
+
+**E2E tier**: staging (ops).
+
+**Refs**: [Corpus: ADR-022 §Amendment EV-319] [Corpus: ADR-004] [Corpus: config]
+
+### UJ-093: FAQ fast-path canned answer (F85 / EV-320 / #320)
+
+**Actor**: Community member
+
+**Goal**: Ask a reviewed FAQ (e.g. “What is Vecinita?”) and get a consistent canned answer
+**without** waiting on Modal GPU cold start.
+
+**Preconditions**: `VECINITA_FAQ_FASTPATH_ENABLED` true; FAQ store seeded (bilingual YAML);
+ChatRAG backend reachable.
+
+**Steps**:
+
+1. Open ChatRAG; set language EN (or ES).
+2. Submit an exact or normalized FAQ variant from the reviewed store.
+3. Observe answer returns promptly with empty sources and `answer_path=faq_bypass`.
+4. Submit a near-miss / unrelated question → normal RAG+LLM (`answer_path=rag_llm`).
+5. (Operator) Disable kill-switch → all asks use RAG even for FAQ variants.
+
+**Acceptance**: Hit = canned + empty sources + no LLM invoke; miss = RAG; kill-switch off = RAG.
+
+**Automated tests**: TC-320-01–TC-320-04 (unit + API e2e).
+
+**E2E tier**: local (API TestClient); staging smoke optional.
+
+**Refs**: [Corpus: feature-list.md §F85] [Corpus: ADR-022 §Amendment EV-320] [Corpus: api] [Corpus: ADR-004]
+
+### UJ-094: Re-seed staging corpus from prod mirror (F83 / EV-338 / #338)
+
+**Actor**: Operator
+
+**Goal**: After staging Postgres was emptied (e.g. test-artifact cleanup), restore a usable
+community corpus so staging ChatRAG H3 asks succeed, without mutating prod.
+
+**Preconditions**: Distinct prod vs staging DB hosts; `pg_dump`/`pg_restore` available;
+corpus-db-safety ack for staging write; staging ChatRAG pointed at staging DB.
+
+**Steps**:
+
+1. Print/compare hostnames for prod source vs `VECINITA_STAGING_DATABASE_URL` (must differ).
+2. Dry-run table list + dump plan; AskQuestion Approve for **staging write only**.
+3. Dump include tables from prod (read-only); restore onto staging with reset ack.
+4. Verify non-empty `documents` / `chunks` / `embeddings`; zero test-artifact URLs.
+5. Run staging H2 (alembic/SELECT) + H3 pantry-style ask; record evidence.
+
+**Acceptance**: Staging corpus non-empty; alembic current; H3 PASS; prod unchanged; runbook
+§Prod → staging corpus mirror followed.
+
+**Automated tests**: TC-321–TC-324 (ops checklist / guard unit where applicable).
+
+**E2E tier**: staging (ops).
+
+**Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+

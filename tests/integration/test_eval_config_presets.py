@@ -53,7 +53,7 @@ def preset_write_client(
     monkeypatch.setenv("DATABASE_URL", database_url)
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
-    seed_eval_corpus(database_url=database_url)
+    _ = seed_eval_corpus(database_url=database_url)
     app = create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge())
     created_ids: list[UUID] = []
     engine = create_engine(database_url)
@@ -61,7 +61,7 @@ def preset_write_client(
         yield client, private_key, created_ids
     with engine.begin() as conn:
         for preset_id in created_ids:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE id = :id"),
                 {"id": preset_id},
             )

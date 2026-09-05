@@ -36,7 +36,7 @@ def seed_feedback_rows(engine: Engine) -> Iterator[None]:
     old_ts = datetime.now(UTC) - timedelta(days=_RETENTION_DAYS + 1)
     fresh_ts = datetime.now(UTC) - timedelta(days=1)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO feedback (id, created_at, category, message, locale)
@@ -45,7 +45,7 @@ def seed_feedback_rows(engine: Engine) -> Iterator[None]:
             ),
             {"id": old_id, "created_at": old_ts},
         )
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO feedback (id, created_at, category, message, locale)
@@ -56,8 +56,8 @@ def seed_feedback_rows(engine: Engine) -> Iterator[None]:
         )
     yield
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": old_id})
-        conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": fresh_id})
+        _ = conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": old_id})
+        _ = conn.execute(text("DELETE FROM feedback WHERE id = :id"), {"id": fresh_id})
 
 
 @pytest.mark.usefixtures("seed_feedback_rows")

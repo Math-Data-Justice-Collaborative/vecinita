@@ -15,10 +15,10 @@ def test_modal_ensure_workspace_retries_transient_token_info_failure(
 ) -> None:
     """First modal token info calls fail; script retries and succeeds (deploy-preflight flake)."""
     counter = tmp_path / "token_info_calls"
-    counter.write_text("0", encoding="utf-8")
+    _ = counter.write_text("0", encoding="utf-8")
 
     fake_modal = tmp_path / "modal"
-    fake_modal.write_text(
+    _ = fake_modal.write_text(
         f"""#!/usr/bin/env bash
 set -euo pipefail
 COUNTER="{counter}"

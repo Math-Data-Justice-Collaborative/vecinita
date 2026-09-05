@@ -7,13 +7,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
 from sqlalchemy import text
 from vecinita_shared_schemas.automations import (
     AutomationJobType,
     AutomationRun,
+    AutomationRunCreateRequest,
     AutomationRunListResponse,
     AutomationRunStatus,
     AutomationsConfigResponse,
@@ -22,6 +23,8 @@ from vecinita_shared_schemas.automations import (
 )
 from vecinita_shared_schemas.db_mapping import (
     mapping_row,
+    row_datetime,
+    row_datetime_optional,
     row_str,
     row_str_optional,
     row_uuid,
@@ -36,21 +39,6 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
-def _row_datetime(row: Mapping[str, object], key: str) -> datetime:
-    value = row[key]
-    if isinstance(value, datetime):
-        return value
-    msg = f"Expected datetime for {key!r}, got {type(value).__name__}"
-    raise TypeError(msg)
-
-
-def _row_datetime_optional(row: Mapping[str, object], key: str) -> datetime | None:
-    value = row[key]
-    if value is None:
-        return None
-    return _row_datetime(row, key)
-
-
 def _run_from_row(row: Mapping[str, object]) -> AutomationRun:
     job_type = cast("AutomationJobType", row_str(row, "job_type"))
     status = cast("AutomationRunStatus", row_str(row, "status"))
@@ -58,13 +46,13 @@ def _run_from_row(row: Mapping[str, object]) -> AutomationRun:
         id=row_uuid(row, "id"),
         job_type=job_type,
         status=status,
-        started_at=_row_datetime_optional(row, "started_at"),
-        finished_at=_row_datetime_optional(row, "finished_at"),
+        started_at=row_datetime_optional(row, "started_at"),
+        finished_at=row_datetime_optional(row, "finished_at"),
         error=row_str_optional(row, "error"),
         document_id=row_uuid_optional(row, "document_id"),
         revision=row_str_optional(row, "revision"),
-        created_at=_row_datetime(row, "created_at"),
-        updated_at=_row_datetime(row, "updated_at"),
+        created_at=row_datetime(row, "created_at"),
+        updated_at=row_datetime(row, "updated_at"),
     )
 
 
@@ -84,7 +72,7 @@ def get_automations_config(engine: Engine) -> AutomationsConfigResponse:
 def set_automations_enabled(engine: Engine, *, enabled: bool) -> AutomationsConfigResponse:
     """Persist DM enable/disable and return the full config snapshot."""
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE automation_settings
@@ -133,3 +121,50 @@ def list_automation_runs(
         page_size=page_size,
         total_count=total,
     )
+
+
+_TERMINAL_RUN_STATUSES: frozenset[str] = frozenset({"completed", "failed", "skipped", "blocked"})
+
+
+def create_automation_run(
+    engine: Engine,
+    body: AutomationRunCreateRequest,
+) -> AutomationRun:
+    """Insert one ``automation_runs`` row and return the persisted record (TC-289)."""
+    now = datetime.now(UTC)
+    started_at = body.started_at or now
+    finished_at = body.finished_at
+    if finished_at is None and body.status in _TERMINAL_RUN_STATUSES:
+        finished_at = now
+    with engine.begin() as conn:
+        row = mapping_row(
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO automation_runs (
+                        job_type, status, started_at, finished_at,
+                        error, document_id, revision
+                    )
+                    VALUES (
+                        :job_type, :status, :started_at, :finished_at,
+                        :error, :document_id, :revision
+                    )
+                    RETURNING
+                        id, job_type, status, started_at, finished_at, error,
+                        document_id, revision, created_at, updated_at
+                    """
+                ),
+                {
+                    "job_type": body.job_type,
+                    "status": body.status,
+                    "started_at": started_at,
+                    "finished_at": finished_at,
+                    "error": body.error,
+                    "document_id": body.document_id,
+                    "revision": body.revision,
+                },
+            )
+            .mappings()
+            .one()
+        )
+    return _run_from_row(row)

@@ -43,7 +43,7 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
         except Exception:  # noqa: BLE001 # intentionally mirrors production broad-except under test
             _logger.warning(
                 "LlmTagClient init failed — retag jobs will fail. "
-                "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret.",
+                + "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret.",
                 exc_info=True,
             )
             tag_client = None
@@ -56,7 +56,7 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
         patch.dict("os.environ", {}, clear=False),
     ):
         env_key = "VECINITA_MODAL_LLM_URL"
-        os.environ.pop(env_key, None)
+        _ = os.environ.pop(env_key, None)
 
         result = _make_tag_client_like_modal(test_logger)
 
@@ -69,7 +69,7 @@ def test_tag_client_init_failure_is_logged(caplog: pytest.LogCaptureFixture) -> 
     )
     assert warning_found, (
         "Expected a WARNING log when LlmClient init fails, but none was emitted. "
-        "The silent except Exception swallows the error with no visibility."
+        + "The silent except Exception swallows the error with no visibility."
     )
 
 
@@ -81,5 +81,5 @@ def test_docstring_lists_llm_url_as_required() -> None:
     source = app_path.read_text()
     assert "VECINITA_MODAL_LLM_URL" in source, (
         "data_management_app.py must document VECINITA_MODAL_LLM_URL as a required "
-        "env var so operators include it in the Modal secret."
+        + "env var so operators include it in the Modal secret."
     )

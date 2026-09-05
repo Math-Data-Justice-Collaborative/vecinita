@@ -62,7 +62,7 @@ def seeded_document_id(engine: Engine) -> Iterator[UUID]:
             conn.execute(
                 text(
                     "INSERT INTO documents (url, title, language) "
-                    "VALUES (:url, :title, 'en') RETURNING id"
+                    + "VALUES (:url, :title, 'en') RETURNING id"
                 ),
                 {
                     "url": f"https://retag-500-{uuid4().hex[:8]}.example.com",
@@ -73,8 +73,8 @@ def seeded_document_id(engine: Engine) -> Iterator[UUID]:
         doc_id = UUID(str(doc_id_raw))
     yield doc_id
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def _auth() -> dict[str, str]:
@@ -128,7 +128,7 @@ def test_retag_modal_401_must_not_be_opaque_500(seeded_document_id: UUID) -> Non
 
     assert resp.status_code != HTTPStatus.INTERNAL_SERVER_ERROR, (
         "Retag must not return opaque 500 when Modal enqueue fails; "
-        f"got {resp.status_code}: {resp.text}"
+        + f"got {resp.status_code}: {resp.text}"
     )
     assert resp.status_code == HTTPStatus.BAD_GATEWAY
     assert "401" in resp.text or "enqueue" in resp.text.lower()

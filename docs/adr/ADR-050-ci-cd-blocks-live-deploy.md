@@ -22,7 +22,9 @@ deploy-preflight on `main`) also created false “green” signals.
 4. Prefer `bash scripts/ci/watch_github_ci.sh [branch]` (or project equivalent); non-zero
    exit is blocking.
 5. Document branch-protection / required checks in the staging/deploy runbook when the
-   host allows (RA-010).
+   host allows (RA-010). **F83 / ADR-054:** ruleset on `main` must require CI **and**
+   staging deploy + H1–H5 smoke for the PR tip SHA (Environments `staging` /
+   `production`).
 
 ## Consequences
 

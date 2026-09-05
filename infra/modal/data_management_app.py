@@ -7,6 +7,7 @@ Requires Modal secret `vecinita-data-management` with:
 VECINITA_MODAL_EMBED_URL, VECINITA_INTERNAL_WRITE_URL, VECINITA_INTERNAL_API_KEY,
 VECINITA_MODAL_PROXY_KEY, VECINITA_CORS_ORIGINS (admin frontend origin),
 VECINITA_MODAL_LLM_URL (required for retag and LLM tagging at ingest),
+VECINITA_MODAL_DATA_MGMT_URL (F75/F76 daily schedule self-enqueue via ModalJobsEnqueueClient),
 SUPABASE_URL, VECINITA_AUTH_REQUIRED (EV-005 F34 admin JWT on /jobs*),
 SUPABASE_SECRET_KEY (EV-006 F35 — Admin API for /admin/users*; ADR-030 / TP-S005-01).
 See infra/modal/.env.example and docs/staging-secrets-matrix.md.
@@ -16,10 +17,10 @@ from __future__ import annotations
 
 import logging
 import os
-from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import modal
+from infra.modal.repo_paths import resolve_repo_root
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
@@ -31,21 +32,14 @@ logger = logging.getLogger(__name__)
 APP_NAME = "vecinita-data-management"
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when deploying from infra/modal; /opt/vecinita when Modal mounts at /root."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/opt/vecinita")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root()
 
 app = modal.App(APP_NAME)
 
 _PKG_ROOT = "/opt/vecinita"
 _PYTHONPATH = ":".join(
     [
+        "/root",
         f"{_PKG_ROOT}/packages/ingest",
         f"{_PKG_ROOT}/packages/embedding-client",
         f"{_PKG_ROOT}/packages/llm-client",
@@ -71,6 +65,7 @@ image = (
         "playwright>=1.40,<2",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
+    .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
     .add_local_dir(_REPO_ROOT / "packages" / "ingest", remote_path=f"{_PKG_ROOT}/packages/ingest")
     .add_local_dir(
         _REPO_ROOT / "packages" / "embedding-client",
@@ -101,8 +96,20 @@ image = (
 
 def _run_scheduled_catchup_tick() -> str:
     """F75 daily catch-up branch (job/CRUD enqueue residual; cron records tick)."""
-    logger.info("daily schedule tick: job_type=automation_catchup (shared Period(days=1))")
-    return "automation_catchup_tick"
+    from vecinita_data_management_backend.schedule_catchup import (
+        record_scheduled_catchup_tick,
+    )
+    from vecinita_data_management_backend.write_client import (
+        InternalWriteClient,
+        InternalWriteClientError,
+    )
+
+    try:
+        write = InternalWriteClient()
+    except InternalWriteClientError:
+        logger.warning("catch-up tick: write client unavailable", exc_info=True)
+        return "automation_catchup_tick"
+    return record_scheduled_catchup_tick(write)
 
 
 def _run_scheduled_freshness_tick() -> dict[str, object]:
@@ -202,7 +209,7 @@ def fastapi_app():
     except Exception:
         logger.warning(
             "LlmTagClient init failed — retag/translate jobs will fail. "
-            "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
+            + "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
             APP_NAME,
             exc_info=True,
         )
@@ -210,7 +217,7 @@ def fastapi_app():
         translate_client = None
 
     # F77: approved finetune_train jobs call vecinita-llm-finetune::train_lora (T129.5).
-    os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
+    _ = os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
 
     def runner(job_id: UUID) -> None:
         run_job(

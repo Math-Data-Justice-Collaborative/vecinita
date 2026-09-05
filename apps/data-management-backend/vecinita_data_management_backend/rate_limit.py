@@ -36,7 +36,7 @@ class SlidingWindowRateLimiter:
         events = self._events[key]
         cutoff = now - self._window
         while events and events[0] <= cutoff:
-            events.popleft()
+            _ = events.popleft()
         if len(events) >= self._max:
             return False
         events.append(now)

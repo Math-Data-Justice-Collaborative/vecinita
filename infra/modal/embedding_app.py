@@ -12,10 +12,10 @@ from __future__ import annotations
 import json
 import logging
 import os
-from pathlib import Path
 from typing import Protocol, cast
 
 import modal
+from infra.modal.repo_paths import resolve_repo_root
 from vecinita_embedding_client.modal_pins import (
     DEFAULT_EMBEDDING_MODEL_ID,
     EMBED_IMAGE_PIPS,
@@ -30,18 +30,11 @@ VOLUME_NAME = "embedding-models"
 _LOG = logging.getLogger(__name__)
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when deploying from infra/modal; /opt/vecinita when Modal mounts at /root."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/opt/vecinita")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root()
 _PKG_ROOT = "/opt/vecinita"
 _PYTHONPATH = ":".join(
     [
+        "/root",
         f"{_PKG_ROOT}/packages/embedding-client",
         f"{_PKG_ROOT}/packages/shared-schemas",
     ],
@@ -59,6 +52,7 @@ image = (
         "httpx>=0.27,<1",
     )
     .env({"PYTHONPATH": _PYTHONPATH})
+    .add_local_dir(_REPO_ROOT / "infra", remote_path="/root/infra")
     .add_local_dir(
         _REPO_ROOT / "packages" / "embedding-client",
         remote_path=f"{_PKG_ROOT}/packages/embedding-client",
@@ -176,14 +170,21 @@ class EmbeddingService:
     @modal.enter(snap=True)
     def load_model(self) -> None:
         self._backend = _load_backend("/models")
-        self._backend.embed(["warmup"])
+        _ = self._backend.embed(["warmup"])
 
     @modal.method()
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         return self._backend.embed(texts)
 
 
-@app.function(image=image, memory=EMBED_MEMORY_MIB, secrets=_EMBED_SECRETS)
+@app.function(
+    image=image,
+    memory=EMBED_MEMORY_MIB,
+    secrets=_EMBED_SECRETS,
+    # Keep one ASGI worker so /health is not stuck behind cold import of
+    # sentence_transformers/fastembed (image.imports) after app stop/drain.
+    min_containers=1,
+)
 @modal.asgi_app()
 def embedding_api():
     from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -211,9 +212,13 @@ def embedding_api():
             },
         )
 
-    async def warm(_: Request) -> JSONResponse:
-        """Boot EmbeddingService during user think-time (S001 T11)."""
-        service.embed_texts.remote(["warmup"])
+    async def warm(_request: Request) -> JSONResponse:
+        """Boot EmbeddingService during user think-time (S001 T11).
+
+        Fire-and-forget via ``.spawn()`` so the ASGI worker is not held while
+        the class container cold-starts (BUG-2026-08-27 queue saturation).
+        """
+        _ = service.embed_texts.spawn(["warmup"])
         return JSONResponse({"status": "ok"})
 
     async def embed(request: Request) -> JSONResponse:
@@ -222,7 +227,8 @@ def embedding_api():
             item = EmbedRequest.model_validate(payload)
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=422)
-        vectors = service.embed_texts.remote([item.text])
+        # ``.aio`` keeps the ASGI event loop free (BUG-2026-08-27 / #275).
+        vectors = await service.embed_texts.remote.aio([item.text])
         return JSONResponse({"embedding": vectors[0]})
 
     async def embed_batch(request: Request) -> JSONResponse:
@@ -231,7 +237,7 @@ def embedding_api():
             item = EmbedBatchRequest.model_validate(payload)
         except (json.JSONDecodeError, ValidationError) as exc:
             return JSONResponse({"detail": str(exc)}, status_code=422)
-        vectors = service.embed_texts.remote(item.texts)
+        vectors = await service.embed_texts.remote.aio(item.texts)
         return JSONResponse({"embeddings": vectors})
 
     return Starlette(

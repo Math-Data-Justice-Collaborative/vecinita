@@ -80,7 +80,7 @@ def test_ingest_job_completes_when_tag_inference_returns_non_json() -> None:
         embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
         write_client=write_client,  # type: ignore[arg-type]
         fetch_document=_fetch_fixture,
-        tag_client=_NonJsonTagClient(),  # type: ignore[arg-type]
+        tag_client=_NonJsonTagClient(),
         tag_vocabulary=_VOCAB,
     )
 

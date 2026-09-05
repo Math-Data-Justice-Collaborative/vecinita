@@ -14,6 +14,7 @@ import pytest
 
 _REPO = Path(__file__).resolve().parents[3]
 _LLM_APP = _REPO / "infra" / "modal" / "llm_app.py"
+_LLM_CORE = _REPO / "infra" / "modal" / "llm_service_core.py"
 _PLAYGROUND_APP = _REPO / "infra" / "modal" / "llm_playground_app.py"
 
 
@@ -37,14 +38,18 @@ def test_prod_llm_service_mounts_finetune_adapters_volume() -> None:
     text = _cls_volumes_source(_LLM_APP)
     assert "/adapters" in text
     assert "adapters_volume" in text or "llm-finetune-adapters" in text
-    source = _LLM_APP.read_text(encoding="utf-8")
-    assert "decide_serve_adapter_id" in source
-    assert '_adapter_load_for_role("prod")' in source
+    llm_app_source = _LLM_APP.read_text(encoding="utf-8")
+    core_source = _LLM_CORE.read_text(encoding="utf-8")
+    assert "decide_serve_adapter_id" in llm_app_source
+    assert "_adapter_load_for_role" in core_source
+    assert 'serve_role: ClassVar[ServeRole] = "prod"' in llm_app_source
 
 
 def test_playground_llm_service_mounts_finetune_adapters_volume() -> None:
     """Playground LlmService mounts adapters for pre-promote candidates."""
     text = _cls_volumes_source(_PLAYGROUND_APP)
     assert "/adapters" in text
-    source = _PLAYGROUND_APP.read_text(encoding="utf-8")
-    assert '_adapter_load_for_role("playground")' in source
+    playground_source = _PLAYGROUND_APP.read_text(encoding="utf-8")
+    core_source = _LLM_CORE.read_text(encoding="utf-8")
+    assert "_adapter_load_for_role" in core_source
+    assert 'serve_role: ClassVar[ServeRole] = "playground"' in playground_source

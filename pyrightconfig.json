@@ -1,7 +1,7 @@
 {
   "include": ["apps", "packages", "tests", "infra", "scripts"],
   "exclude": ["**/__pycache__", ".venv", ".pytest_cache", "**/node_modules"],
-  "extraPaths": [".cursor/hooks"],
+  "extraPaths": [".cursor/hooks", "scripts"],
   "stubPath": "stubs",
   "pythonVersion": "3.11",
   "typeCheckingMode": "strict",
@@ -9,6 +9,12 @@
   "reportMissingTypeStubs": false,
   "reportExplicitAny": "error",
   "reportAny": "error",
+  "reportUnusedCallResult": "error",
+  "reportUnnecessaryTypeIgnoreComment": "error",
+  "reportMatchNotExhaustive": "error",
+  "reportImplicitStringConcatenation": "error",
+  "reportDeprecated": "error",
+  "reportPrivateUsage": "error",
   "executionEnvironments": [
     {
       "root": "infra",

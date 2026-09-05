@@ -1,10 +1,58 @@
 # Staging secrets matrix
 
-> **Project**: Vecinita staging  
-> **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 planned secrets; prior S010/EV-011 F39 M80)
+> **Project**: Vecinita  
+> **Source**: `docs/deployment-integration.md` §Secrets, ADR-007, ADR-010, **ADR-054 / F83**  
+> **Last updated**: 2026-08-31 (EV-305 dual Resend path)
 
-Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — never commit to git.
+Store values in **DigitalOcean App Platform** secrets, **Modal** secrets, or **GitHub
+Environments** — never commit to git.
+
+## Dual environment (ADR-054)
+
+| Env | DO apps | Postgres | Supabase | Modal | GitHub Environment |
+|-----|---------|----------|----------|-------|-------------------|
+| **staging** | `vecinita-staging-*` (short names ≤32: `write-api`, `chat-api`, `chat-fe`, `admin-fe`) | `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** | `staging` |
+| **prod** | current sole stack (legacy names OK) | current managed DB | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** | `production` |
+
+Use **separate** secret values per environment (never point staging apps at prod
+`DATABASE_URL` or prod Modal Environment `main` secrets). Same Modal workspace token may
+deploy both Environments; Modal Secrets are Environment-scoped. Suggested GitHub secret
+suffixes: `*_STAGING` on Environment `staging`; unsuffixed or `*_PROD` on `production`.
+
+| Variable / secret | Staging notes |
+|-------------------|---------------|
+| `VECINITA_ENV` | `staging` on staging apps; `production` on prod |
+| `VECINITA_MODAL_WORKSPACE` | Always **`vecinita`** (both envs) |
+| `MODAL_ENVIRONMENT` | `staging` for staging deploys; `main` (or unset) for prod |
+| `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Workspace `vecinita` token (same OK for GH Env staging + production) |
+| `SUPABASE_URL` / keys / project ref | Staging project only on staging admin FE + write API |
+| `DATABASE_URL` | Staging Postgres only on staging DO backends (never Modal) |
+| `RESEND_API_KEY` / `RESEND_SENDER_EMAIL` / `SUPABASE_SMTP_PASS` | **Distinct values per env** (EV-305 / #305). Same Resend **account** OK; staging uses its own API key + From (e.g. `noreply+staging@josephcmcg.com`). Never reuse the prod `re_` key on staging Modal / write-api / staging Supabase SMTP. |
+
+## Dual Resend path (EV-305 / #305–#309)
+
+Same Resend account; **isolated path** = separate API key + staging sender under that account
+(ADR-054). Env **names** stay `RESEND_API_KEY`, `RESEND_SENDER_EMAIL`, `SUPABASE_SMTP_PASS`.
+
+| Surface | Staging value | Prod value |
+|---------|---------------|------------|
+| Resend API key | Staging-only `re_…` (GH Env `staging`, Modal env `staging`, staging write-api) | Prod `re_…` (GH Env `production`, Modal `main`, prod write-api) |
+| `RESEND_SENDER_EMAIL` / SMTP `admin_email` | Staging local-part on verified domain (e.g. `noreply+staging@josephcmcg.com`) | Prod From (e.g. `noreply@josephcmcg.com`) |
+| `SUPABASE_SMTP_PASS` | = staging Resend key → **staging** Supabase project | = prod Resend key → **prod** Supabase project |
+| Feedback notify To | `VECINITA_FEEDBACK_NOTIFY_EMAIL` on staging write-api only until prod AskQuestion | Prod write-api — AskQuestion required |
+
+**Operator provision (#306):** Resend dashboard → create API key labeled staging → add/verify
+staging From on the existing domain (plus-addressing preferred; no new DNS subdomain required)
+→ store in operator `.env` / GH Environment `staging` (never commit).
+
+**Wire (#307):** sync staging Modal DM (`MODAL_ENVIRONMENT=staging`), `vecinita-staging-write-api`,
+and staging Supabase SMTP pass from the staging key only. Confirm Resend dashboard traffic for
+test-send / notify attributes to the staging key.
+
+**Docs (#309):** this table + staging-runbook §Dual Resend. **E2E (#308):** after notify code is
+on the staging image (#212), POST feedback → inbox + staging-key traffic.
+
+**Forbidden on Modal (both envs):** `DATABASE_URL` (ADR-007).
 
 ## DigitalOcean — ChatRAG Backend
 
@@ -13,6 +61,10 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `DATABASE_URL` | Yes | Managed Postgres connection string (read + pgvector) |
 | `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix) |
 | `VECINITA_MODAL_LLM_URL` | Yes | Modal `vecinita-llm` base URL |
+| `VECINITA_MODAL_RERANK_URL` | When CE on | Modal `vecinita-rerank` base URL (**`vecinita--vecinita-rerank`** prefix; no `/health` suffix) |
+| `VECINITA_RAG_RERANK_CE` | No (default `false`) | F45 CE rerank; **staging `true`** after Modal deploy + AC-BB9; prod stays `false` (AC-FO4) |
+| `VECINITA_RAG_QUERY_REFINE` | No (default `false`) | F81 LLM query rewrite before retrieve; enable on staging only after `rag-regression` (AC-SR5) |
+| `VECINITA_RAG_OUTPUT_VERIFY` | No (default `false`) | F82 post-generation faithfulness judge + citations; **live `true`** after F36 / `rag-regression` + operator approval (AC-OV7 / S034-D10); sync via GitHub Actions + `do_apps.py` |
 | `VECINITA_MODAL_TOKEN_ID` | If Modal auth | DO→Modal credential |
 | `VECINITA_MODAL_TOKEN_SECRET` | If Modal auth | DO→Modal credential |
 | `VECINITA_TOP_K` | No | Default `5` |
@@ -76,6 +128,7 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 | `VECINITA_MODAL_PROXY_KEY` | Yes | ASGI `requires_proxy_auth` |
 | `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` base URL — used by ingest workers |
 | `VECINITA_MODAL_LLM_URL` | Yes (EV-001) | Modal `vecinita-llm` base URL — LLM tagging at ingest |
+| `VECINITA_MODAL_DATA_MGMT_URL` | Yes (F75/F76) | Self ASGI base URL — `daily_corpus_automations` enqueue via `ModalJobsEnqueueClient` |
 | `VECINITA_CORS_ORIGINS` | Yes (browser UI) | Admin frontend origin; redeploy after change |
 | `VECINITA_LLM_TAG_MAX_TOKENS` | No | Default `128` — EV-001 LLM tag generation token limit |
 | `VECINITA_TAG_SEED_PATH` | No | Default `data/fixtures/tags/seed_tags.json` — EV-001 tag vocabulary path |
@@ -88,7 +141,14 @@ Store values in **DigitalOcean App Platform** secrets or **Modal** secrets — n
 
 | Secret | Required keys | Used by |
 |--------|---------------|---------|
-| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` ASGI — `/models/ollama*` proxy auth (ADR-037 / TP-S010-25) |
+| **`vecinita-llm`** | `VECINITA_MODAL_PROXY_KEY` | `llm_app.py` **and** `llm_playground_app.py` **ASGI only** — proxy auth (ADR-037 / TP-S010-25). Do **not** put GPU snapshot kill-switch here. |
+| **`vecinita-llm-gpu`** | optional `VECINITA_FINETUNE_ADAPTER_ID`; optional `VECINITA_FINETUNE_ADAPTER_HASH` (SHA-256 hex); optional `VECINITA_LLM_ENFORCE_EAGER`; optional `VECINITA_LLM_LORA_RESOLVE` | Prod `LlmService` GPU class only (no proxy key — PR review defense-in-depth). |
+
+**GPU snapshots (`VECINITA_LLM_GPU_SNAPSHOT`):** deploy-time env for `modal deploy infra/modal/llm_app.py`.
+Not read from Modal Secrets at container runtime — `enable_memory_snapshot` is baked at deploy
+import (ADR-022 EV-313 / #313). **Enabled on Modal Environments `staging` and `main` as of
+2026-08-31** — always `export VECINITA_LLM_GPU_SNAPSHOT=true` before redeploying those envs
+(or snapshots silently disable). Playground stays off.
 
 Sync: `bash scripts/deploy/sync_llm_secret.sh --apply` (source `prod.env` first),
 or one-shot `bash scripts/deploy/sync_env.sh --modal --apply` (also merges
@@ -207,7 +267,10 @@ Non-secret defaults also live in `infra/vecinita.yaml` (`chat_rag.energy_*`, `fe
 | `VECINITA_ENERGY_GCO2E_PER_KWH` | ChatRAG backend | No (default 386) | F65 intensity constant |
 | `VECINITA_ENERGY_CAR_GCO2E_PER_KM` | ChatRAG backend | No (default 251) | F65 car distance factor |
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | Internal write API | No (default 90) | F68 feedback purge horizon |
-| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Internal write API | No | Optional notify on new feedback |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | Internal write API | No | Optional webhook URL on new feedback (#214) |
+| `VECINITA_FEEDBACK_NOTIFY_EMAIL` | Internal write API | No | Optional operator To address for Resend notify (#214) |
+| `RESEND_API_KEY` | Internal write API (optional; also Modal DM) | No for feedback | Needed when feedback email notify is enabled (#214). **Per-environment** value (EV-305) — staging write-api / Modal DM must use the **staging** Resend key, not prod. |
+| `RESEND_SENDER_EMAIL` | Internal write API (optional; also Modal DM) | No for feedback | Verified From for feedback notify (#214). Staging: e.g. `noreply+staging@josephcmcg.com` (EV-305). |
 | `SUPABASE_SECRET_KEY` | **DO internal-write-api** (+ Modal DM) | Yes for F69 live enrich | Read-time `actor_email` on `GET /internal/v1/audit` |
 
 ## EV-006 (F35) — Admin user management + Resend SMTP (#75)
@@ -221,8 +284,8 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 | `SUPABASE_SECRET_KEY` | **Modal data-management ASGI** (F35 `/admin/users*`) **and** **DO internal-write-api** (F69 audit `actor_email` enrich) | Yes (F35); Yes (F69 on write API) | Supabase Admin API. **Server-side only** — never in any `VITE_*` build. Modal remains primary for user-mgmt (ADR-030); write API needs the same key for read-time audit enrich (EV-024 / #170). |
 | `VECINITA_INTERNAL_WRITE_URL` | Modal data-management ASGI | Yes (F35) | Base URL for audit ingest (`POST /internal/v1/audit/event`) |
 | `VECINITA_INTERNAL_API_KEY` | Modal data-management ASGI | Yes (F35) | Service key for audit ingest calls |
-| `RESEND_API_KEY` | **Modal data-management ASGI only** | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) for `POST /admin/email/test` (Resend REST). Server-side only. (TP-S005-22) |
-| `RESEND_SENDER_EMAIL` | Modal data-management ASGI | Yes (F35 test-send) | Verified Resend sender (= `[auth.email.smtp] admin_email`) used as test-send `from`. (TP-S005-22) |
+| `RESEND_API_KEY` | **Modal data-management ASGI only** | Yes (F35 test-send) | Resend API key (**same value as that environment’s** `SUPABASE_SMTP_PASS`) for `POST /admin/email/test` (Resend REST). Server-side only. Staging Modal Environment ≠ prod key (EV-305 / #305). (TP-S005-22) |
+| `RESEND_SENDER_EMAIL` | Modal data-management ASGI | Yes (F35 test-send) | Verified Resend sender (= that env’s `[auth.email.smtp] admin_email`) used as test-send `from`. (TP-S005-22; EV-305) |
 | `VITE_VECINITA_IDLE_TIMEOUT_MIN` | DM frontend build (`VITE_*`) | No (default 30) | Idle auto-logout minutes (TP-S005-17) |
 | `VITE_VECINITA_IDLE_WARNING_SEC` | DM frontend build (`VITE_*`) | No (default 60) | Idle warning countdown seconds (TP-S005-17) |
 
@@ -230,9 +293,9 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 
 | Variable / item | Where | Required | Description |
 |-----------------|-------|----------|-------------|
-| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod) | Resend API key; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)` |
-| Verified Resend sending domain | Resend dashboard (operator) | Yes (prod) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090) |
-| Sender address + name | `config.toml` `[auth.email.smtp]` | Yes (prod) | e.g. `noreply@josephcmcg.com` (verified Resend domain), "Vecinita Admin" |
+| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod); staging project separately | Resend API key for **that** Supabase project; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)`. Staging project must use staging Resend key (EV-305). |
+| Verified Resend sending domain | Resend dashboard (operator) | Yes (prod + staging path) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090). One domain OK for both paths. |
+| Sender address + name | `config.toml` `[auth.email.smtp]` / dashboard | Yes | Prod e.g. `noreply@josephcmcg.com`; staging e.g. `noreply+staging@josephcmcg.com` (EV-305 A1) |
 
 ### Per-environment .env files (master = repo-root `prod.env`, gitignored)
 
@@ -333,6 +396,8 @@ EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy c
 > Staging first; AskQuestion before live prod automation enable / FT promote.
 > Sync via `scripts/deploy/sync_modal_secret.sh --merge --apply` for Modal secrets;
 > DO apps via `do_apps.py sync-secrets` (never commit operator specs).
+> **EV-031:** keys below added to `sync_github_secrets.sh`, `do_apps.py`, and
+> `deploy-digitalocean.yml` (CD parity — values still safe-off until operator enable).
 
 ### DigitalOcean — Internal write API / Modal DM (add)
 
@@ -345,6 +410,8 @@ EV-004 is client-only i18n/UI. **No new environment variables** or CORS policy c
 | `VECINITA_FRESHNESS_STALE_DAYS` | No | Stale threshold days (default `30`) |
 | `VECINITA_FINETUNE_ENABLED` | No | F77 feature flag (default `false`) |
 | `VECINITA_FINETUNE_ADAPTER_ID` | No | Promoted LoRA adapter id on prod `vecinita-llm` (empty = base) |
+| `VECINITA_FINETUNE_ADAPTER_HASH` | No | Lowercase hex SHA-256 of promoted adapter dir (ADR-022 EV-316 / #316); empty = base |
+| `VECINITA_LLM_LORA_RESOLVE` | No | `post_restore` (default) \| `snapshot_bound` — LoRA bind after GPU snapshot restore |
 | `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | No | Pre-promote candidate adapter on playground only |
 | `VECINITA_FINETUNE_REQUIRE_APPROVE` | No | Require approve before GPU (default `true`) |
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | No | F77 max concurrent trains (default `1`) |
@@ -361,11 +428,16 @@ Modal secret name: **`vecinita-llm-finetune`** (`infra/modal/finetune_app.py`).
 | Volume `llm-finetune-adapters` | Yes | Adapter artifacts (Modal Volume, not env) |
 | Volume `llm-models` | Yes | Pinned Qwen base (shared with `vecinita-llm`) |
 
-### Modal — `vecinita-llm` (promote pin)
+### Modal — `vecinita-llm-gpu` (promote pin + eager)
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only |
+| `VECINITA_FINETUNE_ADAPTER_ID` | No | Load adapter after human promote only (prod GPU class) |
+| `VECINITA_FINETUNE_ADAPTER_HASH` | No | SHA-256 hex of promoted adapter dir (EV-316 / #316) |
+| `VECINITA_LLM_LORA_RESOLVE` | No | `post_restore` (default) \| `snapshot_bound` |
+| `VECINITA_LLM_ENFORCE_EAGER` | No | vLLM eager A/B (default `true` if unset in sync) |
+
+ASGI proxy key stays on **`vecinita-llm`** only — not mounted on GPU workers.
 
 ### Modal — `vecinita-llm-playground` (pre-promote candidate)
 

@@ -39,7 +39,7 @@ def test_create_rebuild_run_request_accepts_modes_and_stamps() -> None:
 def test_create_rebuild_run_request_rejects_unknown_mode() -> None:
     """Invalid rebuild mode is rejected at the schema boundary."""
     with pytest.raises(ValidationError):
-        CreateRebuildRunRequest.model_validate({"mode": "reindex", "dry_run": True})
+        _ = CreateRebuildRunRequest.model_validate({"mode": "reindex", "dry_run": True})
 
 
 def test_create_rebuild_run_response_requires_id() -> None:

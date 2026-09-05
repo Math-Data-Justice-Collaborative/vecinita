@@ -15,13 +15,15 @@ source "${ROOT}/scripts/modal_ensure_workspace.sh"
 
 REQUIRED_SECRET="vecinita-data-management"
 LLM_SECRET="vecinita-llm"
+RERANK_SECRET="vecinita-rerank"
 FINETUNE_SECRET="vecinita-llm-finetune"
-REQUIRED_VOLUMES=(embedding-models llm-models llm-finetune-adapters)
+REQUIRED_VOLUMES=(embedding-models llm-models rerank-models llm-finetune-adapters)
 REQUIRED_APPS=(
   vecinita-embedding
   vecinita-data-management
   vecinita-llm
   vecinita-llm-playground
+  vecinita-rerank
   vecinita-llm-finetune
 )
 
@@ -55,6 +57,14 @@ if ! grep -qx "${LLM_SECRET}" <<<"${secret_names}"; then
   exit 1
 fi
 echo "OK secret ${LLM_SECRET} exists"
+
+echo "==> Required secret: ${RERANK_SECRET} (F45 CE rerank)"
+if ! grep -qx "${RERANK_SECRET}" <<<"${secret_names}"; then
+  echo "ERROR: missing Modal secret '${RERANK_SECRET}'." >&2
+  echo "Create empty placeholder: modal secret create ${RERANK_SECRET}" >&2
+  exit 1
+fi
+echo "OK secret ${RERANK_SECRET} exists"
 
 echo "==> Required secret: ${FINETUNE_SECRET} (ADR-053 FT worker)"
 if ! grep -qx "${FINETUNE_SECRET}" <<<"${secret_names}"; then

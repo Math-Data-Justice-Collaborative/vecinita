@@ -1,0 +1,49 @@
+---
+description: Keep synthetic test URLs out of managed (staging/prod) corpus Postgres
+globs:
+  - tests/**
+  - scripts/ops/**
+  - apps/database/**
+alwaysApply: true
+---
+# No corpus test artifacts on managed Postgres
+
+Synthetic pytest/e2e documents must **never** remain on DigitalOcean Managed Postgres
+(staging or production corpus). Incidents: leftover `*.example.com` / `fixture://` rows
+polluted the live corpus (HF-prod-corpus-test-artifacts, 2026-09-03).
+
+[Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push]
+
+## Test-artifact URL patterns (delete / refuse)
+
+| Pattern | Examples |
+|---------|----------|
+| `*.example.com` | `https://batch-upsert-….example.com/`, `https://test.example.com/uj017-…` |
+| `fixture://` | `fixture://corpus/en/community-resources.md` |
+| localhost | `http://localhost:…`, `http://127.0.0.1:…` |
+
+Classifier: `tests/helpers/corpus_test_artifacts.py`  
+Cleanup: `uv run python scripts/ops/cleanup_corpus_test_artifacts.py --database-url "$URL"`  
+Apply (managed hosts): set `VECINITA_ALLOW_CORPUS_RESET=1` and
+`VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed`, then pass `--apply`.
+
+## Do
+
+- Run pytest / e2e against **local** Postgres only (`localhost` / `127.0.0.1` / `postgres`).
+- Tear down fixture documents in the same test (or session-scoped cleanup).
+- After any accidental insert into a managed DB: dry-run the cleanup script, then `--apply`
+  with the corpus-reset override (AskQuestion for live prod).
+- Prefer fixture hosts under `example.com` so the classifier can find leftovers.
+
+## Do not
+
+- Point `DATABASE_URL` at `*.ondigitalocean.com` for `pytest` / `make test-py`.
+- Leave `example.com` / `fixture://` documents on staging or production after a probe.
+- Use `TRUNCATE` / full corpus wipe to remove test rows — delete by URL pattern only.
+- Skip AskQuestion for **live production** corpus deletes
+  ([no-live-prod-corpus-push.mdc](no-live-prod-corpus-push.mdc)).
+
+## CI
+
+`scripts/check_corpus_test_artifacts_guard.sh` (via `make ci-guards`) asserts the
+classifier, cleanup script, and this rule stay wired.

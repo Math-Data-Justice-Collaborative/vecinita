@@ -15,7 +15,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Seed the canonical super-admin operator for RAG config promote.",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--dry-run", action="store_true", help="Print action without mutating Supabase"
     )
     args = parser.parse_args(argv)

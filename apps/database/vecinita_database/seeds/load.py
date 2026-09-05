@@ -106,12 +106,12 @@ def load_corpus(*, database_url: str | None = None) -> dict[str, int]:
                 )
                 documents += 1
 
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM chunks WHERE document_id = :document_id"),
                     {"document_id": doc_id},
                 )
                 for index, chunk in enumerate(_chunk_text(body)):
-                    conn.execute(
+                    _ = conn.execute(
                         text(
                             """
                             INSERT INTO chunks (document_id, chunk_index, text, token_count)

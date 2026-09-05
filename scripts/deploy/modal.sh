@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Deploy all Modal apps (embedding, data-management, LLM, finetune). Requires: modal CLI,
-# authenticated. Uses the vecinita Modal workspace (not fontface). See
-# scripts/modal_ensure_workspace.sh.
+# Deploy all Modal apps (embedding, data-management, LLM, rerank, finetune).
+# Requires: modal CLI, authenticated. Workspace: vecinita. Environment:
+# MODAL_ENVIRONMENT / VECINITA_MODAL_ENVIRONMENT (main|staging).
+# See scripts/modal_ensure_workspace.sh and docs/adr/ADR-054-distinct-staging-and-production.md.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -17,21 +18,34 @@ else
   MODAL_CMD=(modal)
 fi
 
+MODAL_ENV="${MODAL_ENVIRONMENT:-${VECINITA_MODAL_ENVIRONMENT:-}}"
+ENV_ARGS=()
+if [[ -n "${MODAL_ENV}" ]]; then
+  ENV_ARGS=(--env "${MODAL_ENV}")
+  echo "==> Modal Environment: ${MODAL_ENV}"
+fi
+
 echo "Deploying vecinita-embedding..."
-"${MODAL_CMD[@]}" deploy infra/modal/embedding_app.py
+"${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/embedding_app.py
 
 echo "Deploying vecinita-data-management..."
-"${MODAL_CMD[@]}" deploy infra/modal/data_management_app.py
+"${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/data_management_app.py
 
 echo "Deploying vecinita-llm (prod pin; ADR-037 / RD-169)..."
-"${MODAL_CMD[@]}" deploy infra/modal/llm_app.py
+"${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/llm_app.py
 
 echo "Deploying vecinita-llm-playground (shared llm-models; TP-S010-25)..."
-"${MODAL_CMD[@]}" deploy infra/modal/llm_playground_app.py
+"${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/llm_playground_app.py
+
+echo "Deploying vecinita-rerank (CE rerank; F45 / EV-029)..."
+"${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/rerank_app.py
 
 echo "Deploying vecinita-llm-finetune (flags off by default; ADR-053)..."
-"${MODAL_CMD[@]}" deploy infra/modal/finetune_app.py
+"${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/finetune_app.py
 
 echo "Done. vecinita-ollama is deprecated — do not deploy (ADR-037)."
-echo "Record VECINITA_MODAL_LLM_URL (prod) and VECINITA_MODAL_LLM_PLAYGROUND_URL in DO secrets"
-echo "(see docs/staging-secrets-matrix.md)."
+echo "Record VECINITA_MODAL_LLM_URL (prod), VECINITA_MODAL_LLM_PLAYGROUND_URL, and"
+echo "VECINITA_MODAL_RERANK_URL (when CE on) in DO secrets (docs/staging-secrets-matrix.md)."
+if [[ "${MODAL_ENV}" == "staging" ]]; then
+  echo "Staging URLs use prefix vecinita-staging-- (Environment web suffix)."
+fi

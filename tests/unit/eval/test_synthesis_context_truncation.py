@@ -118,4 +118,4 @@ def test_synthesize_with_system_prompt_uses_str_when_no_text_attr() -> None:
 def test_truncate_synthesis_context_rejects_non_positive_max() -> None:
     """max_chars must be >= 1."""
     with pytest.raises(ValueError, match="max_chars"):
-        truncate_synthesis_context("abc", max_chars=0)
+        _ = truncate_synthesis_context("abc", max_chars=0)

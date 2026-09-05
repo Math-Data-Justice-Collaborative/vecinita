@@ -28,16 +28,16 @@ def test_job_store_base_methods_raise_not_implemented() -> None:
     store = JobStore()
 
     with pytest.raises(NotImplementedError):
-        store.create_job(urls=["https://example.com"])
+        _ = store.create_job(urls=["https://example.com"])
 
     with pytest.raises(NotImplementedError):
-        store.get_job(uuid4())
+        _ = store.get_job(uuid4())
 
     with pytest.raises(NotImplementedError):
-        store.update_job(uuid4(), status="failed")
+        _ = store.update_job(uuid4(), status="failed")
 
     with pytest.raises(NotImplementedError):
-        store.list_jobs()
+        _ = store.list_jobs()
 
 
 def test_in_memory_list_jobs_sorted_newest_first() -> None:
@@ -45,7 +45,7 @@ def test_in_memory_list_jobs_sorted_newest_first() -> None:
     store = InMemoryJobStore()
     first = store.create_job(urls=["https://example.com/1"])
     second = store.create_job(urls=["https://example.com/2"])
-    store.update_job(second.job_id, status="completed")
+    _ = store.update_job(second.job_id, status="completed")
 
     jobs = store.list_jobs()
 
@@ -93,7 +93,7 @@ def test_in_memory_update_job_raises_for_missing_id() -> None:
     store = InMemoryJobStore()
 
     with pytest.raises(KeyError):
-        store.update_job(uuid4(), status="failed")
+        _ = store.update_job(uuid4(), status="failed")
 
 
 def test_dict_job_store_round_trip() -> None:
@@ -121,7 +121,7 @@ def test_dict_job_store_update_raises_for_missing_id() -> None:
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", {}))
 
     with pytest.raises(KeyError):
-        store.update_job(uuid4(), status="failed")
+        _ = store.update_job(uuid4(), status="failed")
 
 
 def test_dict_job_store_get_job_returns_none_for_missing() -> None:
@@ -209,4 +209,4 @@ def test_job_store_delete_job_base_raises() -> None:
     """JobStore.delete_job is abstract and raises NotImplementedError."""
     store = JobStore()
     with pytest.raises(NotImplementedError):
-        store.delete_job(uuid4())
+        _ = store.delete_job(uuid4())

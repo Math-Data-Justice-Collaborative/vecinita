@@ -264,7 +264,7 @@ def enrich_spdx(path: Path, *, workers: int) -> dict[str, int]:
             if mutable.get("licenseConcluded") in (None, NOASSERTION):
                 mutable["licenseConcluded"] = lic
 
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    _ = path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
     concluded = Counter(
         str(pkg.get("licenseConcluded") or NOASSERTION) for pkg in packages if isinstance(pkg, dict)
@@ -325,23 +325,23 @@ def inventory_uv_lock(lock_path: Path, out_path: Path, *, workers: int) -> dict[
         rows = list(pool.map(one, pkgs))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps({"packages": rows}, indent=2) + "\n", encoding="utf-8")
+    _ = out_path.write_text(json.dumps({"packages": rows}, indent=2) + "\n", encoding="utf-8")
     unknown = sum(1 for row in rows if not row.get("license"))
     return {"packages": len(rows), "resolved": len(rows) - unknown, "unknown": unknown}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--spdx", type=Path, help="Path to manifest.spdx.json")
-    parser.add_argument("--uv-lock", type=Path, help="Path to uv.lock for Python inventory")
-    parser.add_argument(
+    _ = parser.add_argument("--spdx", type=Path, help="Path to manifest.spdx.json")
+    _ = parser.add_argument("--uv-lock", type=Path, help="Path to uv.lock for Python inventory")
+    _ = parser.add_argument(
         "--uv-out",
         type=Path,
         default=None,
         help="Output path for Python license inventory JSON",
     )
-    parser.add_argument("--workers", type=int, default=16)
-    parser.add_argument("--summary", type=Path, help="Write enrichment summary JSON")
+    _ = parser.add_argument("--workers", type=int, default=16)
+    _ = parser.add_argument("--summary", type=Path, help="Write enrichment summary JSON")
     args = parser.parse_args(argv)
 
     summary: dict[str, object] = {}
@@ -350,8 +350,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         summary["spdx"] = spdx_stats
         print(
             f"[enrich-sbom] spdx packages={spdx_stats['packages']} "
-            f"resolved={spdx_stats['resolved']} "
-            f"still_noassertion={spdx_stats['still_noassertion']}",
+            + f"resolved={spdx_stats['resolved']} "
+            + f"still_noassertion={spdx_stats['still_noassertion']}",
             file=sys.stderr,
         )
     if args.uv_lock:
@@ -362,7 +362,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         summary["uv"] = uv_stats
         print(
             f"[enrich-sbom] uv.lock packages={uv_stats['packages']} "
-            f"resolved={uv_stats['resolved']} unknown={uv_stats['unknown']} -> {uv_out}",
+            + f"resolved={uv_stats['resolved']} unknown={uv_stats['unknown']} -> {uv_out}",
             file=sys.stderr,
         )
     if args.summary:

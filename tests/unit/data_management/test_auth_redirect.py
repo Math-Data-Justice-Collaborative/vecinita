@@ -28,20 +28,20 @@ def test_build_auth_redirect_path_rejects_invalid_path() -> None:
     """Invalid callback path names raise AdminRedirectConfigError."""
     origin = "https://admin.example.com"
     with pytest.raises(AdminRedirectConfigError, match="Invalid auth callback path"):
-        build_auth_redirect_path(origin, cast("AuthCallbackPath", "login"))
+        _ = build_auth_redirect_path(origin, cast("AuthCallbackPath", "login"))
 
 
 def test_build_auth_redirect_path_rejects_invalid_origin() -> None:
     """Malformed origins raise AdminRedirectConfigError."""
     with pytest.raises(AdminRedirectConfigError, match="Invalid admin frontend origin"):
-        build_auth_redirect_path("not-a-url", "accept-invite")
+        _ = build_auth_redirect_path("not-a-url", "accept-invite")
 
 
 def test_admin_frontend_origin_from_env_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     """Missing VECINITA_ADMIN_FRONTEND_URL raises AdminRedirectConfigError."""
     monkeypatch.delenv("VECINITA_ADMIN_FRONTEND_URL", raising=False)
     with pytest.raises(AdminRedirectConfigError, match="VECINITA_ADMIN_FRONTEND_URL"):
-        admin_frontend_origin_from_env()
+        _ = admin_frontend_origin_from_env()
 
 
 def test_admin_frontend_origin_from_env_valid(monkeypatch: pytest.MonkeyPatch) -> None:

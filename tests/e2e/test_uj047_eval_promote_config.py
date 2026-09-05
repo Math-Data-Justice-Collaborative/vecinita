@@ -52,8 +52,8 @@ def promote_config_e2e_client(
     set_auth_config_for_tests(make_auth_config(private_key))
     engine = create_engine(database_url)
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
-        conn.execute(text("DELETE FROM audit_log WHERE event_type = 'rag.config.promoted'"))
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM audit_log WHERE event_type = 'rag.config.promoted'"))
     app = create_app()
     with TestClient(app) as client:
         yield client, private_key, database_url
@@ -76,7 +76,7 @@ def _insert_preset(database_url: str, *, owner_id: UUID) -> UUID:
     ).model_dump(mode="json")
     engine = create_engine(database_url)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO eval_config_presets (

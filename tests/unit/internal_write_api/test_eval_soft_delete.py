@@ -38,7 +38,7 @@ def test_soft_delete_hides_from_default_list(engine: Engine) -> None:
         assert all(item.run_id != run_id for item in listed.items)
     finally:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_soft_delete_hides_from_default_detail(engine: Engine) -> None:
@@ -55,7 +55,7 @@ def test_soft_delete_hides_from_default_detail(engine: Engine) -> None:
         assert get_eval_run(engine, run_id=run_id) is None
     finally:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_soft_delete_sets_deleted_at(engine: Engine) -> None:
@@ -73,4 +73,4 @@ def test_soft_delete_sets_deleted_at(engine: Engine) -> None:
         assert row[0] is not None
     finally:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})

@@ -154,7 +154,7 @@ def parity_seed(client: TestClient, engine: Engine) -> Iterator[dict[str, str]]:
     )
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text("UPDATE documents SET paired_document_id = :es WHERE id = :en"),
             {"es": es_paired_id, "en": en_paired_id},
         )
@@ -170,13 +170,13 @@ def parity_seed(client: TestClient, engine: Engine) -> Iterator[dict[str, str]]:
 
     with engine.begin() as conn:
         for doc_id in (en_only_id, en_paired_id, es_paired_id):
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM chunks WHERE document_id = :id"), {"id": doc_id})
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM chunks WHERE document_id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_ev031_stats_summary_parity_fields(

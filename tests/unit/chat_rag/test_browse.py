@@ -27,7 +27,7 @@ def test_engine_from_url_creates_engine() -> None:
     engine = engine_from_url(database_url())
     try:
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            _ = conn.execute(text("SELECT 1"))
     finally:
         engine.dispose()
 

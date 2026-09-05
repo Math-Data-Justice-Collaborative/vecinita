@@ -36,7 +36,7 @@ def test_feedback_cleanup_uses_retention_env(
     """Feedback cleanup passes the configured retention window to the helper."""
     monkeypatch.setenv("VECINITA_FEEDBACK_RETENTION_DAYS", str(_RETENTION_DAYS))
     with patch(
-        "vecinita_internal_write_api.app.cleanup_feedback",
+        "vecinita_internal_write_api.routes.audit_feedback.cleanup_feedback",
         return_value=_EXPECTED_DELETED,
         create=True,
     ) as mock_cleanup:
@@ -60,7 +60,7 @@ def test_feedback_cleanup_skips_when_retention_zero(
     """Feedback cleanup skips the helper when retention is zero."""
     monkeypatch.setenv("VECINITA_FEEDBACK_RETENTION_DAYS", "0")
     with patch(
-        "vecinita_internal_write_api.app.cleanup_feedback",
+        "vecinita_internal_write_api.routes.audit_feedback.cleanup_feedback",
         create=True,
     ) as mock_cleanup:
         resp = client.post(

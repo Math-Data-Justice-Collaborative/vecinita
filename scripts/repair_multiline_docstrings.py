@@ -72,7 +72,7 @@ def main() -> int:
         original = path.read_text(encoding="utf-8")
         fixed = "".join(repair(original.splitlines(keepends=True)))
         if fixed != original:
-            path.write_text(fixed, encoding="utf-8")
+            _ = path.write_text(fixed, encoding="utf-8")
             changed += 1
     print(f"Repaired {changed} files")
     return 0

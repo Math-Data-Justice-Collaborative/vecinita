@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 _ENV_DATA_MGMT_URL: Final[str] = "VECINITA_MODAL_DATA_MGMT_URL"
 _ENV_PROXY_KEY: Final[str] = "VECINITA_MODAL_PROXY_KEY"
+_ENV_INTERNAL_API_KEY: Final[str] = "VECINITA_INTERNAL_API_KEY"
 
 
 class ModalJobsEnqueueError(RuntimeError):
@@ -42,8 +43,14 @@ class ModalJobsEnqueueClient:
         *,
         http_client: httpx.Client | None = None,
         timeout: float = 60.0,
+        service_authorization: str | None = None,
     ) -> None:
-        """Resolve Modal DM URL + proxy key from args or environment."""
+        """Resolve Modal DM URL + proxy key from args or environment.
+
+        When ``VECINITA_AUTH_REQUIRED=true``, POST /jobs also needs admin JWT or
+        ``Authorization: Bearer {VECINITA_INTERNAL_API_KEY}`` (service path). Schedule
+        and catch-up self-enqueue default to the internal service key when set.
+        """
         resolved_url = base_url or os.environ.get(_ENV_DATA_MGMT_URL)
         resolved_key = proxy_key or os.environ.get(_ENV_PROXY_KEY)
         if not resolved_url or not resolved_key:
@@ -51,6 +58,11 @@ class ModalJobsEnqueueClient:
             raise ModalJobsEnqueueError(msg)
         self._base_url = resolved_url.rstrip("/")
         self._proxy_key = resolved_key
+        if service_authorization is not None:
+            self._service_authorization = service_authorization
+        else:
+            internal_key = os.environ.get(_ENV_INTERNAL_API_KEY)
+            self._service_authorization = f"Bearer {internal_key}" if internal_key else None
         self._owns = http_client is None
         self._client = http_client or httpx.Client(base_url=self._base_url, timeout=timeout)
 
@@ -58,6 +70,12 @@ class ModalJobsEnqueueClient:
         """Close the owned HTTP client when this wrapper created it."""
         if self._owns:
             self._client.close()
+
+    def _auth_header(self, authorization: str | None) -> str | None:
+        """Prefer explicit Authorization; else default service Bearer."""
+        if authorization is not None:
+            return authorization
+        return self._service_authorization
 
     def enqueue_automation_catchup(
         self,
@@ -78,8 +96,9 @@ class ModalJobsEnqueueClient:
             ),
         )
         headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
-        if authorization:
-            headers["Authorization"] = authorization
+        auth = self._auth_header(authorization)
+        if auth:
+            headers["Authorization"] = auth
         response = self._client.post(
             "/jobs",
             json=body.model_dump(mode="json"),
@@ -111,8 +130,9 @@ class ModalJobsEnqueueClient:
             ),
         )
         headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
-        if authorization:
-            headers["Authorization"] = authorization
+        auth = self._auth_header(authorization)
+        if auth:
+            headers["Authorization"] = auth
         response = self._client.post(
             "/jobs",
             json=body.model_dump(mode="json"),

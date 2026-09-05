@@ -71,7 +71,7 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
                 conn.execute(
                     text(
                         "INSERT INTO documents (url, title, language) "
-                        "VALUES (:url, :title, 'en') RETURNING id"
+                        + "VALUES (:url, :title, 'en') RETURNING id"
                     ),
                     {"url": url, "title": f"Stats Doc {i}"},
                 )
@@ -81,16 +81,16 @@ def sample_docs(engine: Engine) -> Iterator[list[UUID]]:
     yield doc_ids
     with engine.begin() as conn:
         for doc_id in doc_ids:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM document_serving_stats WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-            conn.execute(
+            _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": doc_id},
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_stats_served_upserts_counter(
@@ -139,12 +139,12 @@ def test_stats_served_ignores_unknown_docs(client: TestClient) -> None:
 
 def test_top_served_returns_ranked_list(client: TestClient, sample_docs: list[UUID]) -> None:
     """GET /stats/top-served returns documents ranked by served_count."""
-    client.post(
+    _ = client.post(
         "/internal/v1/stats/served",
         json={"document_ids": [str(sample_docs[0])]},
         headers=_auth(),
     )
-    client.post(
+    _ = client.post(
         "/internal/v1/stats/served",
         json={"document_ids": [str(sample_docs[0]), str(sample_docs[1])]},
         headers=_auth(),

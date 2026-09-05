@@ -68,7 +68,7 @@ def test_run_golden_eval_applies_top_k_and_min_retrieval_score() -> None:
         patch.object(CorpusPgvectorRetriever, "__init__", autospec=True) as mock_init,
     ):
         mock_init.return_value = None
-        run_golden_eval(
+        _ = run_golden_eval(
             embed_fn=_stub_embed_fn,
             database_url=_UNUSED_DB,
             judge=None,
@@ -87,7 +87,7 @@ def test_run_golden_eval_uses_sandbox_system_prompt_for_synthesis() -> None:
     llm = _RecordingLLM()
     chunk = _sample_chunk()
     with patch.object(CorpusPgvectorRetriever, "retrieve_chunks", return_value=[chunk]):
-        run_golden_eval(
+        _ = run_golden_eval(
             embed_fn=_stub_embed_fn,
             database_url=_UNUSED_DB,
             judge=None,
@@ -130,7 +130,7 @@ def test_synthesize_with_system_prompt_includes_context_and_question() -> None:
     answer = synthesize_with_system_prompt(
         "What are pantry hours?",
         [chunk],
-        llm,  # pyright: ignore[reportArgumentType]
+        llm,
         system_prompt="Answer from context only.",
     )
     assert answer.answer == "Sandbox answer."
@@ -147,7 +147,7 @@ def test_run_golden_eval_without_config_keeps_default_retriever_params() -> None
     ):
         mock_init.return_value = None
         rows = load_golden_rows(fixture_path=_FIXTURE_PATH)
-        run_golden_eval(
+        _ = run_golden_eval(
             embed_fn=_stub_embed_fn,
             database_url=_UNUSED_DB,
             judge=None,

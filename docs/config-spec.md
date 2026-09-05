@@ -15,6 +15,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 |----------|------|---------|----------|-------------|
 | `DATABASE_URL` | string | — | Yes (DO backends only) | Postgres connection; **not** on Modal workers |
 | `VECINITA_ENV` | string | `development` | No | `development` \| `staging` \| `production` |
+| `VECINITA_MODAL_WORKSPACE` | string | `vecinita` | No | Modal workspace — always **`vecinita`** for prod and staging (ADR-054 / F83). |
+| `MODAL_ENVIRONMENT` | string | `main` | No (set for staging deploy) | Modal Environment name: prod `main`, staging `staging`. Alias: `VECINITA_MODAL_ENVIRONMENT`. Passed as `modal deploy --env`. |
 | `VECINITA_LOG_LEVEL` | string | `INFO` | No | Logging level |
 | `VECINITA_LOG_RETENTION_DAYS` | int | `7` | No | Max retention; no raw prompts in persistent logs |
 
@@ -37,6 +39,11 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_RAG_RERANK_CE` | string | `false` | No | F45 CE rerank on/off; **default off** until ship gate |
 | `VECINITA_RAG_RERANK_CE_MODEL` | string | `BAAI/bge-reranker-v2-m3` | No | F45 CE model id (spike + gated prod) |
 | `VECINITA_RAG_RERANK_CE_TOP_N` | int | `20` | No | F45 retrieve-N before CE; keep `top_k` after |
+| `VECINITA_MODAL_RERANK_URL` | string | — | When CE on | F45 Modal `vecinita-rerank` HTTP base URL |
+| `VECINITA_RAG_QUERY_REFINE` | string | `false` | No | F81 LLM query refinement on/off (default off) |
+| `VECINITA_RAG_QUERY_REFINE_COUNT` | int | `2` | No | F81 max alternate queries (1–3) |
+| `VECINITA_RAG_OUTPUT_VERIFY` | string | `false` | No | F82 post-generation groundedness check on/off (default off) |
+| `VECINITA_RAG_OUTPUT_VERIFY_MIN` | float | `1.0` | No | F82 minimum faithfulness score (1.0 = YES on LLM judge) |
 | `VECINITA_CHAT_MAX_TOKENS` | int | `256` | No | Max tokens sent to Modal LLM per chat answer |
 | `VECINITA_ENERGY_GPU_TDP_W` | float | `70` | No | F65 heuristic GPU TDP (watts); prod pin T4 |
 | `VECINITA_ENERGY_GPU_UTIL` | float | `0.5` | No | F65 assumed GPU utilization (0–1] |
@@ -45,7 +52,8 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_ENERGY_CAR_GCO2E_PER_DAY` | float | — | No | Optional F65 use-guide % of typical car-day |
 | `VECINITA_ENERGY_CAR_GCO2E_PER_YEAR` | float | — | No | Optional F65 use-guide % of typical car-year |
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | int | `90` | No | F68 purge horizon for `feedback` rows |
-| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator notify URL on new feedback |
+| `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator webhook URL on new feedback (#214) |
+| `VECINITA_FEEDBACK_NOTIFY_EMAIL` | string | — | No | Optional operator inbox for Resend notify on new feedback (#214); requires `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` on internal-write (see F35 Resend rows). **Per-environment** Resend values (EV-305 / #305) — staging must not reuse the prod API key. |
 | `VECINITA_AUTOMATIONS_ENABLED` | string | `false` | No | F75 master enable (`true`/`false`) |
 | `VECINITA_AUTOMATIONS_KILL_SWITCH` | string | `false` | No | F75/F77 hard stop — no new automation/FT train enqueue when `true` |
 | `VECINITA_AUTOMATIONS_MAX_CONCURRENT` | int | `2` | No | F75 concurrency cap for automation jobs |
@@ -53,6 +61,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_FRESHNESS_ENABLED` | string | `false` | No | F76 schedule refresh enable |
 | `VECINITA_FINETUNE_ENABLED` | string | `false` | No | F77 feature flag |
 | `VECINITA_FINETUNE_ADAPTER_ID` | string | — | No | Promoted LoRA adapter id for prod `vecinita-llm` (empty = base; clear to rollback) |
+| `VECINITA_FINETUNE_ADAPTER_HASH` | string | — | No | Lowercase hex **SHA-256** of promoted adapter dir (canonical digest; ADR-022 EV-316 / #316). Empty when base-only. Set with promote; restore compares with `hmac.compare_digest`. |
 | `VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID` | string | — | No | Optional pre-promote LoRA candidate on `vecinita-llm-playground` only (ADR-053; never auto-loads on prod) |
 | `VECINITA_FINETUNE_REQUIRE_APPROVE` | string | `true` | No | F77 train must be approved before GPU (RD-328) |
 | `VECINITA_FINETUNE_MAX_CONCURRENT` | int | `1` | No | F77 max concurrent GPU train jobs (TP5 / RD-348) |
@@ -62,17 +71,28 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_MODAL_LLM_PLAYGROUND_URL` | string | — | Yes (admin/eval sandbox, Slice D) | Modal **`vecinita-llm-playground`** base URL — list/pull/eval sandbox (TP-S010-27) |
 | `VECINITA_MODAL_PROXY_KEY` | string | — | Yes (prod) | `X-Vecinita-Proxy-Key` for **all** Modal LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | string | `qwen2.5:1.5b-instruct` | No | Prod pin on `vecinita-llm`; playground overrides only on playground app (RD-169, TP-S010-25) |
+| `VECINITA_LLM_GPU_SNAPSHOT` | string | `false` | No | Prod `vecinita-llm` only: enable GPU memory snapshots + Level-1 sleep/wake (ADR-022 EV-313 / #313). Unset/`false`/`0`/`off` = off; `true`/`1`/`on` = on. **Must be set in the `modal deploy` environment** (baked into `enable_memory_snapshot` at import); Modal Secret alone does not flip the class. Playground must ignore / stay off. **Live:** staging + prod Modal Environments enabled 2026-08-31 (EV-313-D7/D8); re-export on every deploy that should keep snapshots on. |
+| `VECINITA_LLM_LORA_RESOLVE` | string | `post_restore` | No | Prod LoRA bind mode when GPU snapshots are used (ADR-022 EV-316 / #316). `post_restore` (default) = resolve+SHA-256-verify after restore; `snapshot_bound` = legacy/debug only (not recommended when adapter volume mutates). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
+| `VECINITA_LLM_ENFORCE_EAGER` | string | `true` | No | vLLM `enforce_eager` A/B for CUDA graphs vs snapshot experiments (S001 T7 / ADR-022). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
+| `VECINITA_LLM_SCALEDOWN_WINDOW` | int (seconds) | `300` | No | Prod `vecinita-llm` `LlmService.scaledown_window` (ADR-022 EV-319 / #319). Candidates **60 / 120 / 300**. **Must be set in the `modal deploy` environment** (baked at import); Modal Secret alone does not retune a already-deployed class decorator. Invalid values fail closed at import. Easy revert: set `300`. Do **not** use for `min_containers` / always-on. Playground may keep hardcoded 300 this cycle. |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
 | `VECINITA_REQUEST_TIMEOUT_S` | int | `120` | No | Upstream Modal timeout (cold-start margin; see R5) |
 | `VECINITA_BROWSE_PAGE_SIZE` | int | `20` | No | Default page size for `GET /api/v1/documents` |
 | `VECINITA_STATS_ENABLED` | string | `true` | No | Fire-and-forget stats POST after ask (F28); `false` disables |
+| `VECINITA_METRICS_ENABLED` | string | `true` | No | Fire-and-forget chat/embed metric events (F84); `false` disables |
+| `VECINITA_METRICS_RAW_RETENTION_DAYS` | int | `7` | No | Raw `operation_metrics` retention before rollup (F84 / ADR-055) |
+| `VECINITA_METRICS_HOURLY_RETENTION_DAYS` | int | `90` | No | Hourly rollup retention (F84) |
+| `VECINITA_ALERTMANAGER_WEBHOOK_URL` | string | — | Staging obs | Alertmanager receiver webhook (F84); staging secret only |
+| `VECINITA_GRAFANA_URL` | string | — | Staging obs | Operator link to staging Grafana (optional admin deep-link) |
 | `VECINITA_INTERNAL_WRITE_URL` | string | — | Yes (EV-002) | Internal write API base for stats POST |
 | `VECINITA_INTERNAL_API_KEY` | string | — | Yes (EV-002) | Bearer for stats POST; must match write API |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` | int | `10` | No | Hard cap on document tags |
 | `VECINITA_MAX_TAGS_PER_CHUNK` | int | `5` | No | Hard cap on chunk tags |
 | `VECINITA_TAG_SEED_PATH` | string | `data/fixtures/tags/seed_tags.json` | No | Starter tag vocabulary for LLM + browse facets |
+| `VECINITA_FAQ_FASTPATH_ENABLED` | string | `true` | No | F85 / EV-320: enable reviewed FAQ canned-answer bypass before retrieve/LLM. `false`/`0`/`off` forces `answer_path=rag_llm`. Not F43 cache. |
+| `VECINITA_FAQ_STORE_PATH` | string | (package/default FAQ YAML) | No | Path to versioned bilingual FAQ store (variants + answers). Hot-load editor deferred (#81). |
 
 ### DO internal write API
 
@@ -194,9 +214,9 @@ corpus DB stays PII-free.
 |----------|------|---------|----------|-------------|
 | `SUPABASE_SECRET_KEY` | string (secret) | — | Yes (F35) | Supabase Admin API key for `/admin/users*` (invite/list/role/disable/delete/reset/revoke-invite). **Server-side only**; never in browser builds. Previously seed/operator-shell only (F34). |
 | `VECINITA_ADMIN_FRONTEND_URL` | string (URL) | — | Yes (F35 EV-007) | Deployed admin SPA origin **without trailing slash** — used to build `redirect_to` for GoTrue invite/resend/recovery (`{url}/accept-invite`, `{url}/reset-password`). Modal DM backend secret (also used by internal-write-api health aggregator). |
-| `SUPABASE_SMTP_PASS` | string (secret) | — | Yes (F35 prod) | Resend API key; referenced by `[auth.email.smtp] pass = "env(SUPABASE_SMTP_PASS)"` in `config.toml`. Read by Supabase/CLI, **not** by Vecinita backends. |
-| `RESEND_API_KEY` | string (secret) | — | Yes (F35 test-send) | Resend API key (same value as `SUPABASE_SMTP_PASS`) read by the **DM backend** for `POST /admin/email/test` (Resend REST). Modal DM secret only. (ADR-031 TP-S005-22) |
-| `RESEND_SENDER_EMAIL` | string | — | Yes (F35 test-send) | Verified Resend sender address (= `[auth.email.smtp] admin_email`) used as the `from` for test sends. Modal DM secret. (ADR-031 TP-S005-22) |
+| `SUPABASE_SMTP_PASS` | string (secret) | — | Yes (F35 prod); staging project separately | Resend API key for **that** Supabase project; referenced by `[auth.email.smtp] pass = "env(SUPABASE_SMTP_PASS)"` in `config.toml`. Read by Supabase/CLI, **not** by Vecinita backends. Staging vs prod keys must differ (EV-305). |
+| `RESEND_API_KEY` | string (secret) | — | Yes (F35 test-send) | Resend API key (**same value as that environment’s** `SUPABASE_SMTP_PASS`) read by the **DM backend** for `POST /admin/email/test` (Resend REST). Modal DM secret (Environment-scoped). Also on **internal-write** when F68/#214 feedback email notify is enabled. Same Resend account OK; staging key ≠ prod key (EV-305 / #305). (ADR-031 TP-S005-22; EV-214) |
+| `RESEND_SENDER_EMAIL` | string | — | Yes (F35 test-send) | Verified Resend sender for **this** environment (= that env’s `[auth.email.smtp] admin_email`) used as the `from` for test sends / feedback notify. Staging local-part e.g. `noreply+staging@josephcmcg.com` (EV-305 A1). Modal DM + optional internal-write. (ADR-031 TP-S005-22; EV-214) |
 
 **Supabase `config.toml` (versioned; synced via `config push`):**
 
@@ -341,6 +361,11 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_RAG_SOFT_LANGUAGE_FALLBACK` in `true`, `false` | Config module at startup (F44) |
 | `VECINITA_RAG_RERANK_CE` in `true`, `false` | Config module at startup (F45) |
 | `VECINITA_RAG_RERANK_CE_TOP_N` ≥ `top_k` and ≤ 50 | Config module at startup (F45) |
+| `VECINITA_MODAL_RERANK_URL` non-empty when `VECINITA_RAG_RERANK_CE=true` | Config module at startup (F45) |
+| `VECINITA_RAG_QUERY_REFINE` in `true`, `false` | Config module at startup (F81) |
+| `VECINITA_RAG_QUERY_REFINE_COUNT` ≥ 1 and ≤ 3 | Config module at startup (F81) |
+| `VECINITA_RAG_OUTPUT_VERIFY` in `true`, `false` | Config module at startup (F82) |
+| `VECINITA_RAG_OUTPUT_VERIFY_MIN` ≥ 0.0 and ≤ 1.0 | Config module at startup (F82) |
 | `VECINITA_CHAT_MAX_TOKENS` ≥ 32 and ≤ 2048 | Config module at startup |
 | `VECINITA_CHUNK_SIZE_TOKENS` ≥ 64 | Ingest validation |
 | `VECINITA_CHUNK_OVERLAP_TOKENS` ≥ 0 and &lt; `VECINITA_CHUNK_SIZE_TOKENS` | Ingest validation (F49) |
@@ -357,10 +382,20 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_BROWSE_PAGE_SIZE` ≥ 1 and ≤ 100 | Config module |
 | `VECINITA_AUDIT_RETENTION_DAYS` ≥ 0 (0 = forever) | Config module |
 | `VECINITA_STATS_ENABLED` in `true`, `false` | Config module |
+| `VECINITA_METRICS_ENABLED` in `true`, `false` | Config module (ChatRAG / embed emitters, F84) |
+| `VECINITA_METRICS_RAW_RETENTION_DAYS` ≥ 1 and ≤ 30 | Config / rollup job (F84) |
+| `VECINITA_METRICS_HOURLY_RETENTION_DAYS` ≥ 7 and ≤ 365 | Config / rollup job (F84) |
 | `VECINITA_HEALTH_TIMEOUT_MS` ≥ 1000 and ≤ 30000 | Config module (internal-write-api) |
 | Reject unknown `VECINITA_*` in strict mode | Optional dev strictness |
 | No identity fields in public API bodies | OpenAPI + Pydantic models |
 | `VECINITA_AUTH_REQUIRED` in `true`, `false` | Config module (admin backends, F34) |
+| `VECINITA_LLM_GPU_SNAPSHOT` in `true`, `false` (also `1`/`0`/`on`/`off` at parse) | Modal `vecinita-llm` prod class only (ADR-022 EV-313 / #313); playground ignores |
+| `VECINITA_LLM_LORA_RESOLVE` in `post_restore`, `snapshot_bound` | Modal prod LoRA after snapshot restore (ADR-022 EV-316 / #316); default `post_restore` |
+| `VECINITA_FINETUNE_ADAPTER_HASH` empty or 64-char lowercase hex SHA-256 | When set, must pair with `VECINITA_FINETUNE_ADAPTER_ID`; restore fail-closed on mismatch |
+| `VECINITA_LLM_ENFORCE_EAGER` in `true`, `false` (also `1`/`0`/`on`/`off`) | Modal LLM engine kwargs (S001 T7 / ADR-022) |
+| `VECINITA_LLM_SCALEDOWN_WINDOW` integer seconds in **[60, 600]** (candidates 60/120/300) | Modal `vecinita-llm` prod `LlmService` at deploy-import (ADR-022 EV-319 / #319); invalid fails closed |
+| `VECINITA_FAQ_FASTPATH_ENABLED` in `true`, `false` (also `1`/`0`/`on`/`off`) | ChatRAG ask path (F85 / EV-320); default true |
+| `VECINITA_FAQ_STORE_PATH` non-empty path when override set | ChatRAG FAQ store file (F85); must be readable YAML/JSON |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |
 | ChatRAG `VECINITA_CORS_ORIGINS` is non-wildcard, frontend origin only | Config / deploy review (F34, RD-079) |
 | `SUPABASE_SECRET_KEY` set on the backend hosting `/admin/users*` | Admin user-mgmt startup (F35); server-side only |

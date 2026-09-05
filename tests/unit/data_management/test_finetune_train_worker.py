@@ -85,7 +85,7 @@ def test_run_finetune_train_job_skip_at_capacity(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setenv("VECINITA_FINETUNE_MAX_CONCURRENT", "1")
     store = InMemoryJobStore()
     running = store.create_job(urls=[], job_type="finetune_train", options={"approved": True})
-    store.update_job(running.job_id, status="running")
+    _ = store.update_job(running.job_id, status="running")
     pending = store.create_job(urls=[], job_type="finetune_train", options=dict(_CHUNK_OPTS))
     run_finetune_train_job(pending.job_id, store=store)
     updated = store.get_job(pending.job_id)
@@ -98,7 +98,7 @@ def test_run_finetune_train_job_skip_daily_cap(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setenv("VECINITA_FINETUNE_MAX_RUNS_PER_DAY", "1")
     store = InMemoryJobStore()
     prior = store.create_job(urls=[], job_type="finetune_train", options={"approved": True})
-    store.update_job(prior.job_id, status="completed")
+    _ = store.update_job(prior.job_id, status="completed")
     assert prior.updated_at.astimezone(UTC).date() == datetime.now(UTC).date()
     pending = store.create_job(urls=[], job_type="finetune_train", options=dict(_CHUNK_OPTS))
     run_finetune_train_job(pending.job_id, store=store)
@@ -161,7 +161,7 @@ def test_daily_cap_ignores_yesterday_starts(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setenv("VECINITA_FINETUNE_MAX_RUNS_PER_DAY", "1")
     store = InMemoryJobStore()
     old = store.create_job(urls=[], job_type="finetune_train", options={"approved": True})
-    store.update_job(old.job_id, status="completed")
+    _ = store.update_job(old.job_id, status="completed")
     yesterday = datetime.now(UTC) - timedelta(days=1)
     mutated = store.get_job(old.job_id)
     assert mutated is not None
@@ -189,7 +189,7 @@ def test_daily_cap_ignores_non_finetune_jobs(monkeypatch: pytest.MonkeyPatch) ->
     """Daily counter skips non-finetune job types when scanning the store."""
     monkeypatch.setenv("VECINITA_FINETUNE_MAX_RUNS_PER_DAY", "1")
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com"], job_type="ingest")
+    _ = store.create_job(urls=["https://example.com"], job_type="ingest")
     pending = store.create_job(urls=[], job_type="finetune_train", options=dict(_CHUNK_OPTS))
 
     def _invoker(_payload: dict[str, object]) -> dict[str, object]:
@@ -258,7 +258,7 @@ def test_modal_train_invoker_rejects_non_dict(monkeypatch: pytest.MonkeyPatch) -
     invoker = resolve_default_train_invoker()
 
     with pytest.raises(TypeError, match="non-object"):
-        invoker({"job_id": "x"})
+        _ = invoker({"job_id": "x"})
 
 
 def test_modal_train_invoker_returns_dict(monkeypatch: pytest.MonkeyPatch) -> None:

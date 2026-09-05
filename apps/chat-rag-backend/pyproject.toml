@@ -11,6 +11,7 @@ dependencies = [
     "vecinita-rag",
     "vecinita-shared-schemas",
     "vecinita-embedding-client",
+    "vecinita-rerank-client",
     "vecinita-llm-client",
     "vecinita-tagging",
 ]
@@ -26,5 +27,6 @@ packages = ["vecinita_chat_rag_backend"]
 vecinita-rag = { workspace = true }
 vecinita-shared-schemas = { workspace = true }
 vecinita-embedding-client = { workspace = true }
+vecinita-rerank-client = { workspace = true }
 vecinita-llm-client = { workspace = true }
 vecinita-tagging = { workspace = true }

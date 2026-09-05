@@ -6,7 +6,14 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_validator,
+    model_validator,
+)
 
 from vecinita_shared_schemas.eval_config import EvalConfig, EvalConfigPartial, EvalRunMode
 from vecinita_shared_schemas.json_types import JsonObject
@@ -32,6 +39,15 @@ class ChunkUpsert(BaseModel):
     chunk_index: int = Field(..., ge=0)
     text: str
     embedding: list[float] = Field(..., min_length=384, max_length=384)
+
+    @field_validator("text")
+    @classmethod
+    def reject_nul_bytes(cls, value: str) -> str:
+        """Postgres text cannot store NUL (BUG-2026-09-03)."""
+        if "\x00" in value:
+            msg = "chunk text must not contain NUL (0x00) bytes"
+            raise ValueError(msg)
+        return value
 
 
 class ChunkDetail(BaseModel):
@@ -67,6 +83,15 @@ class DocumentUpsert(BaseModel):
     tags: list[TagInput] | None = Field(default=None, max_length=10)
     paired_document_id: UUID | None = None
     publish_status: PublishStatus = "published"
+
+    @field_validator("body_text")
+    @classmethod
+    def reject_nul_bytes_in_body(cls, value: str | None) -> str | None:
+        """Postgres text cannot store NUL (BUG-2026-09-03 Drive PDF binary)."""
+        if value is not None and "\x00" in value:
+            msg = "body_text must not contain NUL (0x00) bytes"
+            raise ValueError(msg)
+        return value
 
     @model_validator(mode="after")
     def require_chunks_or_body_text(self) -> DocumentUpsert:
@@ -455,6 +480,97 @@ class StatsServedResponse(BaseModel):
     """Acknowledged fire-and-forget response."""
 
     acknowledged: bool = True
+
+
+class MetricsEventRequest(BaseModel):
+    """POST /internal/v1/metrics/events — privacy-safe operational event (F84 / ADR-055)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    workload: Literal["chat", "embed"]
+    outcome: Literal["success", "failure", "no_context"]
+    latency_ms: int = Field(..., ge=0)
+    error_code: str | None = Field(default=None, max_length=128)
+    locale: str | None = Field(default=None, max_length=8)
+    job_id: str | None = Field(default=None, max_length=128)
+
+
+class MetricsEventAccepted(BaseModel):
+    """202 response for metrics event ingest."""
+
+    acknowledged: bool = True
+    event_id: UUID
+
+
+class MetricsEventRecord(BaseModel):
+    """GET /internal/v1/metrics/events/{event_id} — allow-listed fields only."""
+
+    event_id: UUID
+    workload: Literal["chat", "embed"]
+    outcome: Literal["success", "failure", "no_context"]
+    latency_ms: int
+    error_code: str | None = None
+    locale: str | None = None
+    job_id: str | None = None
+    created_at: datetime
+
+
+class MetricsWorkloadStats(BaseModel):
+    """Per-workload counts for metrics summary."""
+
+    total: int
+    succeeded: int
+    failed: int
+    success_rate: float
+    no_context: int | None = None
+
+
+class MetricsLatencyPercentiles(BaseModel):
+    """Latency percentiles in milliseconds."""
+
+    p50: int
+    p95: int
+
+
+class MetricsTopError(BaseModel):
+    """Top error code count (no message bodies)."""
+
+    workload: Literal["chat", "embed", "ingest"]
+    error_code: str
+    count: int
+
+
+class MetricsSummaryResponse(BaseModel):
+    """GET /internal/v1/metrics/summary."""
+
+    window: Literal["1h", "24h", "7d", "30d"]
+    workloads: dict[str, MetricsWorkloadStats]
+    latency_ms: dict[str, MetricsLatencyPercentiles]
+    top_error_codes: list[MetricsTopError]
+
+
+class MetricsTimeseriesBucket(BaseModel):
+    """One timeseries bucket."""
+
+    t: datetime
+    success_rate: float
+    total: int
+    failed: int
+
+
+class MetricsTimeseriesResponse(BaseModel):
+    """GET /internal/v1/metrics/timeseries."""
+
+    metric: Literal[
+        "ingest_success_rate",
+        "chat_success_rate",
+        "embed_success_rate",
+        "ingest_volume",
+        "chat_volume",
+        "embed_volume",
+    ]
+    window: Literal["1h", "24h", "7d", "30d"]
+    buckets: list[MetricsTimeseriesBucket]
 
 
 class TopServedItem(BaseModel):

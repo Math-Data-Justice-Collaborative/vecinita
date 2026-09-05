@@ -91,7 +91,7 @@ def _emit_job_terminal_audit(
 
 
 def _maybe_trigger_catchup(record: JobRecord) -> None:
-    maybe_enqueue_after_job(record, jobs_client=_catchup_jobs_client())
+    _ = maybe_enqueue_after_job(record, jobs_client=_catchup_jobs_client())
 
 
 def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
@@ -199,7 +199,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
             _emit_job_terminal_audit(scoped_write, final, "job.failed")
             _maybe_trigger_catchup(final)
         if final is not None and final.status not in ("completed", "failed"):
-            store.update_job(
+            _ = store.update_job(
                 job_id,
                 status="failed",
                 error_code=type(exc).__name__,

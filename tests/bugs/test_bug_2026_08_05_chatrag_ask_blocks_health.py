@@ -77,7 +77,7 @@ async def test_bug_2026_08_05_ask_does_not_block_event_loop() -> None:
             )
             ticks_during = ticks - ticks_before
         finally:
-            ticker_task.cancel()
+            _ = ticker_task.cancel()
             with pytest.raises(asyncio.CancelledError):
                 await ticker_task
 
@@ -85,5 +85,5 @@ async def test_bug_2026_08_05_ask_does_not_block_event_loop() -> None:
     assert ask_resp.json()["answer"] == "ok"
     assert ticks_during >= _MIN_TICKS_DURING_ASK, (
         f"event loop stalled during ask: only {ticks_during} ticks "
-        f"(expected >= {_MIN_TICKS_DURING_ASK}); sync ask likely ran on the loop"
+        + f"(expected >= {_MIN_TICKS_DURING_ASK}); sync ask likely ran on the loop"
     )

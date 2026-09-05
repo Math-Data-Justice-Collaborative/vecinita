@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { MODEL_PULL_POLL_INTERVAL_MS } from "./playgroundModelDownloadContext";
+import { MODEL_PULL_POLL_INTERVAL_MS } from "./playground-model-download-context";
 import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -213,5 +213,28 @@ describe("usePlaygroundModelDownload hook", () => {
     expect(clearTimeoutSpy).toHaveBeenCalled();
     clearTimeoutSpy.mockRestore();
     vi.useRealTimers();
+  });
+
+  it("skips setState after unmount while model list refresh is in flight", async () => {
+    let resolveList:
+      | ((value: { items: { model_id: string; available: boolean }[] }) => void)
+      | undefined;
+    vi.spyOn(adminApi, "fetchPlaygroundModels").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveList = resolve;
+        }),
+    );
+
+    const { unmount } = renderHook(() => usePlaygroundModelDownload(), {
+      wrapper: providerWrapper,
+    });
+    unmount();
+    act(() => {
+      resolveList?.({
+        items: [{ model_id: "qwen2.5:1.5b-instruct", available: true }],
+      });
+    });
+    await Promise.resolve();
   });
 });

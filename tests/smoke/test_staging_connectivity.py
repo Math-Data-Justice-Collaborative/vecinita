@@ -234,6 +234,34 @@ def test_h4_write_api_cors_preflight_stats_summary(admin_frontend: str) -> None:
     )
 
 
+def test_h4_write_api_cors_preflight_metrics_summary(admin_frontend: str) -> None:
+    """F84 / UJ-088: OPTIONS on GET /internal/v1/metrics/summary from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/metrics/summary",
+        method="GET",
+        extra_request_headers=["authorization"],
+    )
+
+
+def test_h4_write_api_cors_preflight_metrics_timeseries(admin_frontend: str) -> None:
+    """F84 / UJ-088: OPTIONS on GET /internal/v1/metrics/timeseries from admin frontend."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    if not write_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL")
+    assert_cors_preflight(
+        api_base=write_url,
+        origin=admin_frontend,
+        path="/internal/v1/metrics/timeseries",
+        method="GET",
+        extra_request_headers=["authorization"],
+    )
+
+
 def test_h4_write_api_cors_preflight_health_all(admin_frontend: str) -> None:
     """EV-002 TC-060: OPTIONS on GET /internal/v1/health/all from admin frontend."""
     write_url = _env("VECINITA_STAGING_WRITE_URL")

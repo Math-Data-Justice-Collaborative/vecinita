@@ -14,7 +14,11 @@ from vecinita_data_management_backend.app import (
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
 from vecinita_data_management_backend.write_client import InternalWriteClient
-from vecinita_shared_schemas.auth import reset_auth_config_for_tests
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    require_admin_write,
+    reset_auth_config_for_tests,
+)
 from vecinita_shared_schemas.internal_write import (
     AuditEventRequest,
     EvalMetricsSummary,
@@ -355,11 +359,29 @@ def test_create_job_persists_freshness_toggle_options() -> None:
     assert record.options["is_stale"] is True
 
 
+def test_write_auth_dep_rejects_missing_principal() -> None:
+    """Defensive guard when require_admin_write override returns empty principal."""
+    app = create_app(store=InMemoryJobStore(), require_proxy_auth=False)
+    app.dependency_overrides[require_admin_write] = lambda: AuthContext(
+        principal=None,
+        is_service=False,
+    )
+    client = TestClient(app)
+
+    response = client.post(
+        "/jobs",
+        json={"urls": ["https://example.com/page"]},
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {"detail": "Forbidden"}
+
+
 def test_list_jobs_returns_all_jobs() -> None:
     """Test list jobs returns all jobs."""
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/a"])
-    store.create_job(urls=["https://example.com/b"], job_type="retag")
+    _ = store.create_job(urls=["https://example.com/a"])
+    _ = store.create_job(urls=["https://example.com/b"], job_type="retag")
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     response = client.get("/jobs")
@@ -397,7 +419,7 @@ def test_list_jobs_includes_eval_runs_from_internal_write_api() -> None:
             )
 
     store = InMemoryJobStore()
-    store.create_job(urls=["https://example.com/a"])
+    _ = store.create_job(urls=["https://example.com/a"])
     client = TestClient(
         create_app(
             store=store,
@@ -420,8 +442,8 @@ def test_list_jobs_filters_by_status() -> None:
     """Test list jobs filters by status."""
     store = InMemoryJobStore()
     done = store.create_job(urls=["https://example.com/a"])
-    store.update_job(done.job_id, status="completed")
-    store.create_job(urls=["https://example.com/b"])
+    _ = store.update_job(done.job_id, status="completed")
+    _ = store.create_job(urls=["https://example.com/b"])
     client = TestClient(create_app(store=store, require_proxy_auth=False))
 
     response = client.get("/jobs", params={"status": "completed"})

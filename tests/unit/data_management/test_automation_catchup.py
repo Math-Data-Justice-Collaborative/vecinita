@@ -63,9 +63,9 @@ def test_count_running_automation_catchup_excludes_other_types() -> None:
         job_type="automation_catchup",
         options=_catchup_options(revision="1"),
     )
-    store.update_job(running.job_id, status="running")
+    _ = store.update_job(running.job_id, status="running")
     other = store.create_job(urls=["https://example.com"], job_type="ingest")
-    store.update_job(other.job_id, status="running")
+    _ = store.update_job(other.job_id, status="running")
     pending = store.create_job(
         urls=[],
         job_type="automation_catchup",
@@ -173,6 +173,50 @@ def test_catchup_worker_complete_embed_skips_reembed(
     assert called == []
 
 
+def test_catchup_worker_records_run_history_on_skip_complete(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-289: skip_complete catch-up persists an automation_runs row (no re-embed)."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options=_catchup_options(embed_status="complete"),
+    )
+    recorded: list[dict[str, object]] = []
+
+    class _RecordingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            recorded.append(dict(kwargs))
+
+    run_automation_catchup_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        perform_catchup=lambda _doc: None,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "catchup_outcome": "skipped_complete",
+        "documents_processed": 0,
+    }
+    assert recorded == [
+        {
+            "job_type": "automation_catchup",
+            "status": "skipped",
+            "document_id": DOC_ID,
+            "revision": "1",
+            "error": None,
+        }
+    ]
+
+
 def test_catchup_worker_at_capacity_skips_reembed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -190,7 +234,7 @@ def test_catchup_worker_at_capacity_skips_reembed(
             job_type="automation_catchup",
             options=_catchup_options(revision=str(index), embed_status="partial"),
         )
-        store.update_job(peer.job_id, status="running")
+        _ = store.update_job(peer.job_id, status="running")
 
     record = store.create_job(
         urls=[],
@@ -268,7 +312,7 @@ def test_run_job_dispatches_automation_catchup(
         store_obj = kwargs["store"]
         assert isinstance(store_obj, InMemoryJobStore)
         dispatched.append(job_id)
-        store_obj.update_job(
+        _ = store_obj.update_job(
             job_id,
             status="completed",
             metrics={"catchup_outcome": "reembedded", "documents_processed": 1},
@@ -315,7 +359,7 @@ def test_create_job_request_accepts_automation_catchup() -> None:
 def test_create_job_request_requires_document_id_for_catchup() -> None:
     """automation_catchup without document_id is rejected at the API schema."""
     with pytest.raises(ValueError, match="document_id"):
-        CreateJobRequest.model_validate(
+        _ = CreateJobRequest.model_validate(
             {
                 "urls": [],
                 "options": {"job_type": "automation_catchup", "revision": "1"},

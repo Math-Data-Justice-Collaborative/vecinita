@@ -22,10 +22,10 @@ def test_job_options_accepts_overlap_below_size() -> None:
 def test_job_options_rejects_overlap_equal_to_size() -> None:
     """TC-192: overlap >= size is rejected (AC-IR6)."""
     with pytest.raises(ValidationError, match="chunk_overlap_tokens"):
-        JobOptions.model_validate({"chunk_size_tokens": 256, "chunk_overlap_tokens": 256})
+        _ = JobOptions.model_validate({"chunk_size_tokens": 256, "chunk_overlap_tokens": 256})
 
 
 def test_job_options_rejects_overlap_against_default_size_when_size_omitted() -> None:
     """When size omitted, overlap is checked against default size 256."""
     with pytest.raises(ValidationError, match="chunk_overlap_tokens"):
-        JobOptions.model_validate({"chunk_overlap_tokens": 256})
+        _ = JobOptions.model_validate({"chunk_overlap_tokens": 256})

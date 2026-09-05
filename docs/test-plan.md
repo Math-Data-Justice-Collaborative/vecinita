@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-12 (docs sync — scope blurb; TC-252–265 corpus automations / FT)  
+> **Last updated**: 2026-09-03 (EV-338 / #338 — TC-321–324 staging corpus mirror; prior TC-320 FAQ)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -35,10 +35,13 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-070 Energy estimate + guide | `tests/e2e/test_uj070_energy_estimate.py` + Vitest | TC-218, TC-219, TC-220, TC-231 | `tests/ui/chat/uj070-energy.spec.ts` |
 | UJ-071 Icon micro-interactions | Vitest both frontends + `frontend-ui` | TC-221, TC-222 | opt |
 | UJ-072 Bilingual tooltips | Vitest `frontend-ui` + both apps | TC-223, TC-224 | opt |
-| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228 | `tests/ui/chat/uj073-feedback.spec.ts` |
+| UJ-073 Anonymous feedback | `tests/e2e/test_uj073_feedback.py` + Vitest | TC-225–228, TC-308–311 | `tests/ui/chat/uj073-feedback.spec.ts` |
 | UJ-074 Audit actor email | `tests/e2e/test_uj074_audit_actor.py` + Vitest | TC-229, TC-230 | opt |
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
-| UJ-076 F36 EN/ES embed promote report | `tests/e2e/test_uj076_embed_promote_report.py` + unit | TC-232–236, TC-239–241 | — (Jobs UI unchanged) |
+| UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
+| UJ-094 Staging corpus mirror from prod | ops checklist + corpus guards | TC-321–TC-324 | — |
+| UJ-088 Monitoring rates | `tests/e2e/test_uj088_monitoring_metrics.py` | TC-299–TC-304 | Vitest Monitoring page |
+| UJ-089 Staging Grafana/Loki | staging obs checklist / smoke | TC-305–TC-306 | — |
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
 | UJ-078 Relevance-gated sources | `tests/e2e/test_uj078_relevance_sources.py` + unit | TC-245, TC-246, TC-247 | — |
 | UJ-079 Operator display_title | `tests/e2e/test_uj079_display_title.py` + Vitest admin | TC-248, TC-249, TC-250, TC-251 | opt |
@@ -98,8 +101,9 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-056 F42 staging Hy1 eval gate | unit + eval harness (ISS-008 fixture) | TC-174, TC-175 | — |
 | UJ-057 Answer/retrieve cache | `tests/e2e/test_uj057_answer_cache.py` | TC-176, TC-177, TC-178, TC-179 | — (no UI change) |
 | UJ-058 Soft language L1 fallback | `tests/e2e/test_uj058_soft_language.py` | TC-180, TC-181 | — |
-| UJ-059 CE gated ask | `tests/e2e/test_uj059_ce_rerank.py` | TC-182, TC-183 | — |
+| UJ-059 CE gated ask | `tests/e2e/test_uj059_ce_rerank.py` | TC-182, TC-183, TC-281 | — |
 | UJ-060 CE ship gate spike | spike harness + report | TC-184 | — |
+| UJ-085 LLM query refinement gated ask | `tests/e2e/test_uj085_query_refine.py` | TC-282, TC-283 | — |
 | UJ-061 Non-empty staging retrieve | `tests/e2e/test_uj061_retrieve_nonempty.py` | TC-185, TC-186 | — (no UI change) |
 | UJ-023 Jobs tab (EV-012 extend) | `tests/e2e/test_uj023_job_management.py` | TC-049, TC-150, TC-151 | `tests/ui/admin/uj023-jobs-tab.spec.ts` |
 | UJ-045 Eval Playground configure + run | `tests/e2e/test_uj045_eval_playground.py` | TC-127, TC-128, TC-129 | `tests/ui/admin/uj045-eval-playground.spec.ts` |
@@ -199,9 +203,15 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 ### TC-258: Scrape host fallbacks (F7, EV-249 / #249)
 
-- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries alternate browser headers; stable operator `error_code` when blocked.
-- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with VecinitaBot UA + success with Chrome UA; all 403.
-- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with `tls_handshake_failed` or `host_waf_blocked` when exhausted.
+- **Objective**: Apex TLS failures retry `www.`; persistent HTTP 403 retries
+  ordered browser UAs (Windows then Mac Chrome); SiteGround captcha interstitials
+  are WAF blocks; stable operator `error_code` when blocked (BUG-2026-09-02).
+- **Input**: Mock transport — TLS fail on apex + success on `www.`; 403 with
+  VecinitaBot/Windows UA + success with Mac Chrome UA; all 403; `sg-captcha`
+  challenge 202.
+- **Expected**: `fetch_url` returns document on recovery; `ScrapeFetchError` with
+  `tls_handshake_failed` or `host_waf_blocked` when exhausted (never empty success
+  on captcha).
 
 ### TC-259: Suggested question chips (UJ-081, F1, EV-216 / #216)
 
@@ -429,6 +439,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 - **Objective**: Dot-prefixed keys resolve for both locales; pagination helper formats correctly.
 - **Input**: Call `t("en", "shared.pagination", 1, 3, 42)` and Spanish equivalent.
 - **Expected**: Typed keys compile; EN/ES strings differ; unknown keys caught at typecheck.
+- **Related**: TC-307 — full EN/ES key-set equality for all package string keys (EV-296 / #296).
 
 ### TC-068: frontend-ui shared components render (F31)
 
@@ -440,7 +451,7 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: ChatRAG tests pass using shared packages (regression for BUG-2026-06-05 language toggle).
 - **Input**: Run migrated `test_bug_2026_06_05_language_toggle_i18n.test.tsx` (or successor) against shared imports.
-- **Expected**: Same behavior as pre-migration; no app-local duplicate `messages.ts`.
+- **Expected**: Same behavior as pre-migration; no app-local duplicate string catalog (`messages.ts` may re-export package `t`/types only). EV-296 / #296 completes visitor `chat.*` consolidation into `frontend-i18n`.
 
 ### TC-070: Intl timestamp formatting per UI locale (UJ-022, AC-F4, F31)
 
@@ -1699,6 +1710,190 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Input**: Promoted adapter on prod; operator triggers rollback / clear pin.
 - **Expected**: Prod `vecinita-llm` reverts to base (empty `VECINITA_FINETUNE_ADAPTER_ID` or equivalent); chat serves without adapter.
 
+### TC-280: ChatRAG golden regression gate vs committed baseline (F36, EV-028, #181)
+
+- **Objective**: Fail CI when golden-set metrics **regress** beyond tolerance vs `data/fixtures/eval/baseline.json` (not only absolute floors).
+- **Input**: `tests/eval/test_rag_regression_gate.py` — `run_golden_eval` with `MockEvalJudge`, seeded eval corpus (`eval_db` fixture), committed baseline.
+- **Expected**:
+  - **Pass** when current metrics are within tolerance of baseline **and** still meet TC-111/112 floors.
+  - **Fail** when any gated metric regresses beyond tolerance (see AC-RG2).
+  - Baseline bump requires an explicit PR edit to `baseline.json` (AC-RG5).
+- **Tolerances** (vs baseline): retrieval relevance ≥ max(0.80, baseline − 0.02); faithfulness and answer relevancy ≥ max(0.60, baseline − 0.02); `latency_p95_ms` ≤ min(15000, baseline × 1.10 + 500). Cold-start/spawn excluded from latency fail criteria.
+- **CI**: Required job `rag-regression` in `.github/workflows/ci.yml` on PRs to `main` and pushes to `main`.
+- **Local**: `make test-rag-regression` (parity with CI job).
+
+### TC-281: CE scorer wired from settings (UJ-059, F45, EV-029)
+
+- **Objective**: `from_settings` injects CE client when flag on.
+- **Input**: `VECINITA_RAG_RERANK_CE=true` + mock Modal rerank URL.
+- **Expected**: Ask path calls scorer; flag off → no scorer (AC-SR1).
+
+### TC-282: LLM refinement preserves locale (UJ-085, F81)
+
+- **Objective**: Refinement returns same-locale alternates or falls back.
+- **Input**: Spanish question with `VECINITA_RAG_QUERY_REFINE=true`; mock LLM JSON.
+- **Expected**: Retrieve uses refined queries in `es`; invalid output → raw question only (AC-SR4).
+
+### TC-283: Query refine flag default off (UJ-085, F81)
+
+- **Objective**: No LLM rewrite until explicitly enabled.
+- **Input**: Default env (`VECINITA_RAG_QUERY_REFINE=false`).
+- **Expected**: No refine LLM call; path matches F42-only retrieve (AC-SR5).
+
+### TC-284: Output verify wired from settings (UJ-086, F82, EV-030)
+
+- **Objective**: `from_settings` / ask path invokes verifier when flag on.
+- **Input**: `VECINITA_RAG_OUTPUT_VERIFY=true`; mock LLM judge returns YES/NO.
+- **Expected**: Faithfulness called with packed context; flag off → no verify call (AC-OV1).
+
+### TC-285: Hedge on ungrounded verdict (UJ-086, F82)
+
+- **Objective**: Failed verification prepends hedge, keeps answer body.
+- **Input**: Mock judge NO; Spanish locale.
+- **Expected**: Answer starts with ES hedge disclaimer; original text follows (AC-OV2).
+
+### TC-286: Output verify flag default off (UJ-086, F82)
+
+- **Objective**: No post-generation judge until enabled.
+- **Input**: Default env (`VECINITA_RAG_OUTPUT_VERIFY=false`).
+- **Expected**: No verify LLM call; no citation suffix (AC-OV4).
+
+### TC-287: Inline citations match sources (UJ-086, F82)
+
+- **Objective**: Citation markers align with `sources[]` order.
+- **Input**: Three retrieved chunks; verify on; grounded YES.
+- **Expected**: Answer ends with `[1][2][3]`; `sources[i]` maps to `[i+1]` (AC-OV3).
+
+### TC-288: Stream path buffers then verifies (UJ-086, F82)
+
+- **Objective**: SSE path does not emit tokens until verify+cite complete.
+- **Input**: `POST /api/v1/ask/stream` with verify on; mock stream tokens.
+- **Expected**: Single yielded payload includes hedge/citations; no pre-verify tokens (AC-OV5).
+
+### TC-289: Live automation run history after enable (UJ-082, F78, EV-031)
+
+- **Given** live `VECINITA_AUTOMATIONS_ENABLED=true` and kill-switch off after post-enable smoke
+- **When** operator opens DM Automations panel
+- **Then** at least one `automation_runs` row is visible with status and timestamps
+
+### TC-290: Live kill-switch blocks enqueue (UJ-082, F78, EV-031)
+
+- **Given** live stack with `VECINITA_AUTOMATIONS_KILL_SWITCH=true`
+- **When** catch-up trigger fires
+- **Then** no new automation job is enqueued
+
+### TC-291: Live freshness stale visible (UJ-083, F79, EV-031)
+
+- **Given** live `VECINITA_FRESHNESS_ENABLED=true`
+- **When** operator views URL-backed document list
+- **Then** stale / `last_checked` fields are populated per AC-FR3
+
+### TC-292: Finetune Modal app deployed (F80, EV-031)
+
+- **Given** CD includes `vecinita-llm-finetune`
+- **When** deploy smoke runs post-merge
+- **Then** finetune app is listed and train approve path is reachable from DM
+
+### TC-293: Prod LLM has no adapter pin (F80, EV-031)
+
+- **Given** F80 eval path enabled without promote
+- **When** prod `vecinita-llm` health/models is queried
+- **Then** `VECINITA_FINETUNE_ADAPTER_ID` is unset / base model only
+
+### TC-294: Staging stack H1–H5 (UJ-087, F83)
+- **Objective**: Distinct staging DO + DB pass liveness, DB, RAG, CORS, frontend host checks without prod `DATABASE_URL`.
+- **Input**: Staging URLs / `VECINITA_STAGING_*` env; smoke scripts from staging-runbook.
+- **Expected**: H1–H5 pass; prod DB unchanged (AC-ST2).
+
+### TC-295: Staging Modal Environment isolation (F83)
+- **Objective**: Staging Modal Apps live in Environment `staging` (workspace `vecinita`); secrets not shared with `main`.
+- **Input**: `MODAL_ENVIRONMENT=staging`; `VECINITA_MODAL_WORKSPACE=vecinita`; staging embed/LLM base URLs (`vecinita-staging--` web suffix).
+- **Expected**: URL source prefix ≠ prod `vecinita--`; Environment-scoped secrets (AC-ST3).
+
+### TC-296: Staging Supabase project isolation (F83)
+- **Objective**: Staging admin Auth uses staging Supabase project ref/keys only.
+- **Input**: Staging `SUPABASE_*` / `VITE_SUPABASE_*`.
+- **Expected**: Distinct project from `cfuvghdsuwactfeamtym` (AC-ST4).
+
+### TC-297: main ruleset requires staging smoke (F83, ADR-050/054)
+- **Objective**: Merge to `main` blocked unless CI + staging deploy/smoke green for tip SHA.
+- **Input**: GitHub ruleset / branch protection API or UI export.
+- **Expected**: Required checks include CI success job and staging Environment smoke (AC-ST5).
+
+### TC-298: Stage before Main agent rule + ticket tracking (F83, EV-033 / EV-036-D15)
+- **Objective**: Agents and maintainers share one Stage→Main policy with GH tracking.
+- **Input**: `.cursor/rules/stage-before-main.mdc`; `.github/workflows/ci.yml`; GitHub #212
+  (+ children); ruleset API.
+- **Expected**: Rule exists with `alwaysApply: true`; cites F83/ADR-054/EV-036-D15; when
+  `origin/stage` exists, feature/evolve PRs use `--base stage` and `ci.yml` runs on
+  `pull_request`/`push` for `stage`; promote `stage`→`main` requires tip SHA `CI success` +
+  `staging-smoke` (smoke on main-bound PRs only); waivers only via AskQuestion; ruleset
+  checks unchanged (AC-ST8).
+
+### TC-299: Metrics summary windows (UJ-088, F84)
+- **Objective**: `GET /internal/v1/metrics/summary` returns ingest/chat/embed rates for 24h and 7d.
+- **Input**: Admin JWT; seeded jobs + chat/embed outcome events.
+- **Expected**: `200` with per-workload `success_rate`, `total`, `failed`; windows `24h` and `7d` (also accept `1h`/`30d`); no `question`/`answer` fields (AC-MON1).
+
+### TC-300: Metrics timeseries (UJ-088, F84)
+- **Objective**: `GET /internal/v1/metrics/timeseries` returns server-sourced buckets.
+- **Input**: `metric=ingest_success_rate&window=7d` (and chat/embed variants).
+- **Expected**: Ordered buckets with rate + volume; survives client navigation (AC-MON2).
+
+### TC-301: Chat metric emit rejects content (UJ-088, F84, ADR-004)
+- **Objective**: Chat outcome ingest API rejects or strips `question`/`answer`.
+- **Input**: `POST /internal/v1/metrics/events` with forbidden fields.
+- **Expected**: `400`/`422` or fields stripped; nothing persisted with message text (AC-MON4).
+
+### TC-302: Privacy allow-list for metrics tables (F84, F15)
+- **Objective**: New metrics tables are allow-listed; forbidden identity columns absent.
+- **Input**: Schema introspection via `privacy.py` / `tests/privacy/`.
+- **Expected**: Tables listed; no `question`, `answer`, `prompt`, `message`, `user_id`, etc. (AC-MON4).
+
+### TC-303: Monitoring page render + i18n (UJ-088, F84)
+- **Objective**: Admin Monitoring page renders summary cards and chart shell in en/es.
+- **Input**: Vitest with router + mocked metrics APIs.
+- **Expected**: Nav item visible; cards for ingest/chat/embed; window control; no content leaks (AC-MON1, AC-MON5).
+
+### TC-304: Monitoring e2e drill-down to Jobs (UJ-088, F84)
+- **Objective**: API e2e summary + link path to existing Jobs list for failed ingest.
+- **Input**: TestClient write-api + fixtures; optional DM FE Vitest navigation.
+- **Expected**: Failed ingest countable; Jobs tab remains source of truth for job detail (AC-MON3).
+
+### TC-305: Loki / log allow-list (UJ-089, F84, F17)
+- **Objective**: Structured logs shipped to Loki omit prompts/responses at INFO+.
+- **Input**: Sample log lines / unit redaction tests; staging sample query checklist.
+- **Expected**: Allow-listed fields only; retention ≤ configured short window (AC-MON6).
+
+### TC-306: Staging Alertmanager webhook (UJ-089, F84)
+- **Objective**: ≥1 alert rule can POST to staging webhook secret.
+- **Input**: Alertmanager config + test alert or simulated condition.
+- **Expected**: Webhook receives notification; no chat content in payload (AC-MON7–AC-MON8).
+
+### TC-307: frontend-i18n EN/ES key-set equality (F31, EV-296 / #296)
+- **Objective**: Every string key in `packages/frontend-i18n` exists in both `en` and `es` tables (no orphans).
+- **Input**: Vitest in `packages/frontend-i18n` comparing `Object.keys(enStrings)` vs `Object.keys(esStrings)` (or exported equivalents).
+- **Expected**: Key sets equal; ChatRAG visitor strings present under `chat.*`; no divergent app-local string catalog for moved keys (TC-069).
+
+### TC-308: Feedback privacy notice EN/ES + callout (UJ-073, F68 / #214)
+- **Objective**: Feedback page shows expanded no-PII/sensitive-data notice above the form in both locales; callout is present before submit.
+- **Input**: Vitest FeedbackPage EN + ES; i18n keys in `packages/frontend-i18n`.
+- **Expected**: AC-UX18; notice visible pre-submit; copy discourages private and sensitive data.
+
+### TC-309: Feedback webhook notify when configured (UJ-073, F68 / #214)
+- **Objective**: After successful insert, internal-write POSTs JSON payload to `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` when set.
+- **Input**: Unit/integration with mocked HTTP; payload fields id/category/locale/created_at/message only.
+- **Expected**: Webhook called once on success path; AC-UX19; ADR-046 §6.
+
+### TC-310: Feedback email notify when Resend configured (UJ-073, F68 / #214)
+- **Objective**: After successful insert, Resend email is sent to `VECINITA_FEEDBACK_NOTIFY_EMAIL` when `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` are set.
+- **Input**: Unit/integration with mocked Resend HTTP; body includes message text, not visitor identity fields.
+- **Expected**: Email path fires independently of webhook; AC-UX19.
+
+### TC-311: Feedback notify failure does not roll back store (UJ-073, F68 / #214)
+- **Objective**: Webhook and/or email failure after insert still returns success for the stored row.
+- **Input**: Mocked failing notify transport(s).
+- **Expected**: Persist succeeds; notify error logged; AC-UX19.
 
 ### F31 coverage gate — gated components
 
@@ -1731,20 +1926,220 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 
 1. ruff lint + format-check + basedpyright (Python) — no `typing.Any` (ADR-018; supersedes pyright/mypy)
 2. eslint (frontends) — no `any` / unsafe-any flows (`docs/typing-policy.md`)
-3. `uv run pytest tests/unit` (S027-D34 — unit only on remote)
-4. Vitest (frontends) + Playwright UI e2e (`ui-e2e`)
-5. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031) and **posts a sticky PR comment** with the per-component table (`scripts/ci/comment_unit_coverage_pr.sh`)
-6. pip-audit (blocking) + security job
+3. `uv run pytest tests/unit` (S027-D34 — unit only on remote `python` job)
+4. **`rag-regression` job** — `make test-rag-regression` / TC-280 golden baseline compare (EV-028 / #181; postgres service; fixture + mocked judge)
+5. Vitest (frontends) + Playwright UI e2e (`ui-e2e`)
+6. **Unit coverage gate (F31):** dedicated CI `coverage` job runs `make test-unit-coverage` (`--enforce` on summary script; ADR-019, TP-031) and **posts a sticky PR comment** with the per-component table (`scripts/ci/comment_unit_coverage_pr.sh`)
+7. pip-audit (blocking) + security job
 
 **Local CI (compose / long-running — before opening a PR):**
 
 - `make test-py` or `make ci-push` — Postgres via `scripts/ci/with_local_postgres.sh` (docker compose)
 - Runs `tests/unit` + `tests/integration` + `tests/privacy` + `tests/e2e` + `tests/smoke` + `tests/eval` + `tests/bugs`
-- Do **not** rely on remote GitHub Actions for compose-backed suites (S027-D34)
+- `make test-rag-regression` — TC-280 baseline compare (also runs in remote `rag-regression` CI job)
+- Other compose-backed suites remain **local-only** on the `python` job (S027-D34); regression gate is the documented remote exception (EV-028)
 
 **Workflow:** `.github/workflows/ci.yml` (created in **06-tech-tooling**; unit/coverage split S027-D34).
+
+**Job timeouts (EV-034 / #292):** Every job in `ci.yml`, `deploy-preflight.yml`, and `deploy-staging.yml` sets `timeout-minutes: 15` so a hung runner cannot block the merge gate indefinitely.
 
 ## Open Questions
 
 - Exact DO internal write API test harness (shared fixture with integration tests).
 - Live Modal staging nightly — deferred.
+
+### TC-313-01: Prod GPU snapshot kill-switch defaults off (EV-313 / #313, ADR-022)
+
+- **Objective**: `VECINITA_LLM_GPU_SNAPSHOT` unset or false keeps prod snapshot path disabled; true enables config gate used by `LlmService`.
+- **Setup**: Unit parse of env helper (no live Modal required).
+- **Expected**: Unset → false; `true`/`1`/`on` → true; playground class remains snapshot-off regardless.
+- **Refs**: [Corpus: config] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md §Amendment EV-313]
+
+### TC-313-02: Staging cold restore procedure (manual / smoke — non-flaky CI) (EV-313 / #313)
+
+- **Objective**: Documented staging procedure records cold_kind restore vs create vs clean_boot for snapshot on/off.
+- **Setup**: Staging Modal; `export VECINITA_LLM_GPU_SNAPSHOT=true` in the **deploy** shell then `modal deploy infra/modal/llm_app.py` (not Secret-only); optional `modal container stop`; authenticated `/warm` then `/generate` or stream.
+- **Expected**: Snapshot-on restore materially faster than snapshot-off clean boot; no NCCL failure; LoRA id/hash matches promote when adapter set (#316). Missing `sleep`/`wake_up` fails closed (RuntimeError) rather than silent skip.
+- **CI:** Do **not** gate merge on 70s snapshot-create boots; unit TC-313-01 is the CI gate.
+
+### TC-316-01: Post-restore LoRA promote matrix — no stale adapter (EV-316 / #316, ADR-022)
+
+- **Objective**: After snapshot restore, serving pin must match current volume + SHA-256 hash;
+  promote A → mutate volume toward B must not report/serve A as B (or B as A).
+- **Setup**: Unit (preferred) or Modal harness: bind path with fixture adapter dirs; set
+  `VECINITA_FINETUNE_ADAPTER_ID` / `VECINITA_FINETUNE_ADAPTER_HASH` for A; mutate files or
+  swap hash expectation to B; invoke post-restore bind.
+- **Expected**: Hash mismatch or missing dir → fail closed (RuntimeError / ready refused);
+  successful bind exposes matching `adapter_id` + `adapter_hash` on `/health`. Default
+  `VECINITA_LLM_LORA_RESOLVE=post_restore`. Algorithm is SHA-256 + `hmac.compare_digest`
+  (not MD5/SHA-1/CRC).
+- **Refs**: [Corpus: feature-list.md §F77] [Spec: ADR-022 §Amendment EV-316] [Corpus: config]
+
+### TC-316-02: Ready metadata + LoRA resolve kill-switch (EV-316 / #316)
+
+- **Objective**: `/health` includes `base_model_id`, `adapter_id`, `adapter_hash`,
+  `snapshot_schema`, `git_commit`; `VECINITA_LLM_LORA_RESOLVE=snapshot_bound` is parsed and
+  documented as non-default.
+- **Setup**: Unit parse of resolve mode + health payload shape (no live Modal required for CI).
+- **Expected**: Default `post_restore`; invalid resolve mode rejected or fail-closed to
+  `post_restore` per implementation (document chosen behavior in config-spec). Metadata
+  fields present on prod health when snapshot path is exercised.
+- **Refs**: [Corpus: api] [Corpus: config] AC-FT11
+
+### TC-314-01: cold_kind tag schema rejects prompts (EV-314 / #314, ADR-004)
+
+- **Objective**: Harness/stamp helpers accept only allow-listed operational tags; reject
+  `question` / `answer` / `prompt` / `message` keys.
+- **Setup**: Unit — construct sample dict with forbidden fields.
+- **Expected**: Validation error or strip/reject; `cold_kind` enum enforced.
+- **Refs**: [Corpus: ADR-004] [Spec: ADR-022 §Amendment EV-314] AC-314-01
+
+### TC-314-02: Cold-start bench smoke N≈20 (manual / live — non-flaky CI) (EV-314 / #314)
+
+- **Objective**: Opt-in script forces cold, runs ~20 restores, emits JSON with p50/p95 and
+  `cold_kind` breakdown; publishable p95 requires separate N≥100 run.
+- **Setup**: Staging Modal; documented `modal container stop`; `scripts/ops/cold_start_bench.py`
+  (or name from tech-plan) with `--n 20`.
+- **Expected**: JSON report written; no raw prompts persisted; CI does **not** require N=100.
+- **Refs**: AC-314-02 · AC-314-03
+
+### TC-318-01: LLM /warm uses spawn/detach (EV-318 / #318)
+
+- **Objective**: Prod Modal ASGI `POST /warm` does not await full `warm_model.remote.aio` load
+  for the prewarm path (spawn/detach like embedding).
+- **Setup**: Unit / bug-style test of warm handler (mock service); assert spawn called and
+  response returned without awaiting load completion.
+- **Expected**: Immediate response contract; proxy key still required.
+- **Refs**: [Corpus: api] BUG-2026-08-27 · AC-318-01
+
+### TC-318-02: ChatRAG mount prewarm hits /api/v1/warm not /health (EV-318 / #318)
+
+- **Objective**: FE mount and ChatRAG warm route prewarm via `/api/v1/warm` → Modal `/warm`.
+- **Setup**: Vitest ChatPanel / `prewarmChatServices`; API e2e or unit for `POST /api/v1/warm`.
+- **Expected**: No Modal `/health` used as prewarm; response `{"status":"warming"}`; F40/F64
+  residual wait still available.
+- **Refs**: UJ-090 · AC-318-02 · AC-CS6 (wait UX retained)
+
+### TC-315-01: Seed script CLI fail-closed mapping (EV-315 / #315)
+
+- **Objective**: Seed/prime CLI argument parsing and exit codes map create-persists → non-zero.
+- **Setup**: Unit — mock warm/observe; assert exit contract without live Modal.
+- **Expected**: Success when restore-kind observed; fail closed on persistent create-kind.
+- **Refs**: [Spec: ADR-022 §Amendment EV-315] AC-315-01
+
+### TC-315-02: Staging seed after deploy (manual / live — non-flaky CI) (EV-315 / #315)
+
+- **Objective**: After staging LLM deploy + seed, first monitored restore is
+  `snapshot_restore` for expected worker types.
+- **Setup**: Staging Modal with GPU snapshots on; `scripts/ops/seed_gpu_snapshots.py`;
+  optional `#314` bench smoke.
+- **Expected**: Restore-kind samples; create latency documented separately; CI does not
+  require live seed by default.
+- **Refs**: AC-315-01 · AC-315-02 · UJ-091
+
+### TC-317-01: ASGI entry avoids top-level vLLM import (EV-317 / #317)
+
+- **Objective**: Prod LLM ASGI entry module does not import vLLM / heavy GPU internals at
+  load time.
+- **Setup**: Unit/AST scan of ASGI entry (or import-graph test).
+- **Expected**: No top-level vLLM; lazy/split imports only.
+- **Refs**: [Spec: ADR-022 §Amendment EV-317] AC-317-01
+
+### TC-317-02: Health CPU-only; warm spawn preserved (EV-317 / #317)
+
+- **Objective**: `GET /health` stays on CPU Function; `POST /warm` still spawn/detach.
+- **Setup**: Unit — assert ASGI function has no `gpu=`; warm handler still calls `.spawn()`.
+- **Expected**: No T4 for probes; #318 contract retained.
+- **Refs**: AC-317-02 · TC-318-01
+
+### TC-317-03: Optional ingress CPU snapshot (EV-317 / #317 — if enabled)
+
+- **Objective**: If post-thin profile warrants, CPU `enable_memory_snapshot` on ASGI only.
+- **Setup**: Config/unit when feature flag/path enabled; otherwise N/A skip.
+- **Expected**: Snapshot on CPU ingress only; never on T4 ASGI.
+- **Refs**: AC-317-03
+
+### TC-319-01: scaledown_window env parse bounds (EV-319 / #319)
+
+- **Objective**: `VECINITA_LLM_SCALEDOWN_WINDOW` validates int bounds; invalid fails closed.
+- **Setup**: Unit — env parse helper / import-time config.
+- **Expected**: Accepted candidates include 60/120/300; invalid raises or aborts import.
+- **Refs**: [Spec: ADR-022 §Amendment EV-319] AC-319-02 · config-spec
+
+### TC-319-02: Scaledown evidence + formula documented (EV-319 / #319)
+
+- **Objective**: ADR/runbook publish T4 $/s formula; chosen window justified (or thin-traffic
+  → 120 with revert).
+- **Setup**: Doc review + optional staging timestamp-gap note in session evidence.
+- **Expected**: No `min_containers`; `buffer_containers` remains 0; prod flip AskQuestion.
+- **Refs**: AC-319-01 · AC-319-03 · UJ-092
+
+### TC-320-01: FAQ normalize + exact match (F85 / EV-320 / #320)
+
+- **Objective**: Normalized variants match; whitespace/case/`?` differences still hit.
+- **Setup**: Unit — FAQ matcher + fixture store (EN/ES entries).
+- **Expected**: Exact/normalized same-language hit returns entry id + answer; different
+  language or paraphrase miss returns no match.
+- **Refs**: [Corpus: feature-list.md §F85] AC-320-01 · UJ-093
+
+### TC-320-02: Ask path bypass skips retrieve + LLM (F85 / EV-320)
+
+- **Objective**: On FAQ hit, ChatRAG does not call embed/retrieve/LLM clients.
+- **Setup**: Unit/service with mocked RAG + LLM; kill-switch on.
+- **Expected**: `AskResponse.answer_path == "faq_bypass"`, `sources == []`,
+  `cache_hit == "none"`; mocks not invoked.
+- **Refs**: AC-320-02 · api-contract
+
+### TC-320-03: Kill-switch forces RAG (F85 / EV-320)
+
+- **Objective**: `VECINITA_FAQ_FASTPATH_ENABLED=false` never bypasses.
+- **Setup**: Unit/service; FAQ variant that would otherwise match.
+- **Expected**: `answer_path == "rag_llm"`; RAG path invoked.
+- **Refs**: AC-320-03 · config-spec
+
+### TC-320-04: API e2e FAQ hit + miss (F85 / EV-320)
+
+- **Objective**: TestClient `POST /api/v1/ask` (and stream) exercises bypass end-to-end.
+- **Setup**: `tests/e2e/` with FAQ fixture loaded; LLM/embed mocked or stubbed.
+- **Expected**: Hit → 200 canned + `answer_path=faq_bypass` + empty sources; miss → RAG
+  contract; stream emits empty sources + answer + done without generate.
+- **Refs**: AC-320-04 · UJ-093 · e2e-coverage.mdc
+
+### TC-320-05: Harness stamps answer_path without cold_kind (F85 / EV-320)
+
+- **Objective**: Layer E schemas + `cold_start_bench --mode chat-ask` record
+  `answer_path=faq_bypass|rag_llm` separately from GPU `cold_kind`.
+- **Setup**: Unit — `validate_answer_path_latency_sample` + bench chat-ask with mocked ask.
+- **Expected**: FAQ sample rejects `cold_kind`; report `answer_path_summary` groups
+  percentiles; samples never include question/answer text (ADR-004).
+- **Refs**: AC-320-05 · ADR-022 EV-320 · #314
+
+### TC-321: Staging vs prod host confirmation (EV-338 / #338)
+
+- **Objective**: Operator (or script) refuses restore when staging and prod hosts are identical
+  or unset.
+- **Setup**: Ops checklist / optional unit on URL-host compare helper.
+- **Expected**: Distinct `.ondigitalocean.com` (or equivalent) hostnames; abort if equal.
+- **Refs**: UJ-094 · [Corpus: corpus-db-safety] · staging-runbook §Prod → staging corpus mirror
+
+### TC-322: Post-mirror corpus counts (EV-338 / #338)
+
+- **Objective**: After restore, staging has non-empty retrieval corpus.
+- **Setup**: Staging SQL: `COUNT(*)` on `documents`, `chunks`, `embeddings`.
+- **Expected**: All three counts `> 0`; alembic `current` matches `heads`.
+- **Refs**: UJ-094 · AC staging restore
+
+### TC-323: No test-artifact URLs after mirror (EV-338 / #338)
+
+- **Objective**: Staging managed DB has zero `example.com` / `fixture://` / localhost docs.
+- **Setup**: `scripts/ops/cleanup_corpus_test_artifacts.py` dry-run against staging URL.
+- **Expected**: Zero matches (or cleanup applied only on staging with ack).
+- **Refs**: [Corpus: no-corpus-test-artifacts] · UJ-094
+
+### TC-324: Staging ChatRAG H3 after mirror (EV-338 / #338)
+
+- **Objective**: Staging ask returns answer + language after corpus restore.
+- **Setup**: `POST` staging ChatRAG `/api/v1/ask` pantry-style question (or `staging_smoke` H3).
+- **Expected**: HTTP 200; non-empty `answer`; `language` in `en`/`es`; prod corpus unchanged.
+- **Refs**: UJ-094 · staging-runbook H3 · [Corpus: staging]
+

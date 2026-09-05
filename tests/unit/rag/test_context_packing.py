@@ -145,7 +145,7 @@ def test_pack_chunks_p3_short_context_skips_truncate() -> None:
 def test_truncate_context_rejects_non_positive_max_chars() -> None:
     """max_chars < 1 raises ValueError."""
     with pytest.raises(ValueError, match="max_chars"):
-        truncate_context("abc", max_chars=0)
+        _ = truncate_context("abc", max_chars=0)
 
 
 def test_pack_chunks_rejects_unsupported_mode() -> None:

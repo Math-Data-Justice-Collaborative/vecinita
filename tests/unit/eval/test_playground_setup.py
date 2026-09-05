@@ -61,7 +61,7 @@ def test_resolve_playground_base_url_requires_url(
     monkeypatch.delenv("VECINITA_MODAL_LLM_PLAYGROUND_URL", raising=False)
     monkeypatch.delenv("VECINITA_MODAL_LLM_URL", raising=False)
     with pytest.raises(PlaygroundSetupError, match="VECINITA_MODAL_LLM"):
-        resolve_playground_base_url()
+        _ = resolve_playground_base_url()
 
 
 def test_model_is_available_matches_id() -> None:
@@ -218,7 +218,7 @@ def test_ensure_model_ready_raises_when_missing_and_pull_disabled() -> None:
         ),
     )
     with pytest.raises(PlaygroundSetupError, match="not available"):
-        ensure_model_ready(client, "missing:tag", pull_if_missing=False, warm=False)
+        _ = ensure_model_ready(client, "missing:tag", pull_if_missing=False, warm=False)
     client.close()
 
 

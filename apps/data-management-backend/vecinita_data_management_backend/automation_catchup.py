@@ -18,12 +18,16 @@ from vecinita_shared_schemas.automations import (
     CatchupEnqueueRequest,
     EmbedStatus,
     catchup_idempotency_key,
+    catchup_outcome_to_run_status,
     decide_catchup_enqueue,
     is_automations_enabled,
     is_automations_kill_switch_on,
     parse_automations_max_concurrent,
 )
 
+from vecinita_data_management_backend.automation_run_persist import (
+    maybe_record_automation_run,
+)
 from vecinita_data_management_backend.pipeline import reembed_documents
 
 if TYPE_CHECKING:
@@ -111,7 +115,7 @@ def _default_perform_catchup(
     fetch_document: DocumentFetcher | None,
 ) -> None:
     """Re-embed one document via store-backed rebuild helpers (mode=reembed)."""
-    reembed_documents(
+    _ = reembed_documents(
         [document_id],
         write_client=write_client,
         embed_client=embed_client,
@@ -158,7 +162,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
 
     if decision != "enqueue":
         outcome = _DECISION_TO_OUTCOME[decision]
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="completed",
             metrics={
@@ -173,9 +177,17 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
             document_id,
             revision,
         )
+        maybe_record_automation_run(
+            write_client,
+            job_type="automation_catchup",
+            status=catchup_outcome_to_run_status(outcome),
+            document_id=document_id,
+            revision=revision,
+            error=None,
+        )
         return
 
-    store.update_job(job_id, status="running")
+    _ = store.update_job(job_id, status="running")
     try:
         if perform_catchup is not None:
             perform_catchup(document_id)
@@ -186,7 +198,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
                 write_client=write_client,
                 fetch_document=fetch_document,
             )
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="completed",
             metrics={
@@ -194,8 +206,16 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
                 "documents_processed": 1,
             },
         )
+        maybe_record_automation_run(
+            write_client,
+            job_type="automation_catchup",
+            status=catchup_outcome_to_run_status("reembedded"),
+            document_id=document_id,
+            revision=revision,
+            error=None,
+        )
     except Exception as exc:
-        store.update_job(
+        _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
@@ -204,5 +224,13 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
                 "catchup_outcome": "failed",
                 "documents_processed": 0,
             },
+        )
+        maybe_record_automation_run(
+            write_client,
+            job_type="automation_catchup",
+            status=catchup_outcome_to_run_status("failed"),
+            document_id=document_id,
+            revision=revision,
+            error=str(exc)[:500],
         )
         raise

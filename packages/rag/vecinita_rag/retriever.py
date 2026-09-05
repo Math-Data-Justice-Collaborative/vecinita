@@ -27,6 +27,23 @@ if TYPE_CHECKING:
 
 EmbedFn = Callable[[str], list[float]]
 
+# Fallback when callers pass database_url only (prefer injecting a shared Engine).
+_FALLBACK_POOL_SIZE = 2
+_FALLBACK_MAX_OVERFLOW = 1
+_FALLBACK_POOL_RECYCLE_S = 300
+
+
+def _fallback_engine(database_url: str) -> Engine:
+    return create_engine(
+        database_url,
+        pool_size=_FALLBACK_POOL_SIZE,
+        max_overflow=_FALLBACK_MAX_OVERFLOW,
+        pool_pre_ping=True,
+        pool_recycle=_FALLBACK_POOL_RECYCLE_S,
+        connect_args={"application_name": "vecinita-rag-retriever"},
+    )
+
+
 _BASE_SELECT_SQL = """
             SELECT
                 c.id AS chunk_id,
@@ -117,7 +134,7 @@ class CorpusPgvectorRetriever(BaseRetriever):
             msg = f"top_k must be between {MIN_TOP_K} and {MAX_TOP_K}"
             raise ValueError(msg)
         self._embed_fn = embed_fn
-        self._engine = engine or create_engine(database_url or database_url_from_env())
+        self._engine = engine or _fallback_engine(database_url or database_url_from_env())
         self._top_k = top_k
         self._score_threshold = score_threshold
 

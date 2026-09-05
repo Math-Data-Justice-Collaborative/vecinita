@@ -15,16 +15,17 @@ from uuid import uuid4
 
 import pytest
 from vecinita_internal_write_api.automations import (
-    _row_datetime,  # pyright: ignore[reportPrivateUsage]
-    _row_datetime_optional,  # pyright: ignore[reportPrivateUsage]
     _run_from_row,  # pyright: ignore[reportPrivateUsage]
 )
 from vecinita_shared_schemas.automations import (
     DEFAULT_AUTOMATIONS_MAX_CONCURRENT,
+    AutomationRun,
+    AutomationRunCreateRequest,
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
 )
+from vecinita_shared_schemas.db_mapping import row_datetime, row_datetime_optional
 
 from tests.helpers.json_response import response_json_object
 from tests.unit.internal_write_api.conftest import auth_headers
@@ -88,14 +89,54 @@ def test_list_automations_runs_returns_paginated_history(
     assert isinstance(body.items, list)
 
 
+def test_post_automation_run_persists_and_lists(
+    write_client: TestClient,
+) -> None:
+    """POST /internal/v1/automations/runs then GET lists the row (TC-289 / AC-AU5)."""
+    document_id = uuid4()
+    create = write_client.post(
+        "/internal/v1/automations/runs",
+        headers=auth_headers(),
+        json=AutomationRunCreateRequest(
+            job_type="automation_catchup",
+            status="skipped",
+            document_id=document_id,
+            revision="rev-live",
+            error=None,
+        ).model_dump(mode="json"),
+    )
+    assert create.status_code == HTTPStatus.CREATED
+    created = AutomationRun.model_validate(response_json_object(create))
+    assert created.job_type == "automation_catchup"
+    assert created.status == "skipped"
+    assert created.document_id == document_id
+    assert created.revision == "rev-live"
+    assert created.error is None
+    assert created.started_at is not None
+    assert created.finished_at is not None
+    assert created.created_at is not None
+    assert created.updated_at is not None
+
+    listing = write_client.get(
+        "/internal/v1/automations/runs",
+        headers=auth_headers(),
+        params={"page": 1, "page_size": _PAGE_SIZE},
+    )
+    assert listing.status_code == HTTPStatus.OK
+    body = AutomationRunListResponse.model_validate(response_json_object(listing))
+    match = next((item for item in body.items if item.id == created.id), None)
+    assert match is not None
+    assert match == created
+
+
 def test_automation_row_datetime_helpers_cover_type_branches() -> None:
     """Cover datetime coercion helpers used by automation_runs mapping (TP3)."""
     now = datetime.now(UTC)
-    assert _row_datetime({"started_at": now}, "started_at") == now
+    assert row_datetime({"started_at": now}, "started_at") == now
     with pytest.raises(TypeError, match="Expected datetime"):
-        _row_datetime({"started_at": "not-a-datetime"}, "started_at")
-    assert _row_datetime_optional({"finished_at": None}, "finished_at") is None
-    assert _row_datetime_optional({"finished_at": now}, "finished_at") == now
+        _ = row_datetime({"started_at": "not-a-datetime"}, "started_at")
+    assert row_datetime_optional({"finished_at": None}, "finished_at") is None
+    assert row_datetime_optional({"finished_at": now}, "finished_at") == now
 
     run_id = uuid4()
     row = {

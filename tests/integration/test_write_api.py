@@ -45,7 +45,7 @@ async def write_client() -> AsyncIterator[AsyncClient]:
 @pytest.fixture
 def seeded_corpus() -> None:
     """Load seed corpus rows into the integration DATABASE_URL."""
-    load_corpus(database_url=_database_url())
+    _ = load_corpus(database_url=_database_url())
 
 
 @pytest.mark.asyncio

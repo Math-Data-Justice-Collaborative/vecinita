@@ -15,7 +15,7 @@ pytestmark = pytest.mark.integration
 
 def test_retriever_spanish_chunk_for_spanish_query(corpus_db: str) -> None:
     """Test retriever spanish chunk for spanish query."""
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=corpus_db,
         match_substrings={"banco de alimentos": 2, "Food pantry": 0},
         default_index=1,

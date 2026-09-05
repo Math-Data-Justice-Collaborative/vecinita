@@ -17,6 +17,7 @@ APPROVED_COMPONENTS: dict[str, str] = {
     "infra/modal/llm_playground_app.py": "Modal vecinita-llm-playground (ADR-037)",
     "infra/modal/data_management_app.py": "Modal DM workers (F75/F76 automations + jobs)",
     "infra/modal/embedding_app.py": "Modal FastEmbed",
+    "infra/modal/rerank_app.py": "Modal vecinita-rerank CE (F45 / EV-029)",
     "infra/modal": "Modal services (llm / embed / DM / FT)",
     "apps/data-management": "Data Management backend/FE (F75–F77 UI + jobs)",
     "apps/internal-write-api": "Internal write API (automation_runs, promote, corpus)",

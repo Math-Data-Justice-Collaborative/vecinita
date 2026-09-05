@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Sync the Modal `vecinita-llm-finetune` secret from the current shell env.
+# Sync the Modal `vecinita-llm-finetune` secret from the current shell env (F80 / EV-031).
 #
-# Used by infra/modal/finetune_app.py for LoRA train/eval. Safe defaults keep the
-# feature disabled until a later explicit approval gate.
+# Used by infra/modal/finetune_app.py before deploy. Keys match finetune_app.py docstring
+# and docs/staging-secrets-matrix.md §EV-027 Modal — vecinita-llm-finetune.
 #
 # Usage:
-#   set -a && source prod.env && set +a
+#   set -a && source .env && set +a
 #   bash scripts/deploy/sync_finetune_secret.sh            # dry run
 #   bash scripts/deploy/sync_finetune_secret.sh --apply    # write secret
 set -euo pipefail
@@ -50,7 +50,7 @@ done
 if [[ ${#MISSING[@]} -gt 0 ]]; then
   echo "ERROR: missing required env vars for ${SECRET_NAME}:" >&2
   printf '  - %s\n' "${MISSING[@]}" >&2
-  echo "Source prod.env (set -a && source prod.env && set +a). See infra/modal/.env.example." >&2
+  echo "Source .env (set -a && source .env && set +a). See infra/modal/.env.example." >&2
   exit 1
 fi
 
@@ -78,4 +78,4 @@ fi
 
 modal secret create --force "${SECRET_NAME}" "${PAIRS[@]}"
 echo "OK: updated Modal secret ${SECRET_NAME}."
-echo "Redeploy finetune app: modal deploy infra/modal/finetune_app.py"
+echo "Redeploy: modal deploy infra/modal/finetune_app.py"

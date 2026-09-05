@@ -32,6 +32,8 @@ _PARSED_CACHE_SEMANTIC_THRESHOLD = 0.95
 _DEFAULT_CE_TOP_N = 20
 _PARSED_CE_TOP_N = 15
 _DEFAULT_CE_MODEL = "BAAI/bge-reranker-v2-m3"
+_DEFAULT_REFINE_COUNT = 2
+_PARSED_REFINE_COUNT = 3
 
 
 def test_int_env_returns_default_when_missing() -> None:
@@ -89,11 +91,27 @@ def test_from_env_builds_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("VECINITA_TOP_K", "3")
     monkeypatch.setenv("VECINITA_MIN_RETRIEVAL_SCORE", "0.3")
     monkeypatch.setenv("VECINITA_STATS_ENABLED", "false")
+    monkeypatch.delenv("VECINITA_FAQ_FASTPATH_ENABLED", raising=False)
+    monkeypatch.delenv("VECINITA_FAQ_STORE_PATH", raising=False)
     settings = ChatRagSettings.from_env()
     assert settings.top_k == _ENV_TOP_K
     assert settings.min_retrieval_score == _ENV_MIN_SCORE
     assert settings.stats_enabled is False
     assert settings.database_url.startswith("postgresql+psycopg://")
+    assert settings.faq_fastpath_enabled is True
+    assert settings.faq_store_path is None
+
+
+def test_from_env_parses_faq_fastpath_kill_switch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """F85: VECINITA_FAQ_FASTPATH_ENABLED=0 and optional store path."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_FAQ_FASTPATH_ENABLED", "0")
+    monkeypatch.setenv("VECINITA_FAQ_STORE_PATH", "/opt/vecinita/seed_faq.yaml")
+    settings = ChatRagSettings.from_env()
+    assert settings.faq_fastpath_enabled is False
+    assert settings.faq_store_path == "/opt/vecinita/seed_faq.yaml"
 
 
 def test_from_env_defaults_top_k_to_eight_when_unset(
@@ -110,7 +128,7 @@ def test_from_env_requires_database_url(monkeypatch: pytest.MonkeyPatch) -> None
     """Test from env requires database url."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(RuntimeError, match="DATABASE_URL"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_str_env_parses_value(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -186,7 +204,7 @@ def test_from_env_rejects_invalid_f42_rag_knobs(
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     monkeypatch.setenv(name, value)
     with pytest.raises(ValueError, match="VECINITA_RAG_"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_from_env_defaults_f43_rag_cache_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -241,7 +259,7 @@ def test_from_env_rejects_invalid_f43_rag_cache_knobs(
     monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
     monkeypatch.setenv(name, value)
     with pytest.raises(ValueError, match="VECINITA_RAG_CACHE"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
 
 
 def test_from_env_defaults_f44_soft_language_fallback_off(
@@ -285,6 +303,7 @@ def test_from_env_parses_f45_rerank_ce_knobs(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv("VECINITA_RAG_RERANK_CE", "true")
     monkeypatch.setenv("VECINITA_RAG_RERANK_CE_MODEL", _DEFAULT_CE_MODEL)
     monkeypatch.setenv("VECINITA_RAG_RERANK_CE_TOP_N", str(_PARSED_CE_TOP_N))
+    monkeypatch.setenv("VECINITA_MODAL_RERANK_URL", "http://rerank.test")
     settings = ChatRagSettings.from_env()
     assert settings.rag_rerank_ce is True
     assert settings.rag_rerank_ce_model == _DEFAULT_CE_MODEL
@@ -299,4 +318,61 @@ def test_from_env_rejects_invalid_f45_rerank_ce_top_n(
     monkeypatch.setenv("VECINITA_TOP_K", "5")
     monkeypatch.setenv("VECINITA_RAG_RERANK_CE_TOP_N", "3")
     with pytest.raises(ValueError, match="VECINITA_RAG_RERANK_CE_TOP_N"):
-        ChatRagSettings.from_env()
+        _ = ChatRagSettings.from_env()
+
+
+def test_from_env_defaults_f81_query_refine_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-283 / AC-SR5: VECINITA_RAG_QUERY_REFINE defaults false (F81)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_QUERY_REFINE", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_QUERY_REFINE_COUNT", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_query_refine is False
+    assert settings.rag_query_refine_count == _DEFAULT_REFINE_COUNT
+
+
+def test_from_env_parses_f81_query_refine_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F81: VECINITA_RAG_QUERY_REFINE* knobs parse from env (config-spec)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_QUERY_REFINE", "true")
+    monkeypatch.setenv("VECINITA_RAG_QUERY_REFINE_COUNT", "3")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_query_refine is True
+    assert settings.rag_query_refine_count == _PARSED_REFINE_COUNT
+
+
+def test_from_env_defaults_f82_output_verify_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-286 / AC-OV4: VECINITA_RAG_OUTPUT_VERIFY defaults false (F82)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.delenv("VECINITA_RAG_OUTPUT_VERIFY", raising=False)
+    monkeypatch.delenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", raising=False)
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_output_verify is False
+    assert settings.rag_output_verify_min == 1.0
+
+
+def test_from_env_parses_f82_output_verify_knobs(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F82: VECINITA_RAG_OUTPUT_VERIFY* knobs parse from env (config-spec)."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY", "true")
+    monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", "0.5")
+    settings = ChatRagSettings.from_env()
+    assert settings.rag_output_verify is True
+    assert settings.rag_output_verify_min == _DEFAULT_FLOAT
+
+
+def test_from_env_rejects_invalid_f82_output_verify_min(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F82: VECINITA_RAG_OUTPUT_VERIFY_MIN must stay within [0, 1]."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_OUTPUT_VERIFY_MIN", "1.5")
+    with pytest.raises(ValueError, match="VECINITA_RAG_OUTPUT_VERIFY_MIN"):
+        _ = ChatRagSettings.from_env()
+
+
+def test_from_env_requires_rerank_url_when_ce_on(monkeypatch: pytest.MonkeyPatch) -> None:
+    """F45: VECINITA_MODAL_RERANK_URL required when VECINITA_RAG_RERANK_CE=true."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql://vecinita:vecinita@localhost/db")
+    monkeypatch.setenv("VECINITA_RAG_RERANK_CE", "true")
+    monkeypatch.delenv("VECINITA_MODAL_RERANK_URL", raising=False)
+    with pytest.raises(ValueError, match="VECINITA_MODAL_RERANK_URL"):
+        _ = ChatRagSettings.from_env()

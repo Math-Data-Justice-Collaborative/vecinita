@@ -137,6 +137,7 @@ When `tags` is non-empty, retrieval filters by those tags only (LLM tag inferenc
   "answer": "string",
   "language": "en | es",
   "cache_hit": "none | exact | semantic | retrieve",
+  "answer_path": "faq_bypass | rag_llm",
   "energy_estimate": {
     "wh": 0.0,
     "g_co2e": 0.0,
@@ -170,12 +171,19 @@ default 8 remains the max default, not a target count).
 `cache_hit` (F43 / EV-017): optional for older clients; **required in OpenAPI** after F43 ships.
 `none` = full generate path; `exact` / `semantic` skip LLM; `retrieve` reuses cached chunks then may still synthesize.
 
+`answer_path` (F85 / EV-320 / #320): **`faq_bypass`** when a reviewed FAQ store match returns a
+canned answer **before** retrieve/LLM (`sources` empty; `cache_hit` remains `none` — distinct
+from F43). **`rag_llm`** (default) for the normal RAG path. Kill-switch
+`VECINITA_FAQ_FASTPATH_ENABLED=false` forces `rag_llm`. Matching is exact/normalized
+same-language only — not F43 semantic cache and not embedding FAQ similarity.
+
 `energy_estimate` (F65 / EV-024): heuristic Wh/gCO₂e from GPU TDP × util × ask wall time
 (defaults: T4 70 W × 0.5 × duration); **not** live Modal power metrics. Always include
 `advisory` that values are approximate. `car_km_equiv` / `car_m_equiv` =
 `g_co2e / VECINITA_ENERGY_CAR_GCO2E_PER_KM` (default **251** g/km ≈ EPA 404 g/mi) —
 primary UI car framing (S026-D22). FE may derive mi from km. Use guide may also show % of
 optional car-day/year constants; those need not be in the JSON if FE computes from config.
+On `faq_bypass`, `energy_estimate` MAY be omitted or zeroed (no GPU wall time).
 
 - **Errors**: `400` validation / forbidden fields; `503` upstream Modal unavailable.
 
@@ -187,7 +195,26 @@ optional car-day/year constants; those need not be in the JSON if FE computes fr
 - **Response**: `text/event-stream` — events: `token`, `sources`, `done`.
   `done` payload may include `cache_hit` (same enum as `/ask`) when F43 is enabled.
   `done` **includes** `energy_estimate` (F65) when EV-024 ships.
+  `done` (and optionally early `sources`) MAY include `answer_path` (F85). On FAQ bypass:
+  emit empty `sources`, answer token(s) (may be a single chunk), then `done` with
+  `answer_path=faq_bypass` — **without** calling Modal generate.
 - **Errors**: Same as `/ask`.
+
+### POST `/api/v1/warm` (S001 T11 / EV-318 / #318)
+
+- **Purpose**: Fire-and-forget prewarm of Modal embedding + prod LLM when ChatRAG UI mounts
+  (`prewarmChatServices`). Overlaps GPU boot with user think-time (ADR-022 primary lever).
+- **Auth**: None (public); same anonymous ChatRAG surface as `/ask`.
+- **Request**: Empty body.
+- **Response** `200`: `{"status": "warming"}` — returns **immediately**; work continues in a
+  background task that POSTs Modal `POST /warm` (embed + LLM with proxy key).
+- **Must not**: Use Modal or ChatRAG `GET /health` as the prewarm trigger (health is
+  liveness-only and does not boot the T4).
+- **Modal LLM contract (EV-318)**: Upstream `POST /warm` MUST detach GPU load via
+  `.spawn()` (mirror embedding) so ASGI is not held for full engine ready; readiness is
+  observed on later generate/stream / structured stamps (#314).
+- **Errors**: Best-effort — failures are swallowed; residual cold uses F40/F64 wait UX.
+- **Refs**: [Corpus: ADR-022] [Corpus: feature-list.md §F40] TC-318-01 · UJ-090
 
 ### POST `/api/v1/feedback` (EV-024 / F68)
 
@@ -214,6 +241,9 @@ optional car-day/year constants; those need not be in the JSON if FE computes fr
 }
 ```
 
+- **Side effects**: Proxies to internal-write insert; optional operator notify is handled
+  there (#214). Client UX must show bilingual no-PII/sensitive notice above the form
+  (AC-UX18).
 - **Errors**: `400` validation / forbidden fields; `503` write path unavailable.
 
 ### GET `/api/v1/documents`
@@ -484,15 +514,39 @@ Base path: `/` on Modal app `vecinita-llm` (GPU T4, scale-to-zero). Consumers: C
 
 ### POST `/warm`
 
-- **Purpose**: Preload / switch model into vLLM engine.
+- **Purpose**: Preload / switch model into vLLM engine (ChatRAG prewarm + eval).
 - **Auth**: Proxy key required (same fail-closed rule as generate).
 - **Request**: optional `{"model_id": "..."}`.
+- **Semantics (EV-318 / #318)**: Prod ASGI `warm` SHALL **spawn/detach** GPU warm work and
+  return promptly (`{"status": "warming"}` or `{"status": "ok", ...}` without awaiting full
+  load). Do **not** `await warm_model.remote.aio(...)` for the fire-and-forget prewarm path
+  (BUG-2026-08-27 / embedding `.spawn()` precedent). Playground/eval may still wait for
+  ready when an operator explicitly needs a blocking warm.
 - **Errors**: `401` unauthorized.
 
 ### GET `/health`
 
 - **Auth**: May remain open (no proxy key) — probes only.
-- **Response** `200`: `{"status": "ok"}`
+- **Response** `200` (prod `vecinita-llm`, ADR-022 EV-316 / #316):
+
+```json
+{
+  "status": "ok",
+  "base_model_id": "qwen2.5:1.5b-instruct",
+  "adapter_id": null,
+  "adapter_hash": null,
+  "snapshot_schema": "v1",
+  "git_commit": "<short-sha-or-null>"
+}
+```
+
+- When a LoRA is promoted: `adapter_id` and `adapter_hash` (lowercase hex SHA-256 of the
+  canonical adapter-dir digest) are non-null and match the serve pin.
+- **Errors / fail-closed**: container must not become ready for generate if post-restore
+  resolve is on and id/hash verification fails (raise at enter / bind; not a soft `/health`
+  lie claiming a different adapter).
+- Minimal `{"status": "ok"}` remains acceptable for non-prod / playground unless the same
+  metadata is wired for parity.
 
 ### Auth matrix (UJ-049 / TC-142 / RD-165)
 
@@ -734,6 +788,82 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 }
 ```
 
+### GET `/internal/v1/metrics/summary` (EV-036 / F84)
+
+- **Purpose**: Privacy-safe operational success rates for admin Monitoring (`/monitoring`).
+- **Auth**: Supabase JWT (admin or viewer read).
+- **Query**: `window` ∈ `1h` \| `24h` \| `7d` \| `30d` (required; AC requires at least `24h` and `7d`).
+- **Response** `200`:
+
+```json
+{
+  "window": "24h",
+  "workloads": {
+    "ingest": {"total": 40, "succeeded": 36, "failed": 4, "success_rate": 0.9},
+    "chat": {"total": 120, "succeeded": 118, "failed": 2, "success_rate": 0.983, "no_context": 5},
+    "embed": {"total": 40, "succeeded": 38, "failed": 2, "success_rate": 0.95}
+  },
+  "latency_ms": {
+    "chat": {"p50": 1800, "p95": 4200},
+    "embed": {"p50": 400, "p95": 1200}
+  },
+  "top_error_codes": [
+    {"workload": "ingest", "error_code": "EmbedClientError", "count": 2}
+  ]
+}
+```
+
+- **Forbidden**: Any `question`, `answer`, `prompt`, `message`, or transcript fields.
+- **Behavior**: Ingest rates from `jobs` (`job_type` ingest/retag as documented in ADR-055);
+  chat/embed from allow-listed metric events / rollups.
+
+### GET `/internal/v1/metrics/timeseries` (EV-036 / F84)
+
+- **Purpose**: Time-bucketed success rate and volume for charts.
+- **Auth**: Supabase JWT (admin or viewer read).
+- **Query**: `metric` ∈ `ingest_success_rate` \| `chat_success_rate` \| `embed_success_rate` \|
+  `ingest_volume` \| `chat_volume` \| `embed_volume`; `window` as summary.
+- **Response** `200`:
+
+```json
+{
+  "metric": "ingest_success_rate",
+  "window": "7d",
+  "buckets": [
+    {"t": "ISO8601", "success_rate": 0.92, "total": 10, "failed": 1}
+  ]
+}
+```
+
+### POST `/internal/v1/metrics/events` (EV-036 / F84)
+
+- **Purpose**: Ingest privacy-safe operational events (ChatRAG fire-and-forget; embed stage).
+- **Auth**: `VECINITA_INTERNAL_API_KEY` (service) — not browser.
+- **Request** (chat example):
+
+```json
+{
+  "workload": "chat",
+  "outcome": "success",
+  "latency_ms": 1820,
+  "error_code": null,
+  "locale": "en"
+}
+```
+
+- **Request** (embed example): `{ "workload": "embed", "outcome": "failure", "latency_ms": 900, "error_code": "EmbedClientError", "job_id": "…" }`
+- **Response** `202`: `{ "acknowledged": true, "event_id": "uuid" }`
+- **Reject**: Bodies containing `question`, `answer`, `prompt`, `message`, or message history
+  (`400`/`422`). Fire-and-forget from ChatRAG must not block the ask response on metrics failure
+  (mirror F28 stats posture; `VECINITA_METRICS_ENABLED`).
+
+### GET `/internal/v1/metrics/events/{event_id}` (EV-036 / F84)
+
+- **Purpose**: Read one allow-listed event (write-read parity for POST events).
+- **Auth**: Supabase JWT or internal API key.
+- **Response** `200`: `{ event_id, workload, outcome, latency_ms, error_code?, locale?, job_id?, created_at }`
+- **404**: Unknown id. Never includes chat content fields.
+
 ### DELETE `/internal/v1/documents/bulk` (EV-002 / F27)
 
 - **Purpose**: Bulk delete multiple documents.
@@ -895,7 +1025,14 @@ Batch upsert may include tag payloads on ingest — see OpenAPI `BatchUpsertRequ
 - **Purpose**: Persist feedback row (called by ChatRAG backend).
 - **Auth**: Internal API key.
 - **Body**: Same fields as public feedback (no email).
-- **Side effects**: Insert `feedback` row; optional operator notify.
+- **Side effects**: Insert `feedback` row; then optional operator notify (#214 / ADR-046 §6):
+  - If `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` is set → HTTP POST JSON
+    `{id, category, locale, created_at, message}`.
+  - If `VECINITA_FEEDBACK_NOTIFY_EMAIL` is set and Resend env is configured → email the
+    operator inbox (same payload fields in body text/HTML; no visitor identity fields).
+  - Notify runs after successful commit; failures are logged and must not change the
+    success response for the insert (AC-UX19, TC-309–311).
+- **Response** `201`: `{id, created_at}` (unchanged shape).
 
 ### GET `/internal/v1/feedback` (EV-024 / F68) — Internal Write API
 
@@ -1198,6 +1335,7 @@ Compatible deltas unless noted. Auth: admin JWT (+ Modal proxy on Modal routes).
 | `GET` | `/internal/v1/automations/config` | enable flags, kill-switch, caps (read) |
 | `PATCH` | `/internal/v1/automations/config` | enable/disable; admin only |
 | `GET` | `/internal/v1/automations/runs` | Paginated run history (status, timestamps, error) |
+| `POST` | `/internal/v1/automations/runs` | Persist one run (Modal workers / schedule tick; TC-289) |
 | `POST` | `/jobs` (`job_type=automation_catchup`) | Enqueue catch-up (also from schedule / hooks) |
 
 CRUD hooks enqueue with idempotent key `document_id` + `revision` (RD-335).

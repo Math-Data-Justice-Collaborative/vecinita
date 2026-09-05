@@ -1,67 +1,64 @@
 ---
-description: Enforces CogniChem Job template patterns for this Modal service
+description: Enforces Vecinita Modal + monorepo layout patterns (not the antibody Job template)
 globs: ""
 alwaysApply: true
 ---
 
-# Template Conformance (Job)
+# Template Conformance (Vecinita)
 
-This project follows the CogniChem **Job** template (`template-modal-job`). All Modal
-constructs must match the job template patterns documented in
-`.cursor/skills/template-registry.md`.
+Vecinita is a **hybrid monorepo** (DO apps + Modal apps + shared packages). Do **not**
+apply the CogniChem antibody Job template (`cognichem-rfantibody`, single `src/app.py`
+pipeline). That overlay was leftover and is retired for this repo (S031).
 
-## File Layout
+[Corpus: architecture] [Corpus: deploy-integration] [Spec: docs/adr/ADR-037-unified-vecinita-llm-modal-app.md]
+
+## Monorepo layout (required)
 
 ```
-src/
-├── __init__.py
-├── app.py                # Modal app definition, GPU class variants
-├── pipeline.py           # Pipeline orchestrator (Modal-agnostic core logic)
-├── weights.py            # Weight manager (Modal-agnostic core logic)
-├── config.py             # Config parsing, validation, defaults
-├── rfdiffusion_stage.py  # RFdiffusion CLI wrapper (subprocess) — ADR-002
-├── proteinmpnn_stage.py  # ProteinMPNN CLI wrapper (subprocess) — ADR-002
-├── rf2_stage.py          # RF2 CLI wrapper (subprocess) — ADR-002
-├── output.py             # Output packaging (ZIP, results.json)
-└── finetune/             # Fine-tuning module (Python API) — ADR-003
+apps/
+  chat-rag-backend/
+  chat-rag-frontend/
+  data-management-backend/
+  data-management-frontend/
+  internal-write-api/
+  database/
+packages/
+  rag/ ingest/ embedding-client/ llm-client/ tagging/ eval/
+  shared-schemas/ frontend-i18n/ frontend-ui/
+infra/
+  modal/          # Modal app modules
+  do/             # App Platform YAML (SECRET placeholders only)
+tests/            # unit, e2e, integration, privacy, smoke, eval, bugs, ui
 ```
 
-Stage wrappers are flat modules at `src/` root (ADR-002) to avoid namespace collision
-with the upstream `rfantibody` package.
+Surface `[Template Drift]` if a new top-level deployable appears without architecture /
+CORPUS updates.
 
-Files outside this layout should be justified. Surface `[Template Drift]` if the structure
-diverges without a prior ADR.
+## Modal patterns (Vecinita)
 
-## Modal Patterns (Required)
+| App | Module | Role |
+|-----|--------|------|
+| `vecinita-embedding` | `infra/modal/embedding_app.py` | Multilingual embed |
+| `vecinita-data-management` | `infra/modal/data_management_app.py` | ASGI + ingest/automation workers |
+| `vecinita-llm` | `infra/modal/llm_app.py` | Prod ChatRAG / ingest vLLM |
+| `vecinita-llm-playground` | `infra/modal/llm_playground_app.py` | Admin/eval sandbox |
+| `vecinita-llm-finetune` | `infra/modal/finetune_app.py` | LoRA/PEFT train (F77) |
 
-- **App name**: `cognichem-rfantibody`
-- **GPU class variants**: Per-tier classes for each entry point
-  (e.g., `PipelineT4`, `PipelineA100_40`, `RFdiffusionH100`, `FineTuneA100_80`)
-- **`@modal.enter()`**: Required for weight loading on container startup
-- **Weights volume**: `modal.Volume.from_name("cognichem-rfantibody-weights", create_if_missing=True)`
-- **Job manager**: Each `run()` calls `i_am_running(modal.current_function_call_id())`
-- **Signature**: `run(self, payload: dict) -> Tuple[str, bytes]`
-- **Timeout**: 7200s
-- **Deploy command**: `modal deploy -m src.app`
+- Prefer **Modal-agnostic core** under `apps/` / `packages/` with thin Modal wiring in
+  `infra/modal/`.
+- Prod vs playground LLM URLs stay separate ([unified-vecinita-llm.mdc](unified-vecinita-llm.mdc)).
+- F75/F76 share **one** schedule with distinct `job_type`s (ADR-052).
+- F77 adapters load on prod **only after human promote** (ADR-053).
 
-## Separation of Concerns
+## DigitalOcean
 
-- **`src/app.py`**: Modal wiring only — class definitions, volumes, GPU config, enter/run
-  methods that delegate to core logic
-- **Core logic modules** (`pipeline.py`, `weights.py`, `rfantibody/`): No Modal imports.
-  Pure Python, locally testable.
-- If Modal imports appear in any file other than `src/app.py`, surface `[Template Drift]`
+- Four App Platform specs under `infra/do/` — never commit live operator `*-spec.yaml`
+  exports with encrypted secrets.
+- Only DO backends may hold `DATABASE_URL`.
 
-## Naming Conventions
+## When drift is acceptable
 
-- App: `cognichem-rfantibody`
-- Volume: `cognichem-rfantibody-cache` (weights), `cognichem-rfantibody-data` (runs)
-- Classes: `{Component}{GPUTier}` (e.g., `PipelineA100_40`, `RF2H100`)
-- Entry point: `src/app.py` (per ADR-001)
-
-## When Drift Is Acceptable
-
-Template drift is **advisory, not blocking**. If drift is intentional:
+Template drift that matches a new ADR / feature is fine:
 1. Explain the rationale
-2. Create an ADR documenting the deviation
+2. Update `docs/architecture.md` + CORPUS as needed
 3. Update this rule if the deviation becomes the new convention

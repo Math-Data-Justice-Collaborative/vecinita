@@ -60,9 +60,9 @@ def test_compute_energy_estimate_respects_overrides() -> None:
 def test_compute_energy_estimate_rejects_non_positive_duration() -> None:
     """Wall time must be positive."""
     with pytest.raises(ValueError, match="duration"):
-        compute_energy_estimate(duration_s=0.0)
+        _ = compute_energy_estimate(duration_s=0.0)
     with pytest.raises(ValueError, match="duration"):
-        compute_energy_estimate(duration_s=-1.0)
+        _ = compute_energy_estimate(duration_s=-1.0)
 
 
 @pytest.mark.parametrize(
@@ -82,4 +82,4 @@ def test_compute_energy_estimate_rejects_invalid_knobs(
 ) -> None:
     """TDP, util, intensity, and car factors must be in valid ranges."""
     with pytest.raises(ValueError, match=match):
-        compute_energy_estimate(duration_s=1.0, knobs=knobs)
+        _ = compute_energy_estimate(duration_s=1.0, knobs=knobs)

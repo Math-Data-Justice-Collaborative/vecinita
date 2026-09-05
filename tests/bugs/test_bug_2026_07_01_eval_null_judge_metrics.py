@@ -58,7 +58,7 @@ def test_execute_eval_run_wires_default_judge_and_llm_when_modal_url_set(
     )
     try:
         with patch(
-            "vecinita_internal_write_api.eval_service.run_golden_eval",
+            "vecinita_internal_write_api.eval_run_execute.run_golden_eval",
             return_value=([], summary),
         ) as mock_run:
             execute_eval_run(
@@ -72,11 +72,11 @@ def test_execute_eval_run_wires_default_judge_and_llm_when_modal_url_set(
         assert kwargs["llm"] is not None
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
 
 
 def test_default_eval_runtime_returns_none_without_modal_url(

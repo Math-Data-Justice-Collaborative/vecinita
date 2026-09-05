@@ -20,7 +20,7 @@ pytestmark = pytest.mark.unit
 def test_build_golden_row_requires_url_for_hit() -> None:
     """Hit expectation without expected_doc_url raises."""
     with pytest.raises(ValueError, match="expected_doc_url"):
-        build_golden_row(
+        _ = build_golden_row(
             case_id="x",
             locale="en",
             domain="community",
@@ -63,4 +63,4 @@ def test_parse_and_append_golden_draft(tmp_path: Path) -> None:
     expected_rows = 2
     assert len(merged2) == expected_rows
     with pytest.raises(ValueError, match="already exist"):
-        append_golden_rows(fixture_path=fixture, new_rows=again)
+        _ = append_golden_rows(fixture_path=fixture, new_rows=again)

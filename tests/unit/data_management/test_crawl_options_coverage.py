@@ -9,10 +9,10 @@ import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.job_tree import build_job_tree
-from vecinita_data_management_backend.pipeline import (
+from vecinita_data_management_backend.store import InMemoryJobStore, JobRecord
+from vecinita_ingest.jobs.pipeline import (
     _option_int,  # pyright: ignore[reportPrivateUsage]
 )
-from vecinita_data_management_backend.store import InMemoryJobStore, JobRecord
 from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
 from vecinita_shared_schemas.json_types import as_json_object
 

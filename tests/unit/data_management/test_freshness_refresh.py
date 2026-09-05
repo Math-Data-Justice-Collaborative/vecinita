@@ -94,6 +94,49 @@ def test_freshness_worker_kill_switch_skips_refresh(
     assert called == []
 
 
+def test_freshness_worker_records_run_history_on_kill_switch_skip(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-289/TC-290: kill-switch skip persists a blocked automation_runs row."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "true")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(),
+    )
+    recorded: list[dict[str, object]] = []
+
+    class _RecordingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            recorded.append(dict(kwargs))
+
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=lambda _doc: None,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "freshness_outcome": "skipped_kill_switch",
+        "documents_processed": 0,
+    }
+    assert recorded == [
+        {
+            "job_type": "freshness_refresh",
+            "status": "blocked",
+            "document_id": DOC_ID,
+            "revision": None,
+            "error": None,
+        }
+    ]
+
+
 def test_freshness_worker_disabled_skips_refresh(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -253,7 +296,7 @@ def test_run_job_dispatches_freshness_refresh(
         store_obj = kwargs["store"]
         assert isinstance(store_obj, InMemoryJobStore)
         dispatched.append(job_id)
-        store_obj.update_job(
+        _ = store_obj.update_job(
             job_id,
             status="completed",
             metrics={"freshness_outcome": "refreshed", "documents_processed": 1},

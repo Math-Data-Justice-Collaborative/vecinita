@@ -34,6 +34,20 @@ function emptyEnvelope(): ChatHistoryEnvelope {
   return { version: 1, active: emptyConversation(), previous: [] };
 }
 
+/** Newest-started first; stable across select/archive (#273 / ADR-024). */
+function sortPreviousByCreatedAtDesc(
+  conversations: Conversation[],
+): Conversation[] {
+  return [...conversations].sort((a, b) => b.createdAt - a.createdAt);
+}
+
+function cappedPrevious(conversations: Conversation[]): Conversation[] {
+  return sortPreviousByCreatedAtDesc(conversations).slice(
+    0,
+    PREVIOUS_CHATS_CAP,
+  );
+}
+
 function isSource(value: unknown): value is Source {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -152,9 +166,16 @@ export type ConversationStore = {
  * (TC-073, AC-S2).
  */
 export function useConversationStore(): ConversationStore {
-  const [envelope, setEnvelope] = useState<ChatHistoryEnvelope>(
-    () => readEnvelope() ?? emptyEnvelope(),
-  );
+  const [envelope, setEnvelope] = useState<ChatHistoryEnvelope>(() => {
+    const loaded = readEnvelope();
+    if (!loaded) {
+      return emptyEnvelope();
+    }
+    return {
+      ...loaded,
+      previous: cappedPrevious(loaded.previous),
+    };
+  });
 
   // Skip the redundant write on initial mount: the persisted state we just read
   // is already in storage, and a missing/corrupt payload need not be rewritten
@@ -232,10 +253,7 @@ export function useConversationStore(): ConversationStore {
       return {
         ...current,
         active: emptyConversation(),
-        previous: [current.active, ...current.previous].slice(
-          0,
-          PREVIOUS_CHATS_CAP,
-        ),
+        previous: cappedPrevious([current.active, ...current.previous]),
       };
     });
   }, []);
@@ -249,8 +267,8 @@ export function useConversationStore(): ConversationStore {
       const remaining = current.previous.filter((conv) => conv.id !== id);
       const previous =
         current.active.messages.length > 0
-          ? [current.active, ...remaining].slice(0, PREVIOUS_CHATS_CAP)
-          : remaining;
+          ? cappedPrevious([current.active, ...remaining])
+          : cappedPrevious(remaining);
       return { ...current, active: target, previous };
     });
   }, []);

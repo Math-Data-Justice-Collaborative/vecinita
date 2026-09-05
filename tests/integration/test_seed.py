@@ -26,7 +26,7 @@ _MIN_CHUNKS = 2
 @pytest.fixture
 def seeded_db() -> None:
     """Load seed corpus rows into the integration database."""
-    load_corpus(database_url=_database_url())
+    _ = load_corpus(database_url=_database_url())
 
 
 @pytest.mark.usefixtures("seeded_db")
@@ -40,8 +40,8 @@ def test_seed_load_row_counts() -> None:
         chunks = scalar_int(chunks_raw)
         languages = conn.execute(
             text(
-                "SELECT DISTINCT language FROM documents "
-                "WHERE language IN ('en', 'es') ORDER BY language"
+                "SELECT DISTINCT language FROM documents "  # noqa: S608
+                + "WHERE language IN ('en', 'es') ORDER BY language"
             )
         ).fetchall()
 

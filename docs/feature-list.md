@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-08-22 (EV-031 F76 parity #245; EV-030 F75; EV-027 F78–F80 in progress)  
+> **Last updated**: 2026-09-02 (EV-320 F85 FAQ fast-path Layer D #320 / #79)
 > **Source**: Standing product specs + evolve deltas; cite [ADR index](adr/README.md) and session decision logs for cycle history.
 
 ## Summary
@@ -53,7 +53,9 @@
 | F42 | Richer context packing + multi-query retrieval (H7+P1) | Implemented | ChatRAG | packages/rag, chat-rag-backend; F36 eval sandbox join | S019/EV-016 #165; PR #172 |
 | F43 | Answer / retrieval cache (H1 cascade) | Planned | ChatRAG | packages/rag, chat-rag-backend; F36 harness | S020/EV-017; S020-D4/D7 |
 | F44 | Soft language filter / empty-hit fallback (#162) | Planned | ChatRAG | packages/rag, chat-rag-backend | S020/EV-017 #162; S020-D6/D7 |
-| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Planned | ChatRAG | packages/rag, chat-rag-backend; Modal CE spike | S020/EV-017 #83/#161; S021/EV-018 re-gate; S020-D5/D7 |
+| F45 | Cross-encoder rerank spike + gated ship (#83/#161) | Implemented | ChatRAG | packages/rag, rerank-client, chat-rag-backend; Modal `vecinita-rerank` | 11-verify-impl EV-029 2026-08-24; staging CE on |
+| F81 | LLM query refinement before retrieval (#82) | Implemented | ChatRAG | packages/rag, chat-rag-backend, llm-client | 11-verify-impl EV-029 2026-08-24; flag default-off; staging enable deferred |
+| F82 | Output verification + inline citations (#84) | Implemented (live) | ChatRAG | packages/rag, chat-rag-backend, packages/eval | EV-030 live verify 2026-08-24 |
 | F46 | Staging retrieve reliability (non-empty pools) | Planned | ChatRAG | packages/rag, chat-rag-backend, database/corpus pin | S021/EV-018; S021-D8 |
 | F47 | Skip re-ingest when content_hash unchanged (#163) | Implemented | Data Management | data-management-backend, internal-write-api, packages/ingest | 11-verify-impl S022 2026-08-02; EV-019 #163 |
 | F48 | Embedding sub-batch + retry for ingest (#166) | Implemented | Data Management | packages/embedding-client, data-management-backend, Modal embed | 11-verify-impl S022 2026-08-02; EV-019 #166 |
@@ -78,9 +80,12 @@
 | F74 | Operator-settable `display_title` | Implemented | Data Management + ChatRAG | internal-write, DB migration, admin FE, citation packing | S028/EV-026 #224 |
 | F75 | Optional ingest bilingual translation | Implemented | Data Management | data-management-backend, internal-write-api, Modal LLM, admin FE | EV-030 #251 |
 | F76 | Corpus language parity metrics + badges | Implemented | Data Management | internal-write-api, data-management-frontend | EV-031 #245 |
-| F78 | Corpus change automations | In progress (catch-up build; PR open) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73 |
-| F79 | Corpus freshness automation | In progress (write-API + schema; Modal job next) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219 |
-| F80 | Modal LoRA fine-tune + human promote | Planned | Cross-cutting (LLM) | new Modal FT app, llm_app, llm-client, eval, admin FE | S030 #72 |
+| F78 | Corpus change automations | Live enabled (EV-031) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133/M135 |
+| F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
+| F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
+| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule | EV-staging-do-supabase; EV-033; ADR-054 |
+| F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
+| F85 | FAQ fast-path (canned answers; skip LLM) | Implemented | ChatRAG | chat-rag-backend, shared-schemas | EV-320 #320 / #79; ADR-022 Layer D |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -155,9 +160,12 @@
   (`Loading… Sign in`) fail with `drive_auth_required` and are **not** upserted. Private,
   folder-only, and login-required links are unsupported — upload the file or paste an export
   URL. Multi-URL ingest soft-fails per URL with a browser-like User-Agent (#243).
-  Apex hosts with broken TLS may retry `www.` (#249). Persistent `403` from
-  datacenter IPs surfaces `host_waf_blocked`; TLS without recovery surfaces
-  `tls_handshake_failed` (operator-visible in job metrics).
+  Apex hosts with broken TLS may retry `www.` (#249). Persistent `403` retries
+  ordered browser UAs (Windows then Mac Chrome) before surfacing
+  `host_waf_blocked` (#249 / BUG-2026-09-02). SiteGround captcha interstitials
+  (`sg-captcha` / `/.well-known/sgcaptcha/`) are treated as WAF blocks, not empty
+  successful scrapes. TLS without recovery surfaces `tls_handshake_failed`
+  (operator-visible in job metrics).
 - **Source**: User interview 01-requirements; #235 / #243
 
 ### F8: Ingest job queue & status API
@@ -494,9 +502,10 @@
   | `packages/frontend-ui` | `vecinita-frontend-ui` | `LocaleProvider`, `useLocale`, `LanguageToggle`, `ThemeToggle`, `TagFilterChips`, `TagBadge`, `PaginationControls`; minimal shadcn re-exports (Button, Badge, Input, Label, Dialog) |
 - **Admin scope**: ~120+ static strings across Dashboard, Corpus, Health, Audit, bulk dialogs; EN/ES toggle in sidebar footer beside `ThemeToggle` (desktop + mobile sheet).
 - **ChatRAG scope**: Migrate app-local i18n to shared packages; **full Tailwind migration** of ChatRAG layout (not minimal scan-only); consume shared components.
+- **ChatRAG catalog ownership (EV-296 / #296)**: Visitor-facing UI strings live in `packages/frontend-i18n` under **`chat.<camelCase>`** (plus existing `chat.tooltip.*`). ChatRAG must not keep a divergent local string table for moved keys; call sites use package `t(locale, "chat.*")`. Pagination uses `shared.pagination`. Cold-start **facts** may remain in `apps/chat-rag-frontend/src/coldstart/facts.ts` until a separate decision. Staff copy-change path: [runbooks/staff-copy-change.md](runbooks/staff-copy-change.md) (`[Corpus: staff-copy]`, #297).
 - **Limitations**: UI chrome only — corpus document titles, tag labels, URLs, audit JSON payloads, API `error_message`, and health/job status enums remain in source form (R30). No backend or API contract changes. No `Accept-Language` header in F31.
 - **Priority**: High — ship in EV-004 before next deploy.
-- **Source**: EV-004 user interview 2026-06-13; ADR-019, ADR-020 (amended); context-brief §13
+- **Source**: EV-004 user interview 2026-06-13; ADR-019, ADR-020 (amended); context-brief §13; EV-037-D2 / EV-296 (#296)
 
 ### F32: Admin Job Management tab (list jobs)
 
@@ -803,8 +812,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   rotating bilingual (EN/ES) WRWC / Providence / ways-to-give fun facts plus a short
   “starting up…” status line, a soft donate CTA (`wrwc.org/donate`), and a friendly
   first-party consent banner before remembering which facts were shown (opt-out via HTTP
-  cookie). Extends existing `coldStartStatus` / `prewarmChatServices` client warm only —
-  no Modal/backend latency work.
+  cookie). Extends existing `coldStartStatus` / `prewarmChatServices` client warm —
+  residual wait UX when prewarm loses the race (create/clean boot / cold restore).
 - **Inputs**: Locale; cold-start retry / stream timing; optional `VITE_WRWC_DONATE_URL`
   (default `https://wrwc.org/donate/`); consent choice; seen-fact ids in `localStorage`.
 - **Outputs**: Improved wait UX; device-local preference cookie + seen-facts list (no PII,
@@ -814,9 +823,14 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   |---------|--------|
   | `apps/chat-rag-frontend` | Rotating facts UI, consent banner, donate CTA, warm reuse |
   | `packages/frontend-i18n` / `frontend-ui` | Optional shared banner/copy if needed |
-- **Out of scope**: Modal/backend warm-path changes; CMS/API-backed facts; admin UI;
-  analytics of which facts were shown.
-- **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15).
+- **Related (not F40 UX)**: EV-318 / #318 — Modal LLM `POST /warm` spawn/detach + ChatRAG
+  `POST /api/v1/warm` contract (ADR-022 prewarm lever). F40 does **not** own that work.
+  Sibling latency ops (also not F40): EV-315 seed snapshots (#315), EV-317 thin CPU ingress
+  (#317), EV-319 scaledown_window (#319) under ADR-022 / parent #311.
+- **Out of scope (F40)**: Changing Modal spawn semantics (see #318); CMS/API-backed facts;
+  admin UI; analytics of which facts were shown; focus/typing warm predictors.
+- **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15);
+  EV-318 coord 2026-09-02; EV-315/317/319 coord 2026-09-02.
 
 ### F41: Corpus re-embed / re-chunk rebuild (migration job)
 
@@ -957,15 +971,16 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 
 ### F45: Cross-encoder rerank spike + gated ship (#83/#161)
 
-- **What it does**: Renews the **cross-encoder rerank** track for smart retrieval. Runs a
-  documented spike (Modal T4 or playground) with a **hard ship gate**; **no production CE**
-  unless the gate passes (S020-D5). Prior R3 (`bge-reranker-base`) failed relevancy lift —
-  EV-018 re-gate keeps **`BAAI/bge-reranker-v2-m3`** on Modal T4 (RD-213). If gate fails,
-  F45 stays spike/docs only and #83 remains open.
-- **EV-017 outcome**: Path A ship gate **FAIL** (`ship_gate_pass=false`) — empty retrieve pools
-  made faith null and R0≈CE; disposition **spike-only**; prod flag stays off (S020-D21).
-- **EV-018 extension**: Re-run AC-BB9 / UJ-060 / TC-184 **only after F46** restores non-empty
-  staging pools. Same floors (relevancy ≥ 0.28, faith ≥ 0.91) unless Phase 0/01 changes them.
+- **What it does**: **Cross-encoder rerank** for smart retrieval: retrieve-N → CE score →
+  keep `top_k` (F73 threshold-aware). Spike gate **PASS** (S021 AC-BB9). EV-029 ships production
+  Modal app `vecinita-rerank`, HTTP client, and ChatRAG wiring; enables on **staging** first.
+  Prod `VECINITA_RAG_RERANK_CE` stays **false** until deploy AskQuestion (AC-FO4).
+- **Model**: **`BAAI/bge-reranker-v2-m3`** on Modal T4 (RD-213). Prior R3 (`bge-reranker-base`)
+  failed lift — do not regress model choice.
+- **EV-017 outcome**: Path A ship gate **FAIL** on empty pools (S020-D21) — superseded after F46.
+- **EV-018**: AC-BB9 / TC-184 **PASS** (relevancy 0.778 / faith 0.938).
+- **EV-029**: Wire `ce_scorer` in `from_settings`; promote spike to `infra/modal/rerank_app.py`;
+  staging flag on; close #83 when staging smoke passes.
 - **Inputs**: Retrieved top-N passages; CE model id; keep_k; packing (P1) fixed as F42.
 - **Outputs**: Reranked top_k for synthesis when enabled; spike report + gate metrics; optional
   prod flag only after gate pass.
@@ -1259,17 +1274,24 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `feedback` table (anonymous). Admin **Feedback** page (admin+super-admin) lists entries.
   Optional operator notify webhook/email on new row (not visitor identity). **90-day**
   retention + purge. ADR-046 amends ADR-004 for anonymous feedback rows only.
+  **#214 follow-on (EV-214):** stronger bilingual no-PII/sensitive-data notice + UI callout;
+  operator notify implemented on internal-write after successful insert — webhook
+  (`VECINITA_FEEDBACK_NOTIFY_WEBHOOK`) and/or Resend email
+  (`VECINITA_FEEDBACK_NOTIFY_EMAIL` + `RESEND_*`); fail-open (AC-UX18–19, TC-308–311).
 - **Inputs**: Category enum; message text; locale chrome.
-- **Outputs**: Stored feedback rows; admin list; privacy tests.
+- **Outputs**: Stored feedback rows; admin list; privacy tests; optional operator webhook/email.
 - **Protected surfaces**:
   | Surface | Change |
   |---------|--------|
   | `apps/database` | `feedback` migration + purge |
-  | `apps/internal-write-api` | Write/list feedback |
-  | `apps/chat-rag-backend` / frontend | POST + page/button |
+  | `apps/internal-write-api` | Write/list feedback; optional notify (#214) |
+  | `apps/chat-rag-backend` / frontend | POST + page/button; notice polish (#214) |
+  | `packages/frontend-i18n` | EN/ES privacy + intro copy (#214) |
   | `apps/data-management-frontend` / backend | Admin Feedback UI |
-- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages.
-- **Source**: S026 / EV-024; GitHub #186 / #193; S026-D6/D13/D16/D17; ADR-046.
+- **Out of scope**: Visitor email/PII; auto-attach chat transcripts; thumbs on messages;
+  changing 90-day retention.
+- **Source**: S026 / EV-024; GitHub #186 / #193 / **#214**; S026-D6/D13/D16/D17; ADR-046;
+  EV-214-D1–D10.
 
 ### F69: Admin audit actor username (read-time) (#170)
 
@@ -1465,8 +1487,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Journeys / tests**: UJ-082; TC-266–269, TC-270; AC-AU1–AU6.
 - **Out of scope**: #192 dashboard widgets; fine-tune train (→ F80); source refresh (→ F79);
   auto F41 on every change.
-- **Status**: In progress (S030/EV-027; 01-requirements RD-325+).
-- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23; ADR-052.
+- **Status**: Live enabled (EV-031 M133/M135). Run history via `POST /automations/runs` + worker persist (PR #266).
+- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23, D64; ADR-052; S031; EV-031.
 
 ### F79: Corpus freshness automation (#219)
 
@@ -1480,8 +1502,8 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   write API / schema as needed.
 - **Journeys / tests**: UJ-083; TC-271–274, TC-270; AC-FR1–FR6.
 - **Out of scope**: Fine-tune (#72/F80); guaranteeing third-party uptime.
-- **Status**: In progress (S030/EV-027; 01-requirements RD-325+).
-- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19; ADR-052.
+- **Status**: Live enabled (EV-031 M133). TC-291 PASS — stale/`last_checked_at` visible on live admin list.
+- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19, D64; ADR-052; S031; EV-031.
 
 ### F80: Modal LoRA fine-tune + human promote (#72)
 
@@ -1491,7 +1513,9 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   report (base vs adapter) is shown to the operator; **promote is human judgment only**
   (no automated metric abort) — operator should promote only when they judge better than
   base. Prod `vecinita-llm` loads adapter **only after promote**; playground optional
-  for pre-promote (ADR-053).
+  for pre-promote (ADR-053). With GPU memory snapshots (ADR-022), adapters are resolved
+  **after restore** and verified with **SHA-256** (`VECINITA_FINETUNE_ADAPTER_HASH`,
+  AC-FT11 / #316) — not baked into the snapshot.
 - **Inputs**: Corpus-derived SFT set; operator approve; eval golden/held-out set.
 - **Outputs**: Versioned LoRA adapter; eval report; optional promoted serve.
 - **Protected surfaces**: new `infra/modal/` FT module; `llm_app.py`; llm-client; eval
@@ -1500,9 +1524,121 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   (“Eval-gated” = human promote after eval evidence — RD-338; not automated abort.)
 - **Out of scope**: Full-weight FT default; auto-load latest on prod; blind promote
   without operator review.
-- **Status**: Planned (S030/EV-027; 01-requirements RD-325+). Overrides P3 “excluded
-  from v1” for this cycle.
-- **Source**: S030 / EV-027; GitHub #72; ADR-009, ADR-037, ADR-053; S030-D5, D10–D12, D20–D22.
+- **Status**: Eval path live (EV-031 M134) — `VECINITA_FINETUNE_ENABLED=true`, `vecinita-llm-finetune`
+  deployed; prod adapter pin empty (`adapter_id: null`). **Prod promote deferred** — human
+  judgment + AskQuestion for live cutover (ADR-053).
+- **Source**: S030 / EV-027; GitHub #72; ADR-009, ADR-037, ADR-053; S030-D5, D10–D12,
+  D20–D22, D64; S031.
+
+### F81: LLM query refinement before retrieval (#82)
+
+- **What it does**: Optional **LLM rewrite** step before pgvector retrieve — transforms the
+  raw user question into 1–`REFINE_COUNT` alternate retrieval queries via **`vecinita-llm`**
+  (self-hosted). Distinct from **F42 H7** heuristic fan-out (rules/locale variants). Refinement
+  preserves user **locale** (no cross-language translation). Merged retrieve dedupes by chunk id
+  (same merge as H7). Flag-gated default **off** until F36 / `rag-regression` evidence on staging.
+- **Inputs**: Raw question; detected locale; tag vocabulary context (read-only).
+- **Outputs**: Refined query list fed to retrieve; fallback to raw question on LLM/parse failure.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | `refine_query_llm` + merge hook before retrieve |
+  | `apps/chat-rag-backend` | Flag-gated call in ask path (before `_retrieve`) |
+  | `packages/llm-client` | Shared chat-template prompt for rewrite JSON |
+- **Interaction**: Runs **before** F22 tag-filtered retrieve; composes with F42 H7 and F45 CE
+  (refine → multi-query → retrieve-N → CE → pack).
+- **Out of scope**: LangGraph orchestration; paid rewrite APIs; translating user language away.
+- **Ship gate**: Staging F36 + `rag-regression` must not regress beyond EV-028 tolerances; if no
+  lift, ship wiring with flag default-off and keep #82 open for follow-up.
+- **Source**: EV-029; GitHub #82; #76 umbrella; ADR-009 / ADR-037.
+
+### F82: Output verification + inline citations (#84)
+
+- **What it does**: Optional **post-generation groundedness check** before the user sees an
+  answer: score faithfulness with the same self-hosted LLM YES/NO judge used by F36 eval
+  (`score_faithfulness`). When the verdict is below threshold, **prepend** a bilingual hedge
+  disclaimer (intake S034-D2). When enabled, append inline **`[1]`…`[N]`** citation markers
+  mapped to `sources[]` order. Runs on both `/ask` and `/ask/stream` by buffering the full
+  generation, verifying, then emitting (S034-D3).
+- **Inputs**: Question, packed retrieval context, draft LLM answer, locale, ranked sources.
+- **Outputs**: Final answer string (hedge + body + citations); unchanged `sources[]` shape.
+- **Protected surfaces**:
+  | Surface | Change |
+  |---------|--------|
+  | `packages/rag` | `verify_and_format_answer`, hedge + citation helpers |
+  | `apps/chat-rag-backend` | Flag-gated hook after `_synthesize` / stream buffer |
+  | `packages/eval` | `OutputVerificationScorer` adapter (ADR-033 §9) |
+- **Interaction**: Runs **after** F45 CE retrieve and F81 refine paths; before F43 cache store.
+- **Out of scope**: NLI entailment Modal app; regenerate-on-fail; prod flag without AskQuestion.
+- **Ship gate**: Wiring ships with flag default-off; **live `VECINITA_RAG_OUTPUT_VERIFY=true`**
+  after F36 / `rag-regression` non-regression + operator approval (S034-D10 / AC-OV7).
+- **Source**: EV-030; GitHub #84; ADR-033 §9; ADR-009 / ADR-037.
+
+### F83: Distinct staging environment (DO + Supabase + Modal)
+
+- **What it does**: Provisions a **true non-prod staging** stack that mirrors production:
+  DigitalOcean apps + Managed Postgres, Supabase Auth project, and Modal Apps in the same
+  workspace **`vecinita`** under Modal Environment **`staging`** (web suffix `staging`;
+  native Environments). Restores staging→prod paths and ends operational use of
+  `staging_as_live` (ADR-049) once staging is healthy. Requires GitHub ruleset so merges to
+  `main` need CI **and** staging deploy + H1–H5 smoke.
+- **Inputs**: Operator tokens (DO, Modal workspace `vecinita`, Supabase); GitHub Environments
+  `staging` / `production`; seed corpus for staging DB only **or** selective **prod→staging
+  corpus mirror** after AskQuestion (EV-338 / #338 — preferred when staging was wiped and
+  ChatRAG parity with live community content is required).
+- **Outputs**: Distinct staging URLs; `env_role: staging` \| `prod`; ADR-054; updated
+  runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212.
+- **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087; staging corpus restore AC via UJ-094 /
+  TC-321–TC-324 when mirror path used.
+- **Out of scope**: Live corpus clone **or staging write** without AskQuestion; Modal provision
+  during Spec band (Build gate); full hostname rename of legacy prod apps in one cutover;
+  mutating **prod** during mirror (prod remains read-only).
+- **Promotion (EV-036-D15)**: When `origin/stage` exists — feature→`stage` (CI) then
+  promote `stage`→`main` (CI + `staging-smoke`). Smoke remains on main-bound PRs (ADR-054).
+- **Source**: EV-staging-do-supabase; EV-033-stage-before-main; EV-036-D15; ADR-054;
+  ADR-049 exit; ADR-050.
+
+### F84: Admin monitoring + staging Grafana/Loki/alerts (#114)
+
+- **What it does**: Gives operators a dedicated Data Management **Monitoring** tab with
+  privacy-safe success/failure rates and trends for **ingest** (jobs), **chat** (outcome
+  metadata only), and **embed** (pipeline-stage / Modal invoke metrics). Complements F25
+  corpus analytics, F26 point-in-time health, and F32 per-job lists. Also deploys a
+  **staging-only** micro Grafana + Loki + Alertmanager stack (`infra/observability/` on a
+  small Droplet) for Modal/DO SLO panels, short-retention logs (ADR-004 allow-list), and
+  webhook alerts. **Prod always-on Grafana is deferred** until an explicit cost AskQuestion
+  (ADR-004 ≤$50 hard cap).
+- **Inputs**: Existing `jobs` rows; ChatRAG fire-and-forget operational events
+  `{ outcome, latency_ms, error_code?, locale? }` (never `question`/`answer`); embed stage
+  events correlated to ingest `job_id`; admin Supabase JWT; staging obs secrets
+  (`VECINITA_ALERTMANAGER_WEBHOOK_URL`, etc.).
+- **Outputs**: Allow-listed Postgres metrics tables + hourly rollups; admin APIs
+  `GET /internal/v1/metrics/summary` and `…/timeseries`; `/monitoring` UI (en/es); staging
+  Grafana dashboards + Loki + ≥1 Alertmanager rule to a generic webhook.
+- **Acceptance**: AC-MON1–AC-MON8; UJ-088–UJ-089; TC-299–TC-306; ADR-055.
+- **Out of scope**: Chat transcripts/replay; PostHog/Segment identity analytics; per-end-user
+  analytics; PagerDuty; prod Grafana this cycle; full OpenTelemetry APM (P5 remains deferred).
+- **Source**: EV-036-admin-monitoring-grafana; GitHub #114; ADR-004; ADR-055; F17/F25/F26/F32.
+
+### F85: FAQ fast-path — canned answers skip LLM (#79 / #320)
+
+- **What it does**: For **reviewed** FAQ intents, ChatRAG returns a bilingual canned answer
+  **before** retrieval and Modal LLM, so common asks pay **$0 GPU**. Part of epic #311
+  Layer D (perceived / bypass latency). Complements F40/F64 wait UX and Layer A snapshots;
+  does **not** replace corpus RAG for non-FAQ asks.
+- **Inputs**: Ask `question` + optional `language`; versioned FAQ YAML/JSON store (variants +
+  canonical answer per language); kill-switch `VECINITA_FAQ_FASTPATH_ENABLED` (default true).
+- **Outputs**: On match — canned `answer`, `sources=[]`, `answer_path=faq_bypass`,
+  `cache_hit=none` (distinct from F43 cache). On miss / kill-switch off — unchanged RAG+LLM
+  with `answer_path=rag_llm`. Stream uses the same SSE envelope (empty sources + answer + done).
+- **Matching**: Exact + normalized string (trim, collapse whitespace, casefold, strip trailing
+  punctuation/`?`) against **same-language** variants only. **No** embedding/semantic FAQ
+  similarity this cycle (prefer miss over wrong canned answer).
+- **Acceptance**: AC-320-01–AC-320-05; TC-320-01–TC-320-04; UJ-093; ADR-022 EV-320 amendment.
+- **Out of scope**: Admin hot-load editor (#81); query-router umbrella (#76/#78); semantic FAQ;
+  per-user FAQ cache; always-on GPU; unprompted prod seed/scaledown (ops remain AskQuestion).
+- **Naming**: GitHub **#79** ≠ product **F79** (corpus freshness).
+- **Source**: EV-320; #320 · #79 · #311; ADR-004; ADR-022.
 
 ## Planned / Deferred (post-v1)
 
@@ -1512,7 +1648,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 | P2 | Multimodal / full OCR ingest | Low | High | **F59** covers basic PDF text; full OCR still deferred |
 | P3 | Model fine-tuning on corpus | Low | High | **Superseded in-cycle by F80** (S030/EV-027 #72); was “excluded from v1” |
 | P4 | Advanced admin (bulk reindex, A/B prompts) | Low | Medium | — |
-| P5 | Full APM / OpenTelemetry | Low | Medium | Basic logs in v1 (F17) |
+| P5 | Full APM / OpenTelemetry | Low | Medium | Basic logs in v1 (F17); **F84** adds product metrics + staging Grafana/Loki only — not full APM |
 | P6 | ChatRAG nested corpus UI | Medium | Medium | Deferred — licensing research (S024-D17) |
 
 ## Monorepo layout (confirmed)

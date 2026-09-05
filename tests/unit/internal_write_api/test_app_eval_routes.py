@@ -117,7 +117,9 @@ def test_create_eval_run_enqueues_modal_eval_job(internal_api_env: None) -> None
     )
     client = TestClient(app)
 
-    with patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create):
+    with patch(
+        "vecinita_internal_write_api.routes.eval_runs.create_eval_run", side_effect=_fake_create
+    ):
         response = client.post(
             "/internal/v1/eval/runs",
             headers=auth_headers(),
@@ -161,7 +163,9 @@ def test_create_eval_run_returns_503_when_jobs_client_missing(
     client = TestClient(
         create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge(), jobs_client=None),
     )
-    with patch("vecinita_internal_write_api.app.create_eval_run", side_effect=_fake_create):
+    with patch(
+        "vecinita_internal_write_api.routes.eval_runs.create_eval_run", side_effect=_fake_create
+    ):
         response = client.post(
             "/internal/v1/eval/runs",
             json={"corpus_profile": "fixture"},
@@ -266,11 +270,11 @@ def test_get_eval_run_route_returns_detail(
         assert json_str(body, "status") == "pending"
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": created.response.run_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_runs WHERE id = :id"),
                 {"id": created.response.run_id},
             )
@@ -615,7 +619,7 @@ def test_eval_config_preset_routes_with_admin_jwt(
         reset_auth_config_for_tests()
         if preset_id is not None:
             with engine.begin() as conn:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
@@ -662,7 +666,7 @@ def test_ingest_audit_event_service_key(engine: Engine, monkeypatch: pytest.Monk
     finally:
         reset_auth_config_for_tests()
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )
@@ -722,7 +726,7 @@ def test_get_active_rag_config_returns_404_when_empty(
     """GET /rag/config/active returns 404 when no production config is active."""
     client, _owner_id, headers, _private_key = _admin_jwt_client(monkeypatch, role="admin")
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
     try:
         response = client.get("/internal/v1/rag/config/active", headers=headers)
         assert response.status_code == HTTPStatus.NOT_FOUND
@@ -803,7 +807,7 @@ def test_create_eval_run_returns_403_for_private_preset(
         reset_auth_config_for_tests()
         if preset_id is not None:
             with engine.begin() as conn:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
@@ -855,7 +859,7 @@ def test_eval_config_preset_routes_return_403_for_private_preset(
         reset_auth_config_for_tests()
         if preset_id is not None:
             with engine.begin() as conn:
-                conn.execute(
+                _ = conn.execute(
                     text("DELETE FROM eval_config_presets WHERE id = :id"),
                     {"id": preset_id},
                 )
@@ -906,7 +910,7 @@ def test_execute_eval_run_route_invokes_execute_service(internal_api_env: None) 
     )
     client = TestClient(app)
     with patch(
-        "vecinita_internal_write_api.app.execute_eval_run",
+        "vecinita_internal_write_api.routes.eval_runs.execute_eval_run",
         _fake_execute,
     ):
         response = client.post(
@@ -946,7 +950,7 @@ def test_execute_eval_run_route_returns_404_when_missing(internal_api_env: None)
     )
     client = TestClient(app)
     with patch(
-        "vecinita_internal_write_api.app.execute_eval_run",
+        "vecinita_internal_write_api.routes.eval_runs.execute_eval_run",
         _missing,
     ):
         response = client.post(

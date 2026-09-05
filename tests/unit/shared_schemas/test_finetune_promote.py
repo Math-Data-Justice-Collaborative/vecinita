@@ -24,10 +24,10 @@ def test_promote_request_requires_adapter_id_when_not_rollback() -> None:
     assert req.rollback is False
 
     with pytest.raises(ValidationError):
-        FinetunePromoteRequest(adapter_id="   ")
+        _ = FinetunePromoteRequest(adapter_id="   ")
 
     with pytest.raises(ValidationError):
-        FinetunePromoteRequest()
+        _ = FinetunePromoteRequest()
 
 
 def test_promote_request_rollback_clears_without_adapter_id() -> None:

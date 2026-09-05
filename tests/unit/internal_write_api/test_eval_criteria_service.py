@@ -42,7 +42,7 @@ def criterion_id(engine: Engine) -> Iterator[object]:
     )
     yield created.criterion_id
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text("DELETE FROM eval_criteria WHERE id = :id"),
             {"id": created.criterion_id},
         )
@@ -95,7 +95,7 @@ def test_update_eval_criterion_returns_none_when_missing(engine: Engine) -> None
 def test_criterion_from_row_rejects_unsupported_scorer() -> None:
     """_criterion_from_row validates scorer_type."""
     with pytest.raises(ValueError, match="unsupported scorer_type"):
-        _criterion_from_row(
+        _ = _criterion_from_row(
             {
                 "id": uuid4(),
                 "slug": "bad",

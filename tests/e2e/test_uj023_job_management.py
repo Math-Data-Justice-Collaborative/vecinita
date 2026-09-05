@@ -171,7 +171,7 @@ def test_list_jobs_retag_includes_document_id(monkeypatch: pytest.MonkeyPatch) -
         job_type="retag",
         options={"document_id": str(_DOC_ID)},
     )
-    store.update_job(record.job_id, status="completed")
+    _ = store.update_job(record.job_id, status="completed")
     app = create_app(store=store, require_proxy_auth=False)
     app.dependency_overrides[get_principal] = lambda: _ADMIN
     client = TestClient(app)
@@ -191,9 +191,9 @@ def test_list_jobs_status_filter_cancelled(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "false")
     store = InMemoryJobStore()
     cancelled = store.create_job(urls=["https://example.com/cancel"])
-    store.update_job(cancelled.job_id, status="cancelled")
+    _ = store.update_job(cancelled.job_id, status="cancelled")
     running = store.create_job(urls=["https://example.com/run"])
-    store.update_job(running.job_id, status="running")
+    _ = store.update_job(running.job_id, status="running")
     app = create_app(store=store, require_proxy_auth=False)
     app.dependency_overrides[get_principal] = lambda: _ADMIN
     client = TestClient(app)

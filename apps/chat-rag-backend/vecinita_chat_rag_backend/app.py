@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from http import HTTPStatus
@@ -16,7 +17,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request, sta
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from vecinita_shared_schemas.chat_rag import (
     AskRequest,
     AskResponse,
@@ -34,11 +35,14 @@ from vecinita_shared_schemas.validation import validate_ask_request, validate_fe
 
 from vecinita_chat_rag_backend.browse import get_document, list_documents, list_tag_facets
 from vecinita_chat_rag_backend.config import ChatRagSettings
+from vecinita_chat_rag_backend.db import create_app_engine
 from vecinita_chat_rag_backend.energy import EnergyKnobs, compute_energy_estimate
 from vecinita_chat_rag_backend.service import ChatRagService
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from sqlalchemy.engine import Engine
 
 
 async def parse_ask_body(request: Request) -> AskRequest:
@@ -67,10 +71,19 @@ def _check_dependency(url: str | None, path: str = "/health") -> str:
         return "ok" if response.status_code == HTTPStatus.OK else "error"
 
 
-def _warm_modal_url(url: str, *, timeout_s: float) -> None:
+def _warm_modal_url(
+    url: str,
+    *,
+    timeout_s: float,
+    headers: dict[str, str] | None = None,
+) -> None:
     """Best-effort POST /warm on one Modal app; failures are ignored (S001 T11)."""
     with contextlib.suppress(Exception):
-        httpx.post(f"{url.rstrip('/')}/warm", timeout=timeout_s)
+        _ = httpx.post(
+            f"{url.rstrip('/')}/warm",
+            timeout=timeout_s,
+            headers=headers or {},
+        )
 
 
 def _warm_modal_services(
@@ -78,13 +91,23 @@ def _warm_modal_services(
     llm_url: str | None,
     *,
     request_timeout_s: float,
+    llm_proxy_key: str | None = None,
 ) -> None:
     """Boot Modal EmbeddingService and LlmService in parallel during user think-time."""
+    llm_headers: dict[str, str] | None = None
+    if llm_proxy_key:
+        # RD-165 — vecinita-llm /warm requires X-Vecinita-Proxy-Key (BUG-2026-08-27).
+        llm_headers = {"X-Vecinita-Proxy-Key": llm_proxy_key}
     with ThreadPoolExecutor(max_workers=2) as executor:
         if embed_url:
-            executor.submit(_warm_modal_url, embed_url, timeout_s=request_timeout_s)
+            _ = executor.submit(_warm_modal_url, embed_url, timeout_s=request_timeout_s)
         if llm_url:
-            executor.submit(_warm_modal_url, llm_url, timeout_s=request_timeout_s)
+            _ = executor.submit(
+                _warm_modal_url,
+                llm_url,
+                timeout_s=request_timeout_s,
+                headers=llm_headers,
+            )
 
 
 def _source_payload(sources: list[Source]) -> list[dict[str, object]]:
@@ -116,9 +139,45 @@ def _fire_stats(
     if internal_api_key:
         headers["Authorization"] = f"Bearer {internal_api_key}"
     with contextlib.suppress(Exception):
-        httpx.post(
+        _ = httpx.post(
             f"{internal_write_url.rstrip('/')}/internal/v1/stats/served",
             json={"document_ids": doc_ids},
+            headers=headers,
+            timeout=5.0,
+        )
+
+
+def _fire_chat_metric(  # noqa: PLR0913  # fire-and-forget needs URL/key/outcome fields
+    *,
+    latency_ms: int,
+    sources: list[Source],
+    locale: str | None,
+    internal_write_url: str | None,
+    internal_api_key: str | None,
+    metrics_enabled: bool = True,
+    outcome: str = "success",
+    error_code: str | None = None,
+) -> None:
+    """Fire-and-forget privacy-safe chat outcome event (F84). Never sends question/answer."""
+    if not metrics_enabled or not internal_write_url:
+        return
+    resolved_outcome = outcome
+    if outcome == "success" and not sources:
+        resolved_outcome = "no_context"
+    headers: dict[str, str] = {}
+    if internal_api_key:
+        headers["Authorization"] = f"Bearer {internal_api_key}"
+    payload: dict[str, object] = {
+        "workload": "chat",
+        "outcome": resolved_outcome,
+        "latency_ms": max(0, latency_ms),
+        "error_code": error_code,
+        "locale": locale,
+    }
+    with contextlib.suppress(Exception):
+        _ = httpx.post(
+            f"{internal_write_url.rstrip('/')}/internal/v1/metrics/events",
+            json=payload,
             headers=headers,
             timeout=5.0,
         )
@@ -131,15 +190,26 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 ) -> FastAPI:
     """Build the ChatRAG FastAPI app with health, ask, and streaming routes."""
     app = FastAPI(title="Vecinita ChatRAG", version="0.2.0")
-    configure_cors(app)
+    _ = configure_cors(app)
     resolved_settings = settings
     resolved_service = chat_service
+    resolved_engine: Engine | None = None
 
     def get_settings() -> ChatRagSettings:
         nonlocal resolved_settings
         if resolved_settings is None:
             resolved_settings = ChatRagSettings.from_env()
         return resolved_settings
+
+    def get_engine() -> Engine:
+        """One capped QueuePool for health + browse (DO max_connections=25)."""
+        nonlocal resolved_engine
+        if resolved_engine is None:
+            resolved_engine = create_app_engine(
+                get_settings().database_url,
+                application_name="vecinita-chatrag",
+            )
+        return resolved_engine
 
     def get_service() -> ChatRagService:
         nonlocal resolved_service
@@ -156,9 +226,8 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             "modal_llm": _check_dependency(cfg.llm_url),
         }
         try:
-            engine = create_engine(cfg.database_url)
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
+            with get_engine().connect() as conn:
+                _ = conn.execute(text("SELECT 1"))
             deps["postgres"] = "ok"
         except Exception:  # noqa: BLE001  # health probe must tolerate any DB failure
             deps["postgres"] = "error"
@@ -173,6 +242,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             cfg.embed_url,
             cfg.llm_url,
             request_timeout_s=cfg.request_timeout_s,
+            llm_proxy_key=os.environ.get("VECINITA_MODAL_PROXY_KEY"),
         )
         return {"status": "warming"}
 
@@ -204,11 +274,20 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 detail="Upstream unavailable",
             ) from exc
         estimate = _energy_for_duration(time.perf_counter() - started, cfg)
+        latency_ms = int((time.perf_counter() - started) * 1000)
         _fire_stats(
             result.sources,
             cfg.internal_write_url,
             cfg.internal_api_key,
             stats_enabled=cfg.stats_enabled,
+        )
+        _fire_chat_metric(
+            latency_ms=latency_ms,
+            sources=result.sources,
+            locale=result.language,
+            internal_write_url=cfg.internal_write_url,
+            internal_api_key=cfg.internal_api_key,
+            metrics_enabled=cfg.metrics_enabled,
         )
         return result.model_copy(update={"energy_estimate": estimate})
 
@@ -235,9 +314,24 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             done_payload = {
                 "done": True,
                 "cache_hit": session.cache_hit,
+                "answer_path": session.answer_path,
                 "energy_estimate": estimate.model_dump(mode="json"),
             }
             yield f"data: {json.dumps(done_payload)}\n\n"
+            _fire_stats(
+                session.sources,
+                cfg.internal_write_url,
+                cfg.internal_api_key,
+                stats_enabled=cfg.stats_enabled,
+            )
+            _fire_chat_metric(
+                latency_ms=int((time.perf_counter() - started) * 1000),
+                sources=session.sources,
+                locale=body.language,
+                internal_write_url=cfg.internal_write_url,
+                internal_api_key=cfg.internal_api_key,
+                metrics_enabled=cfg.metrics_enabled,
+            )
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
@@ -250,9 +344,8 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     ) -> DocumentBrowsePage:
         cfg = get_settings()
         resolved_page_size = page_size or cfg.browse_page_size
-        engine = create_engine(cfg.database_url)
         return list_documents(
-            engine,
+            get_engine(),
             tags=tags,
             q=q,
             page=page,
@@ -261,18 +354,14 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
 
     @app.get("/api/v1/documents/{document_id}", response_model=DocumentBrowseDetail)
     def get_document_public(document_id: UUID) -> DocumentBrowseDetail:  # pyright: ignore[reportUnusedFunction]
-        cfg = get_settings()
-        engine = create_engine(cfg.database_url)
-        detail = get_document(engine, document_id)
+        detail = get_document(get_engine(), document_id)
         if detail is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
         return detail
 
     @app.get("/api/v1/tags", response_model=TagListResponse)
     def list_tags_public() -> TagListResponse:  # pyright: ignore[reportUnusedFunction]
-        cfg = get_settings()
-        engine = create_engine(cfg.database_url)
-        return list_tag_facets(engine)
+        return list_tag_facets(get_engine())
 
     @app.post(
         "/api/v1/feedback",

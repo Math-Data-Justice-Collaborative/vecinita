@@ -44,17 +44,17 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--base-url",
         default=None,
         help="Override playground/LLM Modal ASGI URL",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--json",
         action="store_true",
         help="Emit JSON {items:[{model_id, available}, ...]}",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--available-only",
         action="store_true",
         help="Only print model_ids that are available=true",

@@ -102,6 +102,17 @@ def test_supabase_ci_sync_accepts_supabase_project_id_alias() -> None:
     assert "SUPABASE_PROJECT_ID" in script
 
 
+def test_sync_production_soft_fails_unauthorized_token() -> None:
+    """Expired Management API PAT must not hard-fail Deploy Modal (CD unblock)."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    sync_start = script.index("sync_production()")
+    sync_end = script.index("preview_branch()", sync_start + 1)
+    sync_section = script[sync_start:sync_end]
+    assert "unauthorized" in sync_section.lower()
+    assert "skipping production sync" in sync_section
+    assert "exit 0" in sync_section
+
+
 def test_supabase_workflow_deletes_preview_branch_on_pr_close() -> None:
     """Preview branches persist during review and tear down when the PR closes."""
     text = _workflow_text()

@@ -40,7 +40,7 @@ def test_audit_cleanup_uses_retention_env(
     """Audit cleanup passes the configured retention window to the cleanup helper."""
     monkeypatch.setenv("VECINITA_AUDIT_RETENTION_DAYS", str(_RETENTION_DAYS))
     with patch(
-        "vecinita_internal_write_api.app.cleanup_audit_log",
+        "vecinita_internal_write_api.routes.audit_feedback.cleanup_audit_log",
         return_value=_EXPECTED_DELETED,
     ) as mock_cleanup:
         resp = client.post(
@@ -62,7 +62,9 @@ def test_audit_cleanup_skips_when_retention_zero(
 ) -> None:
     """Audit cleanup skips the helper entirely when retention is zero."""
     monkeypatch.setenv("VECINITA_AUDIT_RETENTION_DAYS", "0")
-    with patch("vecinita_internal_write_api.app.cleanup_audit_log") as mock_cleanup:
+    with patch(
+        "vecinita_internal_write_api.routes.audit_feedback.cleanup_audit_log"
+    ) as mock_cleanup:
         resp = client.post(
             "/internal/v1/audit/cleanup",
             headers={"Authorization": "Bearer test-key"},

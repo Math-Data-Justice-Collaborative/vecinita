@@ -2,33 +2,45 @@
 
 [Corpus: feature-list.md §F77]
 [Spec: docs/adr/ADR-053-modal-lora-finetune.md]
+[Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md §Amendment EV-316]
 [Spec: docs/config-spec.md §VECINITA_FINETUNE_*]
-[Spec: docs/acceptance-criteria.md §AC-FT1 §AC-FT2 §AC-FT4 §AC-FT6 §AC-FT7 §AC-FT9]
+[Spec: docs/acceptance-criteria.md §AC-FT1 §AC-FT2 §AC-FT4 §AC-FT6 §AC-FT7 §AC-FT9 §AC-FT11]
 [Spec: docs/api-contract.md §EV-027 Fine-tune]
-[Spec: docs/test-plan.md §TC-260 §TC-262 §TC-263 §TC-265]
+[Spec: docs/test-plan.md §TC-260 §TC-262 §TC-263 §TC-265 §TC-316-01 §TC-316-02]
 [Spec: docs/decisions.md §RD-340]
 """
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import os
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 FINETUNE_MAX_CONCURRENT_ENV = "VECINITA_FINETUNE_MAX_CONCURRENT"
 FINETUNE_MAX_RUNS_PER_DAY_ENV = "VECINITA_FINETUNE_MAX_RUNS_PER_DAY"
 FINETUNE_ADAPTER_ID_ENV = "VECINITA_FINETUNE_ADAPTER_ID"
+FINETUNE_ADAPTER_HASH_ENV = "VECINITA_FINETUNE_ADAPTER_HASH"
 PLAYGROUND_FINETUNE_ADAPTER_ID_ENV = "VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID"
+LLM_LORA_RESOLVE_ENV = "VECINITA_LLM_LORA_RESOLVE"
 ADAPTERS_MOUNT_DEFAULT = "/adapters"
 
 DEFAULT_FINETUNE_MAX_CONCURRENT = 1
 DEFAULT_FINETUNE_MAX_RUNS_PER_DAY = 3
 DEFAULT_LORA_MAX_RANK = 64
+LLM_SNAPSHOT_SCHEMA = "v1"
 
 DEFAULT_SFT_INSTRUCTION = (
     "Answer the user's question using only the provided context from the Vecinita corpus."
 )
+
+_SHA256_HEX_RE = re.compile(r"^[0-9a-f]{64}$")
+
+LoraResolveMode = Literal["post_restore", "snapshot_bound"]
 
 TrainStartDecision = Literal[
     "start",
@@ -183,6 +195,37 @@ def parse_finetune_adapter_id() -> str | None:
     return pin
 
 
+def parse_finetune_adapter_hash() -> str | None:
+    """Read promoted adapter SHA-256 hex pin (EV-316 / AC-FT11).
+
+    Empty → None (base-only). Non-empty must be 64 lowercase hex chars.
+    """
+    raw = os.environ.get(FINETUNE_ADAPTER_HASH_ENV)
+    if raw is None:
+        return None
+    pin = raw.strip().lower()
+    if not pin:
+        return None
+    if _SHA256_HEX_RE.fullmatch(pin) is None:
+        msg = "VECINITA_FINETUNE_ADAPTER_HASH must be 64-char lowercase hex SHA-256"
+        raise ValueError(msg)
+    return pin
+
+
+def parse_lora_resolve_mode() -> LoraResolveMode:
+    """Parse LoRA resolve kill-switch (default ``post_restore`` — ADR-022 EV-316)."""
+    raw = os.environ.get(LLM_LORA_RESOLVE_ENV)
+    if raw is None or not raw.strip():
+        return "post_restore"
+    mode = raw.strip().lower()
+    if mode == "post_restore":
+        return "post_restore"
+    if mode == "snapshot_bound":
+        return "snapshot_bound"
+    msg = "VECINITA_LLM_LORA_RESOLVE must be post_restore or snapshot_bound"
+    raise ValueError(msg)
+
+
 def decide_adapter_pin_after_promote(adapter_id: str) -> str:
     """Normalize a human-promoted adapter id for ``VECINITA_FINETUNE_ADAPTER_ID``."""
     pin = adapter_id.strip()
@@ -250,3 +293,101 @@ def merge_lora_engine_kwargs(
     kwargs["max_loras"] = 1
     kwargs["max_lora_rank"] = DEFAULT_LORA_MAX_RANK
     return kwargs
+
+
+def sha256_adapter_dir(adapter_dir: Path | str) -> str:
+    """Return lowercase hex SHA-256 of a canonical adapter-directory digest (EV-316).
+
+    For each file under ``adapter_dir`` (sorted by relative POSIX path), fold
+    ``path ‖ NUL ‖ size ‖ NUL ‖ bytes`` into an outer SHA-256. Symlinks that escape
+    the adapter root raise ``ValueError``.
+    """
+    root = Path(adapter_dir).resolve()
+    if not root.is_dir():
+        msg = f"adapter directory missing: {root}"
+        raise RuntimeError(msg)
+
+    outer = hashlib.sha256()
+    entries: list[tuple[str, Path]] = []
+    for path in sorted(root.rglob("*")):
+        if path.is_symlink():
+            target = path.resolve()
+            try:
+                _ = target.relative_to(root)
+            except ValueError as exc:
+                msg = f"adapter symlink escapes root: {path}"
+                raise ValueError(msg) from exc
+            if target.is_file():
+                entries.append((path.relative_to(root).as_posix(), target))
+            continue
+        if path.is_file():
+            entries.append((path.relative_to(root).as_posix(), path))
+
+    for rel, file_path in entries:
+        data = file_path.read_bytes()
+        outer.update(rel.encode("utf-8"))
+        outer.update(b"\0")
+        outer.update(str(len(data)).encode("ascii"))
+        outer.update(b"\0")
+        outer.update(data)
+    return outer.hexdigest()
+
+
+def verify_adapter_integrity(
+    *,
+    adapter_dir: Path | str,
+    expected_hash: str,
+) -> str:
+    """Fail closed unless directory digest matches expected SHA-256 (AC-FT11).
+
+    Returns the computed digest when it matches (constant-time compare).
+    """
+    root = Path(adapter_dir)
+    if not root.is_dir():
+        msg = f"promoted LoRA adapter missing on volume: {root}"
+        raise RuntimeError(msg)
+    expected = expected_hash.strip().lower()
+    if _SHA256_HEX_RE.fullmatch(expected) is None:
+        msg = "expected adapter hash must be 64-char lowercase hex SHA-256"
+        raise ValueError(msg)
+    actual = sha256_adapter_dir(root)
+    if not hmac.compare_digest(actual, expected):
+        msg = (
+            f"LoRA adapter hash mismatch: expected {expected[:12]}… "
+            f"got {actual[:12]}… (fail closed)"
+        )
+        raise RuntimeError(msg)
+    return actual
+
+
+def build_prod_llm_health(
+    *,
+    base_model_id: str,
+    adapter_id: str | None,
+    adapter_hash: str | None,
+    git_commit: str | None,
+    snapshot_schema: str = LLM_SNAPSHOT_SCHEMA,
+) -> dict[str, str | None]:
+    """Build prod ``GET /health`` ready metadata (TC-316-02 / ADR-022 EV-316)."""
+    return {
+        "status": "ok",
+        "base_model_id": base_model_id,
+        "adapter_id": adapter_id,
+        "adapter_hash": adapter_hash,
+        "snapshot_schema": snapshot_schema,
+        "git_commit": git_commit,
+    }
+
+
+def require_post_restore_adapter_hash(*, adapter_id: str | None) -> str | None:
+    """When post_restore and an adapter is pinned, require a hash env (fail closed)."""
+    if adapter_id is None:
+        return None
+    expected = parse_finetune_adapter_hash()
+    if expected is None:
+        msg = (
+            "VECINITA_FINETUNE_ADAPTER_HASH is required when "
+            "VECINITA_FINETUNE_ADAPTER_ID is set (post_restore)"
+        )
+        raise RuntimeError(msg)
+    return expected

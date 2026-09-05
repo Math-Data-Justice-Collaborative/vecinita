@@ -61,17 +61,17 @@ def assert_corpus_reset_allowed(database_url: str) -> None:
             return
         msg = (
             f"Refusing corpus TRUNCATE/mutation on managed Postgres host {host!r}. "
-            "Test helpers (seed_eval_corpus, reset_corpus_tables, attach_embeddings, "
-            "clear_embeddings) may only run against local/CI Postgres. Restore from DO "
-            "backups instead — see scripts/infra/do_verify_staging_backups.sh and "
-            "docs/staging-runbook.md §Corpus protection."
+            + "Test helpers (seed_eval_corpus, reset_corpus_tables, attach_embeddings, "
+            + "clear_embeddings) may only run against local/CI Postgres. Restore from DO "
+            + "backups instead — see scripts/infra/do_verify_staging_backups.sh and "
+            + "docs/staging-runbook.md §Corpus protection."
         )
         raise RuntimeError(msg)
     if os.environ.get("VECINITA_ALLOW_CORPUS_RESET") == "1":
         return
     msg = (
         f"Refusing corpus TRUNCATE/mutation on non-local database host {host!r}. "
-        "Use localhost for tests or set VECINITA_ALLOW_CORPUS_RESET=1 for intentional "
-        "remote maintenance."
+        + "Use localhost for tests or set VECINITA_ALLOW_CORPUS_RESET=1 for intentional "
+        + "remote maintenance."
     )
     raise RuntimeError(msg)

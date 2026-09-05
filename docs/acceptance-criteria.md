@@ -189,7 +189,7 @@
 - [ ] **AC-CS3**: Soft donate CTA under the fact links to `https://wrwc.org/donate/` (or `VITE_WRWC_DONATE_URL`) in a new tab (TC-159).
 - [ ] **AC-CS4**: Friendly consent banner before remembering seen facts; Accept / No thanks; facts may rotate either way; memory only after Accept (TC-158, ADR-039).
 - [ ] **AC-CS5**: Accept persists seen-fact ids in `localStorage` (`vecinita.chat.coldstart.facts.v1`) and sets first-party consent cookie; No thanks sets opt-out cookie and does not persist seen ids (TC-158).
-- [ ] **AC-CS6**: Wait UX clears on first token or final error; existing cold-start failure copy unchanged; FE `/warm` via `prewarmChatServices` only — no Modal/backend changes (RD-184).
+- [ ] **AC-CS6**: Wait UX clears on first token or final error; existing cold-start failure copy unchanged; FE mount still calls `prewarmChatServices` → ChatRAG `/api/v1/warm` (Modal spawn per #318; residual wait UX unchanged) (RD-184, EV-318).
 - [ ] **AC-CS7**: Cookie/storage are not required by ChatRAG APIs and are not sent as ask/stream auth (ADR-039, RD-185).
 - [ ] **AC-CS8**: Playwright T0-ui covers wait UX + consent interaction (TC-160); Vitest covers TC-156–159.
 
@@ -243,6 +243,27 @@
 - [x] **AC-FO3**: UJ-060 / AC-BB9 re-run only after AC-FO1; empty-pool CE runs are not ship evidence (S021-D9/D13).
 - [x] **AC-FO4**: Prod `VECINITA_RAG_RERANK_CE` remains **false** until AC-BB9 pass + deploy approval (S021-D7). *(PASS metrics; flag still off)*
 - [ ] **AC-FO5**: Out of EV-018 without unlock: LangGraph/ADR-006; #159 multilingual embeds; synthesizer upsizing; changing F43/F44 defaults.
+
+### EV-029 — Smart retrieval ship + query refinement (F45 + F81) — S033
+
+- [x] **AC-SR1**: `ChatRagService.from_settings` wires CE scorer when `VECINITA_RAG_RERANK_CE=true` and Modal rerank URL set (TC-281, F45). *(11-verify-impl EV-029 2026-08-24)*
+- [x] **AC-SR2**: Staging ChatRAG has `VECINITA_RAG_RERANK_CE=true`; prod remains **false** (AC-FO4 / TC-183). *(11-verify-impl EV-029 2026-08-24)*
+- [x] **AC-SR3**: CE retrieve-N=20 → rerank → ≤ `top_k` with F73 threshold (TC-182, UJ-059). *(13-deploy-smoke EV-029 2026-08-24 — live H3)*
+- [x] **AC-SR4**: F81 LLM refinement preserves locale; fallback to raw question on failure (TC-282, UJ-085). *(11-verify-impl EV-029 2026-08-24 — T0)*
+- [x] **AC-SR5**: F81 flag defaults **off**; staging enable only after F36 / `rag-regression` non-regression (TC-283). *(11-verify-impl EV-029 2026-08-24 — default off; enable deferred)*
+- [x] **AC-SR6**: `rag-regression` CI job green on EV-029 branch (TC-280, #181). *(CI `main` @ `9d95133e`)*
+- [x] **AC-SR7**: Modal `vecinita-rerank` deployed; ChatRAG uses `VECINITA_MODAL_RERANK_URL` (deployment-integration). *(13-deploy-smoke EV-029 2026-08-24)*
+- [ ] **AC-SR8**: Out of EV-029 without unlock: prod CE flip; F43 cache; #84 groundedness; LLM-as-reranker.
+
+### EV-030 — Output verification + citations (F82 / #84) — S034
+
+- [x] **AC-OV1**: `ChatRagService` calls shared verifier when `VECINITA_RAG_OUTPUT_VERIFY=true` (TC-284, F82). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV2**: Ungrounded verdict prepends bilingual hedge disclaimer; answer body retained (TC-285, UJ-086). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV3**: Enabled path appends `[1]`…`[N]` citations matching `sources[]` order (TC-287). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV4**: Flag defaults **off**; no verify LLM call until explicitly enabled (TC-286). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV5**: `/ask/stream` buffers full generation → verify+cite → emit (TC-288). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV6**: `OutputVerificationScorer` delegates to same verifier as ChatRAG (ADR-033 §9). *(11-verify-impl EV-030 2026-08-24)*
+- [x] **AC-OV7**: Live enable after F36 / `rag-regression` non-regression + operator approval (AC-FO4). *(live `VECINITA_RAG_OUTPUT_VERIFY=true` in infra/do + DO deploy EV-030 2026-08-24; S034-D10 prod verify 2026-08-24)*
 
 ### EV-019 — Ingest resilience (F47–F49) — S022
 
@@ -299,6 +320,11 @@
 - [ ] **AC-UX11**: Feedback rows stored in corpus Postgres without PII columns (TC-225, privacy).
 - [ ] **AC-UX12**: ChatRAG Feedback button → page; Admin Feedback list for admin/super-admin (TC-226–227).
 - [ ] **AC-UX13**: Feedback retention purge at **90 days** (TC-228).
+- [ ] **AC-UX18**: ChatRAG Feedback shows bilingual no-PII/sensitive-data notice (callout)
+  above the form before submit; Vitest covers EN + ES (UJ-073, TC-308, F68 / #214).
+- [ ] **AC-UX19**: After successful feedback insert, optional operator webhook and/or Resend
+  email notify fire when configured; notify failure does not roll back the store; unset
+  config → submit still succeeds (UJ-073, TC-309–311, ADR-046 §6, EV-214).
 - [ ] **AC-UX14**: Audit UI/API shows resolved actor email (Supabase) with UUID fallback; read-time only (UJ-074, TC-229, F69 / #170).
 - [ ] **AC-UX15**: `audit_log` schema/writes remain free of email/name (TC-230, AC-A6/U6/E8).
 - [ ] **AC-UX16**: Out of EV-024 without unlock: live Modal power metrics per ask; visitor contact email; mini surveys; auto-attach chat transcripts; denormalized actor names on audit_log; live fleet/traffic car factors.
@@ -347,10 +373,19 @@
 | F45 CE ship faithfulness | LlamaIndex judge | ≥0.91 aggregate | `qa_pairs_staging.json` | test-plan TC-184 / AC-BB9 (after F46) |
 | F46 staging retrieve pools | Non-empty representative rows | `pool > 0` | staging golden / fixtures | test-plan TC-185 / AC-FO1 |
 | F46 ask sources | Non-empty `sources[]` | length ≥ 1 | in-corpus ask | test-plan TC-186 / AC-FO2 |
-| Eval latency p95 | Wall-clock per question | Informational (30s reference) | Golden run | test-plan TC-116 |
+| Eval latency p95 | Wall-clock per question | Informational (30s reference); **regression gate** vs baseline per AC-RG2 | Golden run | test-plan TC-116, TC-280 |
 | Coverage (unit, per component) | Line + branch | ≥95% each on 12 components | CI (`make test-unit-coverage`) | test-plan, ADR-019 |
 | Cost | Monthly infra | ≤ $50 cap; $25 target documented | Deploy estimate | ADR-004 |
 | Latency | p95 ask | < 15s | Staging smoke | spec |
+
+### EV-028 — ChatRAG regression gate (#181) — S032 / F36 harness
+
+- [x] **AC-RG1**: Committed `data/fixtures/eval/baseline.json` records golden metrics (`retrieval_relevance`, `faithfulness`, `answer_relevancy`, `latency_p95_ms`) with `schema_version` and `fixture_ref`; no visitor PII (ADR-004). *(EV-028 / TC-280 2026-08-23)*
+- [x] **AC-RG2**: Regression compare fails when any metric exceeds documented tolerance vs baseline while still enforcing TC-111/112 floors (TC-280). *(EV-028 2026-08-23)*
+- [x] **AC-RG3**: Cold-start / spawn latency excluded from fail criteria (reported separately if measured). *(EV-028 — CI uses mocked judge + deterministic embed; no Modal spawn in gate path)*
+- [x] **AC-RG4**: GitHub Actions job `rag-regression` runs on PRs to `main` and pushes to `main`; failure blocks merge (required check). *(EV-028 — wired in `ci.yml` + `ci-success` needs; operator: add branch protection required check)*
+- [x] **AC-RG5**: Baseline refresh requires an explicit PR that edits `baseline.json` — no silent CI overwrite. *(EV-028 — generator script + eval-golden-set SOP)*
+- [x] **AC-RG6**: `make test-rag-regression` matches CI compare logic (TC-280). *(EV-028 2026-08-23)*
 
 ## Qualitative criteria
 
@@ -394,3 +429,99 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-FT7**: Kill-switch/caps apply to FT train jobs (TC-263). Shared `VECINITA_AUTOMATIONS_KILL_SWITCH` plus `VECINITA_FINETUNE_MAX_CONCURRENT` (default 1) and `VECINITA_FINETUNE_MAX_RUNS_PER_DAY` (default 3) — TP5 / RD-348 / S030-D29.
 - [x] **AC-FT8**: Out of F77 without unlock: full-weight FT default; auto-load latest on prod; blind promote without operator review.
 - [x] **AC-FT9**: Rollback path: operator can revert prod to base pin (clear promoted adapter) (UJ-082, TC-265).
+- [x] **AC-FT11**: GPU snapshot restore resolves LoRA post-restore; verifies **SHA-256** adapter
+  content hash (`VECINITA_FINETUNE_ADAPTER_HASH`) with constant-time compare; fail closed on
+  mismatch; `/health` exposes ready metadata; kill-switch `VECINITA_LLM_LORA_RESOLVE`
+  (default `post_restore`) (EV-316 / #316, TC-316-01, TC-316-02, ADR-022).
+
+### Cold-start Layer E harness (EV-314 / #314)
+
+- [ ] **AC-314-01**: Stamp/tag helpers enforce `cold_kind` enum + ADR-004 allow-list; reject
+  raw prompt fields (TC-314-01).
+- [ ] **AC-314-02**: Opt-in bench script supports staged N≈20 smoke and N≥100 publish mode;
+  forced-cold procedure documented (TC-314-02).
+- [ ] **AC-314-03**: Standing docs define DO-504 / restore p95 regression gate language vs
+  published baseline; do not claim statistical percentiles below N=100.
+- [ ] **AC-314-04**: Vocabulary separates `prewarm_to_ready` (#318) from cold TTFT / restore.
+
+### Async GPU prewarm (EV-318 / #318)
+
+- [ ] **AC-318-01**: Prod LLM `POST /warm` spawns/detaches GPU warm and returns promptly
+  (TC-318-01).
+- [ ] **AC-318-02**: ChatRAG mount prewarm uses `POST /api/v1/warm` → Modal `/warm`, not
+  `/health` (TC-318-02, UJ-090).
+- [ ] **AC-318-03**: F40/F64 ColdStartWait remains for residual cold (AC-CS*).
+- [ ] **AC-318-04**: `api-contract.md` documents ChatRAG `/api/v1/warm` + Modal spawn semantics.
+
+### Seed GPU snapshots after deploy (EV-315 / #315)
+
+- [ ] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
+  samples are `cold_kind=snapshot_restore` (or exits non-zero if create persists)
+  (TC-315-01, TC-315-02).
+- [ ] **AC-315-02**: Create-path latency documented separately from restore percentiles;
+  staging runbook + `infra/modal/README.md` describe the procedure.
+- [ ] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
+  CD hard gate deferred this cycle.
+
+### Thin Modal CPU ingress (EV-317 / #317)
+
+- [ ] **AC-317-01**: ASGI entry does not import vLLM / heavy GPU internals at module load
+  (TC-317-01).
+- [ ] **AC-317-02**: `GET /health` never allocates T4; `/warm` keeps spawn/detach (TC-317-02).
+- [ ] **AC-317-03**: Optional ingress CPU snapshot only after post-thin profile evidence
+  (TC-317-03 if enabled).
+
+### Cost-tune LLM scaledown_window (EV-319 / #319)
+
+- [ ] **AC-319-01**: T4 $/s formula + candidate windows (60/120/300) documented; default flip
+  justified (thin traffic → recommend 120 with env revert) (TC-319-02).
+- [ ] **AC-319-02**: `VECINITA_LLM_SCALEDOWN_WINDOW` parsed at deploy-import with validated
+  bounds; invalid fails closed; no `min_containers` / `buffer_containers` change (TC-319-01).
+- [ ] **AC-319-03**: Prod default change requires AskQuestion after staging evidence.
+
+### FAQ fast-path Layer D (F85 / EV-320 / #320)
+
+- [x] **AC-320-01**: Exact + normalized same-language FAQ match only; paraphrase / cross-lang
+  miss → RAG (TC-320-01, UJ-093).
+- [x] **AC-320-02**: On hit — canned answer, `sources=[]`, `answer_path=faq_bypass`,
+  `cache_hit=none`; no retrieve/LLM invoke (TC-320-02).
+- [x] **AC-320-03**: Kill-switch `VECINITA_FAQ_FASTPATH_ENABLED=false` forces RAG (TC-320-03).
+- [x] **AC-320-04**: API e2e covers ask + stream hit/miss (TC-320-04).
+- [x] **AC-320-05**: Harness/schemas can record `answer_path=faq_bypass` without overloading
+  GPU `cold_kind` (ADR-022 EV-320 / TC-320-05).
+
+### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
+
+#### F78 live enable (AC-AU7)
+
+- [x] **AC-AU7**: Live F78 enabled with operator approval; kill-switch ON until post-enable smoke, then off; DM run history observable (TC-289, TC-290). **Signed off M135 2026-08-25** — `POST /automations/runs` 201 + list ≥1 row after PR #266 deploy.
+
+#### F79 live enable (AC-FR7)
+
+- [x] **AC-FR7**: Live F79 enabled together with F78; scheduled refresh runs without spurious catch-up side effects (TC-291). **Signed off M135 2026-08-25** — stale/`last_checked_at` visible on live admin list (92 URL docs).
+
+#### F80 playground eval (AC-FT10)
+
+- [x] **AC-FT10**: `vecinita-llm-finetune` deployed via CD; `VECINITA_FINETUNE_ENABLED=true`; prod adapter pin empty; playground eval path works (TC-292, TC-293). **Signed off M135 2026-08-25 (M134 evidence).**
+
+### EV-staging-do-supabase — Distinct staging (F83 / ADR-054)
+
+- [x] **AC-ST1**: `env_role` resolves to `staging` or `prod` (not `staging_as_live`) once staging H1–H5 pass (ADR-054). — runbook flipped 2026-08-28
+- [x] **AC-ST2**: Staging DO apps + `vecinita-staging-db` healthy; H1–H5 pass without touching prod DB (UJ-087, TC-294). — smoke PASS; prod docs count unchanged
+- [x] **AC-ST3**: Staging Modal uses Environment `staging` (web suffix) in workspace `vecinita`; URLs use `vecinita-staging--` prefix; secrets isolated from Environment `main` (TC-295).
+- [x] **AC-ST4**: Staging Supabase project distinct; staging admin FE uses staging Auth only (TC-296). — ref `camkatfbjguwvymfgdme`
+- [x] **AC-ST5**: GitHub ruleset on `main` requires CI + staging deploy/smoke for PR tip SHA (TC-297). — ruleset `21766359`
+- [x] **AC-ST6**: ADR-049 operational exit documented; runbook describes staging→prod path (ADR-054).
+- [x] **AC-ST7**: No operator `*-spec.yaml` or secrets committed.
+- [x] **AC-ST8**: Always-applied cursor rule Stage→Main; GitHub #212 (+ children) track ADR-054 + EV-036-D15: when `origin/stage` exists, feature/evolve PRs target **`stage` first** (CI required); promote via `stage`→`main` only with `CI success` + `staging-smoke` (or AskQuestion waiver) (TC-298). — EV-033 / EV-036-D15
+
+### EV-036 — Admin monitoring + staging Grafana/Loki (F84 / ADR-055 / #114)
+
+- [ ] **AC-MON1**: Admin `/monitoring` shows ingest, chat, and embed success rates for ≥ `24h` and `7d` (TC-299, TC-303).
+- [ ] **AC-MON2**: Time-series charts use server aggregates (`GET …/metrics/timeseries`); state survives navigation (TC-300).
+- [ ] **AC-MON3**: Failed ingest remains drill-downable via existing Jobs tab (F32) (TC-304).
+- [ ] **AC-MON4**: No new table/column stores chat message text; metric APIs reject `question`/`answer`; privacy tests pass (TC-301, TC-302).
+- [ ] **AC-MON5**: en/es i18n for Monitoring labels (TC-303).
+- [ ] **AC-MON6**: Staging Loki holds ADR-004 allow-listed structured logs only; short retention (TC-305).
+- [ ] **AC-MON7**: Staging Grafana shows Modal + DO panels (UJ-089).
+- [ ] **AC-MON8**: ≥1 Alertmanager rule notifies staging webhook secret; no chat content in alert payload (TC-306). Prod always-on Grafana deferred (EV-036-D11).

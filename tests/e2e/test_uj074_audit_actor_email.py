@@ -54,13 +54,13 @@ def test_uj074_audit_list_includes_actor_email_when_resolvable(
         return {actor_id: _ACTOR_EMAIL}
 
     monkeypatch.setattr(
-        "vecinita_internal_write_api.app.resolve_actor_emails",
+        "vecinita_internal_write_api.audit_service.resolve_actor_emails",
         fake_lookup,
         raising=False,
     )
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO audit_log (
@@ -112,7 +112,7 @@ def test_uj074_audit_list_includes_actor_email_when_resolvable(
         assert "email" not in cols
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )
@@ -132,13 +132,13 @@ def test_uj074_audit_list_actor_email_null_when_unresolved(
         return {}
 
     monkeypatch.setattr(
-        "vecinita_internal_write_api.app.resolve_actor_emails",
+        "vecinita_internal_write_api.audit_service.resolve_actor_emails",
         fake_lookup,
         raising=False,
     )
 
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO audit_log (
@@ -172,7 +172,7 @@ def test_uj074_audit_list_actor_email_null_when_unresolved(
         assert match["actor_email"] is None
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )
@@ -237,7 +237,7 @@ def test_uj074_audit_write_does_not_persist_email(
         assert count == 0
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM audit_log WHERE entity_id = :id"),
                 {"id": entity_id},
             )

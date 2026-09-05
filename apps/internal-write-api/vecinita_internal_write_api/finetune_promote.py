@@ -74,7 +74,7 @@ class FinetuneAdapterPinStore:
         with self._lock:
             self._adapter_id = None
             self._initialized = True
-            os.environ.pop(FINETUNE_ADAPTER_ID_ENV, None)
+            _ = os.environ.pop(FINETUNE_ADAPTER_ID_ENV, None)
 
 
 _STORE = FinetuneAdapterPinStore()

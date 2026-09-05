@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import {
+  Activity,
   BarChart3,
   Bot,
   FileText,
@@ -23,7 +24,7 @@ import { t } from "vecinita-frontend-i18n";
 
 import { useAuth, useIsAdmin } from "@/auth/auth-context";
 import { ModelDownloadProgressIndicator } from "@/evaluation/ModelDownloadProgressIndicator";
-import { PlaygroundModelDownloadProvider } from "@/evaluation/playgroundModelDownloadContext";
+import { PlaygroundModelDownloadProvider } from "@/evaluation/PlaygroundModelDownloadProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,6 +116,11 @@ function NavItems({ onClick }: { onClick?: () => void }) {
     { to: "/corpus", label: tr("admin.nav.corpus"), icon: FileText },
     { to: "/jobs", label: tr("admin.nav.jobs"), icon: ListChecks },
     { to: "/health", label: tr("admin.nav.health"), icon: Heart },
+    {
+      to: "/monitoring",
+      label: tr("admin.nav.monitoring"),
+      icon: Activity,
+    },
     {
       to: "/audit",
       label: tr("admin.nav.auditLog"),

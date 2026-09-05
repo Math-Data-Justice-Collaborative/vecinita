@@ -29,7 +29,7 @@ def upgrade() -> None:
     """Create corpus tables, pgvector extension, and job status enum."""
     op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
-    op.create_table(
+    _ = op.create_table(
         "documents",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("url", sa.Text(), nullable=False),
@@ -52,7 +52,7 @@ def upgrade() -> None:
         sa.UniqueConstraint("url", name="uq_documents_url"),
     )
 
-    op.create_table(
+    _ = op.create_table(
         "chunks",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("document_id", sa.Uuid(), nullable=False),
@@ -81,7 +81,7 @@ def upgrade() -> None:
         """
     )
 
-    op.create_table(
+    _ = op.create_table(
         "jobs",
         sa.Column("id", sa.Uuid(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.Column("status", sa.String(length=32), nullable=False),
@@ -107,7 +107,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
-    op.create_table(
+    _ = op.create_table(
         "config",
         sa.Column("key", sa.Text(), nullable=False),
         sa.Column("value", sa.JSON(), server_default=sa.text("'{}'::jsonb"), nullable=False),

@@ -37,6 +37,7 @@ from infra.modal.finetune_train_core import (
     invoke_train_from_payload,
     materialize_adapter_config,
 )
+from infra.modal.repo_paths import MODAL_ROOT_MOUNT, resolve_repo_root
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -52,15 +53,7 @@ BASE_MODELS_MOUNT: Final[str] = "/models"
 _logger = logging.getLogger("vecinita.finetune")
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when deploying from infra/modal; /root when Modal mounts at /root."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/root")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root(fallback=MODAL_ROOT_MOUNT)
 
 app = modal.App(APP_NAME)
 adapter_volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
@@ -119,10 +112,10 @@ def _peft_sft_train(
     if model_dir is None:
         _logger.warning(
             "base model weights missing under %s — wrote adapter_config only "
-            "(stage Qwen via vecinita-llm volume before production FT)",
+            + "(stage Qwen via vecinita-llm volume before production FT)",
             base_root,
         )
-        (adapter_dir / "adapter_model.safetensors").write_bytes(b"")
+        _ = (adapter_dir / "adapter_model.safetensors").write_bytes(b"")
         return
 
     # Lazy GPU imports — keep module importable in unit tests without CUDA wheels.
@@ -155,8 +148,8 @@ def _peft_sft_train(
     for pair in pairs:
         text = (
             f"### Instruction:\n{pair.instruction}\n\n"
-            f"### Input:\n{pair.input}\n\n"
-            f"### Response:\n{pair.output}"
+            + f"### Input:\n{pair.input}\n\n"
+            + f"### Response:\n{pair.output}"
         )
         rows.append({"text": text})
     dataset = Dataset.from_list(rows)

@@ -1,0 +1,35 @@
+# DigitalOcean App Platform — staging Admin static site (F83 / ADR-054)
+# DO App spec `name` max 32 chars
+name: vecinita-staging-admin-fe
+region: nyc
+
+static_sites:
+  - name: web
+    github:
+      repo: Math-Data-Justice-Collaborative/vecinita
+      branch: main
+      deploy_on_push: false
+    source_dir: apps/data-management-frontend
+    build_command: HUSKY=0 npm ci && npm run build
+    output_dir: dist
+    index_document: index.html
+    catchall_document: index.html
+    envs:
+      - key: VITE_VECINITA_ADMIN_API_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_VECINITA_MODAL_PROXY_KEY
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_VECINITA_CORPUS_API_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_VECINITA_CORPUS_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_SUPABASE_URL
+        scope: BUILD_TIME
+        type: SECRET
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        scope: BUILD_TIME
+        type: SECRET

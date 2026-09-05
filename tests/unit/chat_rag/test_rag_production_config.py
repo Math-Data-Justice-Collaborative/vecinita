@@ -50,10 +50,10 @@ def chat_rag_settings(monkeypatch: pytest.MonkeyPatch) -> ChatRagSettings:
 def clean_rag_production_config(engine: Engine) -> Iterator[None]:
     """Remove production config rows before and after each test."""
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
     yield
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM rag_production_config"))
+        _ = conn.execute(text("DELETE FROM rag_production_config"))
 
 
 def test_fallback_rag_config_uses_settings_defaults(chat_rag_settings: ChatRagSettings) -> None:
@@ -92,7 +92,7 @@ def test_load_active_rag_config_reads_jsonb_dict_snapshot(
         model_id="qwen2.5:1.5b-instruct",
     ).model_dump(mode="json")
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO rag_production_config (
@@ -128,7 +128,7 @@ def test_load_active_rag_config_parses_json_string_config(
     _ = clean_rag_production_config
     config_json = json.dumps({"top_k": _ENV_TOP_K, "system_prompt": "String JSON prompt"})
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO rag_production_config (

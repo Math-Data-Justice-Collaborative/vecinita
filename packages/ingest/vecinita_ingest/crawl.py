@@ -69,7 +69,7 @@ def normalize_url(url: str) -> str:
     for part in raw_parts:
         if part == "..":
             if resolved:
-                resolved.pop()
+                _ = resolved.pop()
             continue
         resolved.append(part)
     path = "/" + "/".join(resolved) if resolved else "/"

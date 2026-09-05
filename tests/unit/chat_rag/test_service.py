@@ -13,6 +13,7 @@ from vecinita_chat_rag_backend.service import (
     _to_ask_response,  # pyright: ignore[reportPrivateUsage]
 )
 from vecinita_rag.cache import AnswerCache, CachedAnswer
+from vecinita_rag.constants import HEDGE_DISCLAIMER_EN
 from vecinita_rag.rerank import CallableCrossEncoderScorer
 from vecinita_rag.types import RagAnswer, RetrievedChunk
 from vecinita_shared_schemas.chat_rag import AskRequest
@@ -234,7 +235,7 @@ def test_ask_uses_spanish_system_prompt_when_language_es() -> None:
         "_production_config",
         return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
     ):
-        service.ask(AskRequest(question="clinic hours", language="es"))
+        _ = service.ask(AskRequest(question="clinic hours", language="es"))
     assert llm.prompts
     prompt = llm.prompts[0]
     assert "únicamente el contexto siguiente" in prompt
@@ -255,7 +256,7 @@ def test_ask_uses_production_system_prompt_when_language_en() -> None:
         "_production_config",
         return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
     ):
-        service.ask(AskRequest(question="clinic hours", language="en"))
+        _ = service.ask(AskRequest(question="clinic hours", language="en"))
     assert llm.prompts
     prompt = llm.prompts[0]
     assert _PROMOTED_EN_SYSTEM_PROMPT in prompt
@@ -276,7 +277,7 @@ def test_stream_ask_uses_spanish_system_prompt_when_language_es() -> None:
         return_value=EvalConfig(system_prompt=_PROMOTED_EN_SYSTEM_PROMPT),
     ):
         session = service.stream_ask(AskRequest(question="clinic hours", language="es"))
-        list(session.tokens)
+        _ = list(session.tokens)
     assert llm.prompts
     prompt = llm.prompts[0]
     assert "únicamente el contexto siguiente" in prompt
@@ -324,10 +325,49 @@ def test_ask_stream_yields_no_context_when_empty() -> None:
 
 
 def test_ask_stream_yields_llm_tokens() -> None:
-    """Test ask stream yields llm tokens."""
+    """F82 / AC-OV5: stream buffers full generation then emits once (TC-288)."""
     service = _service(chunks=[_chunk()])
     tokens = list(service.ask_stream(AskRequest(question="clinic hours")))
-    assert tokens == ["Stream", "ed"]
+    assert tokens == ["Streamed"]
+
+
+def test_ask_applies_output_verify_when_enabled() -> None:
+    """TC-284: verify on prepends hedge and appends citations on /ask path."""
+
+    class _VerifyLlm(StubLlm):
+        def generate(
+            self,
+            prompt: str,
+            *,
+            max_tokens: int = 256,
+            model_id: str | None = None,
+        ) -> str:
+            _ = (max_tokens, model_id)
+            self.prompts.append(prompt)
+            if "faithfulness judge" in prompt:
+                return "NO"
+            return self.answer
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=5,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_output_verify=True,
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+    service = ChatRagService(
+        retriever=StubRetriever([_chunk()]),  # type: ignore[arg-type]
+        llm_client=_VerifyLlm(),  # type: ignore[arg-type]
+        settings=settings,
+    )
+    response = service.ask(AskRequest(question="clinic hours"))
+    assert response.answer.startswith(HEDGE_DISCLAIMER_EN)
+    assert response.answer.endswith("[1]")
+    assert "Generated answer" in response.answer
+    assert len(response.sources) == 1
 
 
 def test_retrieve_sources_maps_chunks() -> None:
@@ -875,7 +915,7 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
         patch("vecinita_chat_rag_backend.service.LlmTagClient", _TagClient),
         patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
         patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=["housing"]),
-        patch("vecinita_chat_rag_backend.service.create_engine"),
+        patch("vecinita_chat_rag_backend.service.create_app_engine"),
         patch(
             "vecinita_chat_rag_backend.service.load_active_rag_config",
             return_value=EvalConfig(),
@@ -891,10 +931,86 @@ def test_from_settings_embed_and_tag_infer_fns() -> None:
 
         mock_retriever.side_effect = _capture_retriever
         service = ChatRagService.from_settings(settings)
-        service.ask(AskRequest(question="housing help"))
+        _ = service.ask(AskRequest(question="housing help"))
 
     embed_fn = embed_fn_holder.get("fn")
     assert callable(embed_fn)
-    assert embed_fn("housing help") == [0.01] * 384  # type: ignore[operator]
+    assert embed_fn("housing help") == [0.01] * 384
     assert captured["tag_question"] == "housing help"
     assert captured["require_proxy_key"] is True
+
+
+def test_from_settings_wires_ce_scorer_when_rerank_ce_on() -> None:
+    """TC-281 / AC-SR1: CE on + rerank URL wires RerankClient as ce_scorer."""
+    captured: dict[str, object] = {}
+    request_timeout_s = 30.0
+
+    class _RerankClient:
+        def __init__(self, url: str, *, timeout: float) -> None:
+            captured["url"] = url
+            captured["timeout"] = timeout
+
+        def score_pairs(self, _query: str, passages: Sequence[str]) -> list[float]:
+            return [0.5] * len(passages)
+
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=4,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=request_timeout_s,
+        rag_rerank_ce=True,
+        rerank_url="http://rerank.test",
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+
+    with (
+        patch("vecinita_chat_rag_backend.service.EmbeddingClient"),
+        patch("vecinita_chat_rag_backend.service.LlmClient"),
+        patch("vecinita_chat_rag_backend.service.LlmTagClient"),
+        patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.create_app_engine"),
+        patch(
+            "vecinita_chat_rag_backend.service.CorpusPgvectorRetriever",
+            return_value=StubRetriever([]),
+        ),
+        patch("vecinita_chat_rag_backend.service.RerankClient", _RerankClient),
+    ):
+        service = ChatRagService.from_settings(settings)
+
+    assert service._ce_scorer is not None  # pyright: ignore[reportPrivateUsage]  # noqa: SLF001
+    assert captured["url"] == "http://rerank.test"
+    assert captured["timeout"] == request_timeout_s
+
+
+def test_from_settings_skips_ce_scorer_when_rerank_ce_off() -> None:
+    """TC-281 / AC-SR1: CE flag off → no ce_scorer even when rerank URL set."""
+    settings = ChatRagSettings(
+        database_url="postgresql+psycopg://vecinita:vecinita@localhost:5432/vecinita",
+        top_k=4,
+        embed_url="http://embed.test",
+        llm_url="http://llm.test",
+        request_timeout_s=30.0,
+        rag_rerank_ce=False,
+        rerank_url="http://rerank.test",
+        rag_multi_query=False,
+        rag_cache=False,
+    )
+
+    with (
+        patch("vecinita_chat_rag_backend.service.EmbeddingClient"),
+        patch("vecinita_chat_rag_backend.service.LlmClient"),
+        patch("vecinita_chat_rag_backend.service.LlmTagClient"),
+        patch("vecinita_chat_rag_backend.service.load_seed_vocabulary", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.vocabulary_slugs", return_value=[]),
+        patch("vecinita_chat_rag_backend.service.create_app_engine"),
+        patch(
+            "vecinita_chat_rag_backend.service.CorpusPgvectorRetriever",
+            return_value=StubRetriever([]),
+        ),
+    ):
+        service = ChatRagService.from_settings(settings)
+
+    assert service._ce_scorer is None  # pyright: ignore[reportPrivateUsage]  # noqa: SLF001

@@ -109,9 +109,11 @@ def doc_with_versions(client: TestClient, engine: Engine) -> Iterator[DocumentFi
     yield {"doc_id": doc_id, "url": url}
 
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id})
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+        _ = conn.execute(
+            text("DELETE FROM document_versions WHERE document_id = :id"), {"id": doc_id}
+        )
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_document_history_returns_versions(

@@ -57,7 +57,7 @@ Allow: /
     )
 
     limiter = RateLimiter(rate_limit_rps=_RATE_LIMIT_RPS)
-    limiter.wait()
+    _ = limiter.wait()
     started = time.monotonic()
     slept = limiter.wait()
     elapsed = time.monotonic() - started
@@ -71,7 +71,7 @@ def test_extract_pdf_text_success_and_empty_soft_fail() -> None:
     assert "Hello PDF" in text
 
     with pytest.raises(PdfExtractError, match=r"(?i)empty|no text|extract"):
-        extract_pdf_text(_EMPTY_PDF)
+        _ = extract_pdf_text(_EMPTY_PDF)
 
 
 def test_should_js_render_auto_escalates_on_sparse_static_text() -> None:
@@ -88,7 +88,7 @@ def test_parse_js_render_mode_accepts_known_and_rejects_unknown() -> None:
     assert parse_js_render_mode("OFF") is JsRenderMode.OFF
     assert parse_js_render_mode("always") is JsRenderMode.ALWAYS
     with pytest.raises(ValueError, match="VECINITA_SCRAPE_JS_RENDER"):
-        parse_js_render_mode("bogus")
+        _ = parse_js_render_mode("bogus")
 
 
 def test_extract_main_content_falls_back_when_trafilatura_returns_empty(
@@ -108,9 +108,9 @@ def test_extract_main_content_falls_back_when_trafilatura_returns_empty(
 def test_rate_limiter_rejects_non_positive_rps() -> None:
     """RateLimiter requires a positive RPS."""
     with pytest.raises(ValueError, match="rate_limit_rps"):
-        RateLimiter(rate_limit_rps=0)
+        _ = RateLimiter(rate_limit_rps=0)
     with pytest.raises(ValueError, match="rate_limit_rps"):
-        RateLimiter(rate_limit_rps=-1.0)
+        _ = RateLimiter(rate_limit_rps=-1.0)
 
 
 def test_rate_limiter_skips_sleep_when_interval_already_elapsed(

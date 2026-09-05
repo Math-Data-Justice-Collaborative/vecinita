@@ -54,13 +54,13 @@ def test_batch_upsert_embedding_dimension() -> None:
 def test_create_job_request_requires_urls_for_ingest() -> None:
     """Test create job request requires urls for ingest."""
     with pytest.raises(ValueError, match="urls required"):
-        CreateJobRequest.model_validate({"urls": [], "options": {"job_type": "ingest"}})
+        _ = CreateJobRequest.model_validate({"urls": [], "options": {"job_type": "ingest"}})
 
 
 def test_create_job_request_requires_document_id_for_retag() -> None:
     """Test create job request requires document id for retag."""
     with pytest.raises(ValueError, match="document_id required"):
-        CreateJobRequest.model_validate(
+        _ = CreateJobRequest.model_validate(
             {
                 "urls": [],
                 "options": JobOptions(job_type="retag", document_id=None),

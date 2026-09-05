@@ -54,7 +54,7 @@ def _import_chat_template_mod() -> ModuleType:
     except ModuleNotFoundError as exc:
         pytest.fail(
             "vecinita_llm_client.chat_template missing "
-            f"(T79.3 / RD-167 / TP-S010-24 / TC-145): {exc}"
+            + f"(T79.3 / RD-167 / TP-S010-24 / TC-145): {exc}"
         )
 
 
@@ -65,7 +65,7 @@ def _import_apply_chat_template() -> _ApplyChatTemplateFn:
     if not callable(raw):
         pytest.fail(
             "apply_chat_template not exported from vecinita_llm_client.chat_template "
-            "(T79.3 / TC-145)"
+            + "(T79.3 / TC-145)"
         )
     return cast("_ApplyChatTemplateFn", raw)
 
@@ -110,20 +110,20 @@ class _FixtureTokenizer:
 
 _QWEN_CHAT_TEMPLATE: Final[str] = (
     "{% for message in messages %}"
-    "{{'<|im_start|>' + message['role'] + '\\n' + message['content'] + '<|im_end|>' + '\\n'}}"
-    "{% endfor %}"
-    "{% if add_generation_prompt %}{{'<|im_start|>assistant\\n'}}{% endif %}"
+    + "{{'<|im_start|>' + message['role'] + '\\n' + message['content'] + '<|im_end|>' + '\\n'}}"
+    + "{% endfor %}"
+    + "{% if add_generation_prompt %}{{'<|im_start|>assistant\\n'}}{% endif %}"
 )
 
 _LLAMA_CHAT_TEMPLATE: Final[str] = (
     "{{ bos_token }}"
-    "{% for message in messages %}"
-    "{{ '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'"
-    "+ message['content'] + '<|eot_id|>' }}"
-    "{% endfor %}"
-    "{% if add_generation_prompt %}"
-    "{{ '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}"
-    "{% endif %}"
+    + "{% for message in messages %}"
+    + "{{ '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'"
+    + "+ message['content'] + '<|eot_id|>' }}"
+    + "{% endfor %}"
+    + "{% if add_generation_prompt %}"
+    + "{{ '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}"
+    + "{% endif %}"
 )
 
 
@@ -224,7 +224,7 @@ def test_default_qwen_tokenizer_rejects_tokenize_true() -> None:
     )
     tok = default_chat_tokenizer()
     with pytest.raises(ValueError, match="tokenize=False"):
-        tok.apply_chat_template(_MESSAGES, tokenize=True, add_generation_prompt=False)
+        _ = tok.apply_chat_template(_MESSAGES, tokenize=True, add_generation_prompt=False)
 
 
 def test_default_qwen_tokenizer_omits_generation_prompt_when_false() -> None:
@@ -260,7 +260,7 @@ def test_apply_chat_template_rejects_non_string_render() -> None:
             return [1, 2, 3]
 
     with pytest.raises(TypeError, match="must return str"):
-        apply_chat_template(
+        _ = apply_chat_template(
             _MESSAGES,
             tokenizer=cast("_ChatTemplateTokenizer", _BadTok()),
             add_generation_prompt=True,

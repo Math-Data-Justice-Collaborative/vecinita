@@ -19,7 +19,7 @@ def test_jobs_client_requires_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("VECINITA_MODAL_PROXY_KEY", raising=False)
 
     with pytest.raises(DataManagementJobsClientError, match="required"):
-        DataManagementJobsClient()
+        _ = DataManagementJobsClient()
 
 
 def test_enqueue_retag_posts_retag_job() -> None:
@@ -93,7 +93,7 @@ def test_enqueue_eval_raises_on_http_error() -> None:
     )
 
     with pytest.raises(DataManagementJobsClientError, match="503"):
-        client.enqueue_eval(uuid4())
+        _ = client.enqueue_eval(uuid4())
     client.close()
 
 
@@ -121,13 +121,13 @@ def test_jobs_client_closes_owned_http_client() -> None:
             closed.append(True)
             original_close()
 
-        http.close = tracked_close  # type: ignore[method-assign]
+        http.close = tracked_close
         return http
 
     import httpx as httpx_module  # noqa: PLC0415
 
     original = httpx_module.Client
-    httpx_module.Client = client_factory  # type: ignore[misc]
+    httpx_module.Client = client_factory
     try:
         client = DataManagementJobsClient(
             base_url="http://data-mgmt.test",
@@ -154,7 +154,7 @@ def test_jobs_client_does_not_close_injected_client() -> None:
         closed.append(True)
         original_close()
 
-    http.close = tracked_close  # type: ignore[method-assign]
+    http.close = tracked_close
     client = DataManagementJobsClient(
         base_url="http://data-mgmt.test",
         proxy_key="proxy-key",

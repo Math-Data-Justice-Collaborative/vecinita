@@ -6,64 +6,51 @@ alwaysApply: true
 
 # Constraint Enforcement
 
-Hard constraints from `docs/spec.md` §Constraints & Assumptions and audit decisions.
+Hard constraints from `docs/spec.md` §Constraints & Assumptions and standing ADRs.
 Violations are blocking — do not proceed without raising a `[Decision]`.
+
+[Corpus: system-spec] [Corpus: config] [Corpus: deps]
 
 ## Version Pins
 
 | Dependency | Required Version | Source |
-|------------|-----------------|--------|
-| Python | 3.10 (exact) | Upstream pyproject.toml, S2.5 |
-| PyTorch | 2.3 with CUDA 11.8 | Upstream pyproject.toml, S2.5 |
-| DGL | 2.4.0+cu118 | Upstream pyproject.toml, S2.5 |
-| CUDA | 11.8+ | Spec §Hard Constraints, S2.H9 |
-| Modal SDK | >=1.2.6,<2 | Template registry |
+|------------|------------------|--------|
+| Python | **3.11** (`>=3.11,<3.12`) | spec H10; `pyproject.toml` |
+| Node | **24 LTS** | spec H10; dependency-inventory |
+| Modal SDK | per `docs/dependency-inventory.md` | deps |
 
-Do not upgrade these without an ADR. Upstream RFantibody pins these versions and
-compatibility is not guaranteed with newer versions.
+Do not upgrade language pins without an ADR / decision. GPU stack pins for Modal LLM /
+embed / FT images live in `infra/modal/` and dependency-inventory — change via ADR.
 
 ## Platform Constraints
 
-- **Linux only**: Upstream RFantibody does not support Windows or macOS. Modal containers
-  are Linux. Do not add platform-specific code for other OSes.
-- **NVIDIA GPU required**: All three inference stages require CUDA. Do not add CPU
-  fallback paths for inference (fine-tuning data validation may run on CPU).
+- **Hybrid deploy**: DigitalOcean (HTTP + Postgres) + Modal (embed, LLM, DM workers, FT);
+  US regions (spec H2).
+- **`DATABASE_URL` only on DO backends** — Modal must not hold the corpus DB URL
+  (ADR-007 / H8).
+- **`packages/` must not import `apps/`** (ADR-012 / H9).
+- Corpus DB holds **no personal account/session/message tables** (H5); admin identity
+  is Supabase-only (ADR-026).
 
-## Excluded Dependencies
+## Excluded / gated patterns
 
-**Cannot use** — do not import, add to manifests/lockfiles, or install:
-
-| Dependency | Reason | Resolution |
-|------------|--------|------------|
-| **PyRosetta** / `pyrosetta` / Rosetta (PyRosetta distribution) | Proprietary; **cannot use** per R2 (licensing + complexity) | Never add PyRosetta |
-| **`RF2_ab.pt`** / Rosetta-DL antibody RF2 weights | Non-commercial; **cannot use** per ADR-007 | TCR Zenodo weights only for RF2 architecture |
-| torchaudio | Removed per S6.H1 — not needed | — |
-| torchvision | Removed per S6.H1 — not needed | — |
-| icecream | Removed per S6.H1 — debug utility not for production | Use standard logging |
-
-## Excluded Patterns
-
-- **No web UI code**: No Flask, FastAPI, Streamlit, Gradio, or HTML/CSS/JS. Service is
-  Modal API-only (S1.H17).
-- **No distributed inference**: Multi-GPU is single-container only (F9). Do not add
-  Ray, Horovod, DeepSpeed multi-node, or similar distributed frameworks.
-- **No training from scratch**: Fine-tuning only (S1.H16). Always load pretrained
-  weights as the starting point.
+| Pattern | Rule |
+|---------|------|
+| Live prod corpus mutate / FT promote / automation enable | AskQuestion required ([no-live-prod-corpus-push.mdc](no-live-prod-corpus-push.mdc)) |
+| Operator DO spec exports (`*-spec.yaml` with secrets) | Never commit ([no-operator-spec-commits.mdc](no-operator-spec-commits.mdc)) |
+| Paid third-party LLM/embed as default | Forbidden (H6) |
+| Antibody Job-template (`cognichem-rfantibody`, `src/rfdiffusion_stage.py`) | Not this product — do not reintroduce |
+| Auto-promote LoRA to prod `vecinita-llm` | Forbidden (F77 / ADR-053) |
 
 ## Validation Constraints
 
-From `docs/config-spec.md` §Validation Rules — enforce in code:
-
-- `diffuser_T` >= `final_step`
-- `diffuser_T` >= 15 (upstream RFdiffusion minimum)
-- `mpnn_temperature` > 0
-- `num_designs` >= 1; warn if > 1000
-- `hotspot_residues` must reference residues that exist in `target_pdb`
-- `model_target` must be one of: `"rfdiffusion"`, `"proteinmpnn"`, `"rf2"`
+From `docs/config-spec.md` §Validation Rules — enforce documented bounds in code (e.g.
+`top_k`, chunk size/overlap, freshness stale days, FT concurrency/daily caps). Do not
+invent alternate defaults without RD/ADR.
 
 ## When a Constraint Must Change
 
 If a constraint needs to be relaxed or modified:
 1. Raise `[Decision]` citing the constraint and why it needs to change
 2. On approval, update this rule and the relevant spec document
-3. Create an ADR documenting the change
+3. Create or amend an ADR documenting the change

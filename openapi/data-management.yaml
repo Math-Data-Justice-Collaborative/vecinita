@@ -972,6 +972,24 @@ components:
             - max_depth
             - complete
           description: Why crawl stopped (F60)
+        freshness_outcome:
+          type: string
+          nullable: true
+          description: F79 freshness_refresh worker outcome (ADR-052)
+        hash_decision:
+          type: string
+          nullable: true
+          enum:
+            - skip_rechunk
+            - rechunk
+          description: >
+            F79 hash-aware freshness decision (BUG-2026-08-28).
+            skip_rechunk when unchanged; rechunk when content changed.
+        documents_processed:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Documents processed by F78 catch-up or F79 freshness
         translated_documents:
           type: integer
           minimum: 0

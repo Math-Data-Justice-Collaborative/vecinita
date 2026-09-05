@@ -102,12 +102,12 @@ def document_id(client: TestClient, engine: Engine) -> Iterator[str]:
     doc_id = json_str(doc, "document_id")
     yield doc_id
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
-        conn.execute(
+        _ = conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": doc_id})
+        _ = conn.execute(
             text("DELETE FROM document_versions WHERE document_id = :id"),
             {"id": doc_id},
         )
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_uj079_operator_display_title_journey(

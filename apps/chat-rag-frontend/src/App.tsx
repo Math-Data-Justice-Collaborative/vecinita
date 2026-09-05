@@ -11,7 +11,7 @@ import { useLocale } from "./hooks/useLocale";
 import { usePathname } from "./hooks/usePathname";
 import { useTagFilters } from "./hooks/useTagFilters";
 import { useTheme } from "./hooks/useTheme";
-import { t } from "./i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import { TooltipProvider } from "vecinita-frontend-ui";
 import "./App.css";
 
@@ -69,7 +69,7 @@ function AppContent() {
           <button
             type="button"
             className="sidebar-toggle"
-            aria-label={t(locale, "toggleSidebar")}
+            aria-label={t(locale, "chat.toggleSidebar")}
             aria-expanded={sidebarOpen}
             onClick={() => {
               setSidebarOpen((value) => !value);
@@ -78,8 +78,8 @@ function AppContent() {
             <span aria-hidden="true">☰</span>
           </button>
           <div className="app-topbar-title">
-            <h1>{t(locale, "appTitle")}</h1>
-            <p className="subtitle">{t(locale, "appSubtitle")}</p>
+            <h1>{t(locale, "chat.appTitle")}</h1>
+            <p className="subtitle">{t(locale, "chat.appSubtitle")}</p>
           </div>
         </header>
         <main className="app">

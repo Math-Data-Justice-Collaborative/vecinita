@@ -26,7 +26,7 @@ def check_pool_connects(url: str) -> None:
     try:
         engine = create_engine(url)
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            _ = conn.execute(text("SELECT 1"))
     except SQLAlchemyError as exc:
         msg = f"DATABASE_URL pool connect failed: {exc}"
         raise RuntimeError(msg) from exc

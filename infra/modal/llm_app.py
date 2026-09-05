@@ -13,21 +13,21 @@ Prod pin (RD-169 / Slice D): ``ALLOW_MODEL_RELOAD=False`` — request ``model_id
 does not reload the vLLM engine. Sandbox/eval model switches use
 ``vecinita-llm-playground`` (shared ``llm-models`` volume).
 
-F77 LoRA (ADR-053): after human promote, load adapter from volume
-``llm-finetune-adapters`` when ``VECINITA_FINETUNE_ADAPTER_ID`` is set. Playground
+F77 LoRA (ADR-053 / EV-316): after human promote, load adapter from volume
+``llm-finetune-adapters`` when ``VECINITA_FINETUNE_ADAPTER_ID`` is set and verify
+``VECINITA_FINETUNE_ADAPTER_HASH`` (SHA-256) on post-restore. Playground
 uses ``VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID`` for pre-promote candidates.
 """
+
+# pyright: reportUnusedFunction=false, reportUntypedBaseClass=false
 
 from __future__ import annotations
 
 import json
 import logging
 import os
-import uuid
-from collections.abc import Iterator
-from http import HTTPStatus
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, Literal
+from typing import TYPE_CHECKING, ClassVar, Final, Literal
 
 import modal
 from infra.modal.llm_model_registry import (
@@ -35,10 +35,14 @@ from infra.modal.llm_model_registry import (
     repo_dir_name,
     resolve_hf_repo,
 )
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from infra.modal.llm_service_core import LlmServiceCore
+from infra.modal.repo_paths import MODAL_ROOT_MOUNT, resolve_repo_root
+from pydantic import BaseModel, ConfigDict, Field
 from vecinita_shared_schemas.finetune import (
+    build_prod_llm_health,
     decide_serve_adapter_id,
-    merge_lora_engine_kwargs,
+    parse_finetune_adapter_hash,
+    parse_finetune_adapter_id,
     resolve_finetune_adapter_dir,
 )
 
@@ -48,15 +52,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("vecinita.llm")
 
 
-def _resolve_repo_root() -> Path:
-    """Repo root when building from infra/modal; /root when Modal mounts llm_app.py."""
-    here = Path(__file__).resolve()
-    if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
-    return Path("/root")
-
-
-_REPO_ROOT = _resolve_repo_root()
+_REPO_ROOT = resolve_repo_root(fallback=MODAL_ROOT_MOUNT)
 
 
 APP_NAME = "vecinita-llm"
@@ -68,6 +64,11 @@ DEFAULT_PLAYGROUND_MODEL_ID: Final[str] = "qwen2.5:1.5b-instruct"
 # Playground app sets ALLOW_MODEL_RELOAD=True on its own module.
 ALLOW_MODEL_RELOAD: Final[bool] = False
 ENFORCE_EAGER_ENV = "VECINITA_LLM_ENFORCE_EAGER"
+GPU_SNAPSHOT_ENV = "VECINITA_LLM_GPU_SNAPSHOT"
+LLM_SCALEDOWN_WINDOW_ENV = "VECINITA_LLM_SCALEDOWN_WINDOW"
+_DEFAULT_LLM_SCALEDOWN_WINDOW: Final[int] = 300
+_MIN_LLM_SCALEDOWN_WINDOW: Final[int] = 60
+_MAX_LLM_SCALEDOWN_WINDOW: Final[int] = 600
 _PROXY_HEADER: Final[str] = "X-Vecinita-Proxy-Key"
 _PROXY_ENV: Final[str] = "VECINITA_MODAL_PROXY_KEY"
 _MANIFEST_PATH = Path("/models/manifest.json")
@@ -113,6 +114,57 @@ def _enforce_eager_from_env() -> bool:
     return raw not in ("0", "false", "no", "off")
 
 
+def _gpu_snapshot_from_env() -> bool:
+    """ADR-022 EV-313 / #313: prod GPU memory snapshot kill-switch (default off)."""
+    raw = os.environ.get(GPU_SNAPSHOT_ENV, "false").strip().lower()
+    return raw in ("1", "true", "yes", "on")
+
+
+def _scaledown_window_from_env() -> int:
+    """Parse prod GPU scaledown window from deploy-import env (TC-319-01)."""
+    raw = os.environ.get(LLM_SCALEDOWN_WINDOW_ENV)
+    if raw is None:
+        return _DEFAULT_LLM_SCALEDOWN_WINDOW
+    try:
+        window = int(raw.strip())
+    except ValueError as exc:
+        msg = (
+            f"{LLM_SCALEDOWN_WINDOW_ENV} must be an integer between "
+            f"{_MIN_LLM_SCALEDOWN_WINDOW} and {_MAX_LLM_SCALEDOWN_WINDOW} seconds"
+        )
+        raise ValueError(msg) from exc
+    if not _MIN_LLM_SCALEDOWN_WINDOW <= window <= _MAX_LLM_SCALEDOWN_WINDOW:
+        msg = (
+            f"{LLM_SCALEDOWN_WINDOW_ENV} must be between "
+            f"{_MIN_LLM_SCALEDOWN_WINDOW} and {_MAX_LLM_SCALEDOWN_WINDOW} seconds"
+        )
+        raise ValueError(msg)
+    return window
+
+
+# Fixed at ``modal deploy`` import time (not container Secret runtime). Set
+# ``VECINITA_LLM_GPU_SNAPSHOT`` in the *deploy* environment, then redeploy (TC-313-01).
+_PROD_GPU_SNAPSHOT: Final[bool] = _gpu_snapshot_from_env()
+_PROD_SCALEDOWN_WINDOW: Final[int] = _scaledown_window_from_env()
+
+
+def _prod_health_payload() -> dict[str, str | None]:
+    """Ready metadata for ``GET /health`` (EV-316 / TC-316-02)."""
+    git_commit = os.environ.get("VECINITA_GIT_COMMIT") or os.environ.get("GITHUB_SHA")
+    if git_commit is not None:
+        git_commit = git_commit.strip() or None
+    try:
+        adapter_hash = parse_finetune_adapter_hash()
+    except ValueError:
+        adapter_hash = None
+    return build_prod_llm_health(
+        base_model_id=DEFAULT_PLAYGROUND_MODEL_ID,
+        adapter_id=parse_finetune_adapter_id(),
+        adapter_hash=adapter_hash,
+        git_commit=git_commit,
+    )
+
+
 LLM_MAX_MODEL_LEN: Final[int] = 2048
 
 
@@ -136,8 +188,8 @@ def _llm_engine_kwargs(*, max_model_len: int, model: str) -> dict[str, object]:
     }
     if "AWQ" in model.upper() or model.endswith("-awq"):
         kwargs["quantization"] = "awq"
-        kwargs.pop("dtype", None)
-        kwargs.pop("hf_overrides", None)
+        _ = kwargs.pop("dtype", None)
+        _ = kwargs.pop("hf_overrides", None)
     if not model.startswith("/"):
         kwargs["download_dir"] = "/models"
     return kwargs
@@ -163,7 +215,7 @@ def _shutdown_vllm_engine(llm: object | None) -> None:
             if engine is not None:
                 shutdown = getattr(engine, "shutdown", None)
                 if callable(shutdown):
-                    shutdown()
+                    _ = shutdown()
         except Exception:
             pass
         del llm
@@ -261,13 +313,18 @@ def _local_repo_path(model_id: str) -> Path:
     return _REPOS_ROOT / repo_dir_name(model_id)
 
 
-def _resolve_vllm_model_arg(model_id: str | None) -> str:
+def _resolve_vllm_model_arg(
+    model_id: str | None,
+    *,
+    allow_model_reload: bool | None = None,
+) -> str:
     """Resolve playground tag or None to a vLLM ``model`` argument.
 
-    When ``ALLOW_MODEL_RELOAD`` is False (prod pin), always return the pinned
+    When ``allow_model_reload`` is False (prod pin), always return the pinned
     ``MODEL_ID`` so playground/eval tags cannot stomp ChatRAG (RD-169 / TC-145).
     """
-    if not ALLOW_MODEL_RELOAD:
+    reload = ALLOW_MODEL_RELOAD if allow_model_reload is None else allow_model_reload
+    if not reload:
         return MODEL_ID
     if model_id is None or normalize_playground_tag(model_id) == normalize_playground_tag(
         DEFAULT_PLAYGROUND_MODEL_ID
@@ -286,7 +343,7 @@ def _download_hf_model(model_id: str) -> Path:
     hf_repo = resolve_hf_repo(model_id)
     dest = _local_repo_path(model_id)
     dest.mkdir(parents=True, exist_ok=True)
-    snapshot_download(repo_id=hf_repo, local_dir=str(dest))
+    _ = snapshot_download(repo_id=hf_repo, local_dir=str(dest))
     return dest
 
 
@@ -296,6 +353,8 @@ adapters_volume = modal.Volume.from_name(ADAPTERS_VOLUME_NAME, create_if_missing
 pull_jobs = modal.Dict.from_name("vecinita-llm-pull-jobs", create_if_missing=True)
 
 _LLM_ASGI_SECRETS = [modal.Secret.from_name("vecinita-llm")]
+# GPU workers: promote pin / eager A/B only — do not mount ASGI proxy key (PR review).
+_LLM_GPU_SECRETS = [modal.Secret.from_name("vecinita-llm-gpu")]
 
 
 def _adapter_load_for_role(role: ServeRole) -> tuple[str | None, str | None]:
@@ -367,7 +426,7 @@ def stage_llm_weights() -> str:
 )
 def stage_default_model() -> str:
     """One-shot: stage the default playground model tag (ADR-037; replaces ollama_app)."""
-    _download_hf_model(DEFAULT_PLAYGROUND_MODEL_ID)
+    _ = _download_hf_model(DEFAULT_PLAYGROUND_MODEL_ID)
     _mark_model_available(DEFAULT_PLAYGROUND_MODEL_ID)
     return f"staged {DEFAULT_PLAYGROUND_MODEL_ID}"
 
@@ -381,7 +440,7 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     """Background HF download for a playground model tag (replaces vecinita-ollama pull)."""
     pull_jobs[job_id] = {"model_id": model_id, "status": "pulling"}
     try:
-        _download_hf_model(model_id)
+        _ = _download_hf_model(model_id)
     except (ValueError, OSError) as exc:
         pull_jobs[job_id] = {"model_id": model_id, "status": "failed", "error": str(exc)}
         raise
@@ -395,134 +454,41 @@ def pull_model_job(job_id: str, model_id: str) -> str:
     image=image,
     gpu="T4",
     volumes={"/models": model_volume, "/adapters": adapters_volume},
-    scaledown_window=300,
+    scaledown_window=_PROD_SCALEDOWN_WINDOW,
     timeout=900,
-    # ADR-037: model_id switching requires clean vLLM init — GPU snapshot breaks NCCL on reload.
-    enable_memory_snapshot=False,
+    secrets=_LLM_GPU_SECRETS,
+    # ADR-022 EV-313: prod-only GPU snapshots behind VECINITA_LLM_GPU_SNAPSHOT (default off).
+    # Playground stays off (ADR-037 reload/NCCL). Enable = set env at *modal deploy* time.
+    enable_memory_snapshot=_PROD_GPU_SNAPSHOT,
+    experimental_options=({"enable_gpu_snapshot": True} if _PROD_GPU_SNAPSHOT else {}),
 )
-class LlmService:
-    @modal.enter()
-    def load_model(self) -> None:
-        """Lazy-load vLLM on first request (supports default + playground tag switches)."""
-        self._llm = None
-        self._loaded_model_arg = None
-        self._loaded_cache_key: tuple[str, str | None] | None = None
-        self._lora_request: object | None = None
+class LlmService(LlmServiceCore):
+    """Prod GPU service — pinned model; LoRA after human promote (ADR-037 / ADR-053)."""
+
+    serve_role: ClassVar[ServeRole] = "prod"
+    allow_model_reload: ClassVar[bool] = ALLOW_MODEL_RELOAD
+
+    if _PROD_GPU_SNAPSHOT:
+
+        @modal.enter(snap=True)
+        def load_model_for_snapshot(self) -> None:
+            """Build pinned base engine, warm, Level-1 sleep — then Modal captures GPU snap."""
+            self._snapshot_enter_build()
+
+        @modal.enter(snap=False)
+        def restore_after_snapshot(self) -> None:
+            """Wake engine and bind promoted LoRA after restore (base-only snapshot)."""
+            self._snapshot_enter_restore()
+
+    else:
+
+        @modal.enter()
+        def load_model(self) -> None:
+            super().load_model()
 
     @modal.exit()
     def unload_model(self) -> None:
-        _shutdown_vllm_engine(getattr(self, "_llm", None))
-        self._llm = None
-        self._loaded_model_arg = None
-        self._loaded_cache_key = None
-        self._lora_request = None
-
-    def _ensure_model_loaded(self, model_id: str | None) -> None:
-        resolved = _resolve_vllm_model_arg(model_id)
-        adapter_id, adapter_dir = _adapter_load_for_role("prod")
-        cache_key = (resolved, adapter_id)
-        if getattr(self, "_loaded_cache_key", None) == cache_key and self._llm is not None:
-            return
-        _shutdown_vllm_engine(getattr(self, "_llm", None))
-        self._llm = None
-        self._loaded_model_arg = None
-        self._loaded_cache_key = None
-        self._lora_request = None
-        import gc
-
-        gc.collect()
-        try:
-            import torch
-
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-                torch.cuda.synchronize()
-        except Exception:
-            pass
-        engine_kwargs = merge_lora_engine_kwargs(
-            _llm_engine_kwargs(max_model_len=max_model_len_for(resolved), model=resolved),
-            adapter_dir=adapter_dir,
-        )
-        self._llm = LLM(**engine_kwargs)
-        self._lora_request = _build_lora_request(adapter_id, adapter_dir)
-        self._loaded_model_arg = resolved
-        self._loaded_cache_key = cache_key
-        warmup_kwargs: dict[str, object] = {}
-        if self._lora_request is not None:
-            warmup_kwargs["lora_request"] = self._lora_request
-        self._llm.generate(["warmup"], SamplingParams(max_tokens=1), **warmup_kwargs)
-
-    def _generate_text(
-        self,
-        prompt: str,
-        *,
-        max_tokens: int = 512,
-        temperature: float = 0.2,
-        model_id: str | None = None,
-    ) -> str:
-        self._ensure_model_loaded(model_id)
-        params = SamplingParams(
-            max_tokens=max_tokens,
-            temperature=temperature,
-            repetition_penalty=1.15,
-        )
-        if self._llm is None:
-            msg = "LlmService model is not loaded"
-            raise RuntimeError(msg)
-        gen_kwargs: dict[str, object] = {}
-        lora = getattr(self, "_lora_request", None)
-        if lora is not None:
-            gen_kwargs["lora_request"] = lora
-        outputs = self._llm.generate([prompt], params, **gen_kwargs)
-        return outputs[0].outputs[0].text
-
-    def _stream_text_deltas(
-        self,
-        prompt: str,
-        *,
-        max_tokens: int = 512,
-        temperature: float = 0.2,
-        model_id: str | None = None,
-    ) -> Iterator[str]:
-        """Yield incremental token text from the vLLM engine (RD-164 / TP-S010-22).
-
-        Uses ``llm_engine.add_request`` + ``step`` so SSE receives real deltas — not a
-        completed reply split into words.
-        """
-        self._ensure_model_loaded(model_id)
-        if self._llm is None:
-            msg = "LlmService model is not loaded"
-            raise RuntimeError(msg)
-        engine = getattr(self._llm, "llm_engine", None)
-        if engine is None or not hasattr(engine, "add_request") or not hasattr(engine, "step"):
-            msg = "vLLM llm_engine streaming API unavailable"
-            raise RuntimeError(msg)
-        params = SamplingParams(
-            max_tokens=max_tokens,
-            temperature=temperature,
-            repetition_penalty=1.15,
-        )
-        request_id = f"stream-{uuid.uuid4()}"
-        lora = getattr(self, "_lora_request", None)
-        if lora is not None:
-            engine.add_request(request_id, prompt, params, lora_request=lora)
-        else:
-            engine.add_request(request_id, prompt, params)
-        previous = ""
-        while engine.has_unfinished_requests():
-            for request_output in engine.step():
-                if getattr(request_output, "request_id", None) != request_id:
-                    continue
-                outputs = getattr(request_output, "outputs", None) or []
-                if not outputs:
-                    continue
-                text = getattr(outputs[0], "text", "") or ""
-                delta = text[len(previous) :]
-                previous = text
-                if delta:
-                    yield delta
-                if getattr(request_output, "finished", False):
-                    return
+        super().unload_model()
 
     @modal.method()
     def complete(
@@ -533,7 +499,7 @@ class LlmService:
         temperature: float = 0.2,
         model_id: str | None = None,
     ) -> str:
-        return self._generate_text(
+        return super().complete(
             prompt,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -550,7 +516,7 @@ class LlmService:
         model_id: str | None = None,
     ):
         """Yield incremental tokens for SSE (real vLLM deltas — RD-164)."""
-        yield from self._stream_text_deltas(
+        yield from super().stream_tokens(
             prompt,
             max_tokens=max_tokens,
             temperature=temperature,
@@ -560,8 +526,7 @@ class LlmService:
     @modal.method()
     def warm_model(self, model_id: str | None = None) -> str:
         """Preload a model into VRAM (fold cold-start into warm-up window)."""
-        self._ensure_model_loaded(model_id)
-        return _resolve_vllm_model_arg(model_id)
+        return super().warm_model(model_id)
 
 
 @app.function(
@@ -572,109 +537,20 @@ class LlmService:
 )
 @modal.asgi_app()
 def fastapi_app():
-    """Starlette ASGI — health, generate, model list/pull (ADR-037 unified surface)."""
-    from starlette.applications import Starlette
-    from starlette.responses import JSONResponse, StreamingResponse
-    from starlette.routing import Route
+    """Starlette ASGI — thin CPU ingress (EV-317); GPU via LlmService methods."""
+    from infra.modal.llm_asgi import AsgiRouteDeps, build_prod_asgi_app
 
-    service = LlmService()
+    def _spawn_pull(job_id: str, model_id: str) -> None:
+        _ = pull_model_job.spawn(job_id, model_id)
 
-    async def health(_: Request) -> JSONResponse:
-        return JSONResponse({"status": "ok"})
-
-    async def warm(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        raw = await request.body()
-        try:
-            payload = WarmRequest.model_validate(json.loads(raw)) if raw else WarmRequest()
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
-        try:
-            loaded = service.warm_model.remote(payload.model_id)
-        except RuntimeError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
-        return JSONResponse(
-            {
-                "status": "ok",
-                "model_id": payload.model_id or DEFAULT_PLAYGROUND_MODEL_ID,
-                "loaded": loaded,
-            }
-        )
-
-    async def list_models(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        return JSONResponse(_list_models_payload())
-
-    async def pull_model(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        try:
-            payload = PullRequest.model_validate(json.loads(await request.body()))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
-        try:
-            resolve_hf_repo(payload.model_id)
-        except ValueError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_REQUEST)
-        job_id = str(uuid.uuid4())
-        pull_model_job.spawn(job_id, payload.model_id)
-        _register_pending_model(payload.model_id)
-        return JSONResponse(
-            {
-                "job_id": job_id,
-                "model_id": payload.model_id,
-                "status": "pulling",
-            },
-            status_code=HTTPStatus.ACCEPTED,
-        )
-
-    async def generate(request: Request) -> JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        try:
-            payload = GenerateRequest.model_validate(json.loads(await request.body()))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=422)
-        try:
-            text = service.complete.remote(
-                payload.prompt,
-                max_tokens=payload.max_tokens,
-                temperature=payload.temperature,
-                model_id=payload.model_id,
-            )
-        except RuntimeError as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=HTTPStatus.BAD_GATEWAY)
-        return JSONResponse({"text": text})
-
-    async def generate_stream(request: Request) -> StreamingResponse | JSONResponse:
-        if not _authorized(request):
-            return JSONResponse({"detail": "Unauthorized"}, status_code=HTTPStatus.UNAUTHORIZED)
-        try:
-            payload = GenerateRequest.model_validate(json.loads(await request.body()))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return JSONResponse({"detail": str(exc)}, status_code=422)
-
-        def event_stream():
-            for token in service.stream_tokens.remote_gen(
-                payload.prompt,
-                max_tokens=payload.max_tokens,
-                temperature=payload.temperature,
-                model_id=payload.model_id,
-            ):
-                yield f"data: {json.dumps({'token': token})}\n\n"
-            yield f"data: {json.dumps({'done': True})}\n\n"
-
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
-
-    return Starlette(
-        routes=[
-            Route("/health", health, methods=["GET"]),
-            Route("/warm", warm, methods=["POST"]),
-            Route("/models/ollama", list_models, methods=["GET"]),
-            Route("/models/ollama/pull", pull_model, methods=["POST"]),
-            Route("/generate", generate, methods=["POST"]),
-            Route("/generate/stream", generate_stream, methods=["POST"]),
-        ]
+    return build_prod_asgi_app(
+        LlmService(),
+        AsgiRouteDeps(
+            health_payload=_prod_health_payload,
+            list_models_payload=_list_models_payload,
+            resolve_hf_repo=resolve_hf_repo,
+            register_pending_model=_register_pending_model,
+            spawn_pull_job=_spawn_pull,
+            default_model_id=DEFAULT_PLAYGROUND_MODEL_ID,
+        ),
     )

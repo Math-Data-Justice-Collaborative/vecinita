@@ -51,48 +51,48 @@ def main(argv: list[str] | None = None) -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--draft", type=Path, default=None, help="JSON draft file (object or array)"
     )
-    parser.add_argument("--id", default="", help="Case id (CLI single-row mode)")
-    parser.add_argument("--locale", default="", help="en or es")
-    parser.add_argument("--domain", default="", help="community, housing, legal, or edge")
-    parser.add_argument("--question", default="", help="User question text")
-    parser.add_argument("--expected-doc-url", default=None, help="Single expected URL (hit)")
-    parser.add_argument(
+    _ = parser.add_argument("--id", default="", help="Case id (CLI single-row mode)")
+    _ = parser.add_argument("--locale", default="", help="en or es")
+    _ = parser.add_argument("--domain", default="", help="community, housing, legal, or edge")
+    _ = parser.add_argument("--question", default="", help="User question text")
+    _ = parser.add_argument("--expected-doc-url", default=None, help="Single expected URL (hit)")
+    _ = parser.add_argument(
         "--expected-doc-url-multi",
         action="append",
         default=[],
         help="Repeatable expected URL (any_of)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--retrieval-expectation",
         default="hit",
         choices=["hit", "any_of", "abstain", "empty"],
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--required-fact",
         action="append",
         default=[],
         help="Repeatable required fact bullet",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--fixture",
         type=Path,
         default=_DEFAULT_FIXTURE,
         help="Target qa_pairs.json path",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--append",
         action="store_true",
         help="Write into --fixture (otherwise print JSON only)",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--replace",
         action="store_true",
         help="Replace existing same id+locale rows when appending",
     )
-    parser.add_argument(
+    _ = parser.add_argument(
         "--out",
         type=Path,
         default=None,

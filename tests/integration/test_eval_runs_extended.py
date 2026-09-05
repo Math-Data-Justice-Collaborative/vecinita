@@ -52,7 +52,7 @@ def extended_eval_client(
     monkeypatch.setenv("DATABASE_URL", database_url)
     monkeypatch.setenv("VECINITA_AUTH_REQUIRED", "true")
     set_auth_config_for_tests(make_auth_config(private_key))
-    seed_eval_corpus(database_url=database_url)
+    _ = seed_eval_corpus(database_url=database_url)
     app = create_app(
         eval_embed_fn=eval_embed_fn,
         eval_judge=MockEvalJudge(),
@@ -65,13 +65,13 @@ def extended_eval_client(
         yield client, private_key, preset_ids, run_ids
     with engine.begin() as conn:
         for run_id in run_ids:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_run_items WHERE run_id = :id"),
                 {"id": run_id},
             )
-            conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
+            _ = conn.execute(text("DELETE FROM eval_runs WHERE id = :id"), {"id": run_id})
         for preset_id in preset_ids:
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM eval_config_presets WHERE id = :id"),
                 {"id": preset_id},
             )

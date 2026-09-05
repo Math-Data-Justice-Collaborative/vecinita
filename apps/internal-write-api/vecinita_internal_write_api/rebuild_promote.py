@@ -106,7 +106,7 @@ def _promote_on_connection(
         msg = "no shadow chunks to promote for rebuild run"
         raise RebuildPromoteConflictError(msg)
 
-    conn.execute(
+    _ = conn.execute(
         text(
             """
             DELETE FROM chunks
@@ -119,7 +119,7 @@ def _promote_on_connection(
         {"id": rebuild_run_id},
     )
 
-    conn.execute(
+    _ = conn.execute(
         text(
             """
             INSERT INTO chunks (document_id, chunk_index, text, token_count)
@@ -132,7 +132,7 @@ def _promote_on_connection(
         {"id": rebuild_run_id},
     )
 
-    conn.execute(
+    _ = conn.execute(
         text(
             """
             INSERT INTO embeddings (chunk_id, embedding)
@@ -150,7 +150,7 @@ def _promote_on_connection(
 
     # First cutover from unstamped live: archive LEGACY_E0 so TC-239 / AC-ME9
     # retains a restorable prior pin before writing the candidate revision.
-    conn.execute(
+    _ = conn.execute(
         text(
             """
             INSERT INTO document_revisions (
@@ -191,7 +191,7 @@ def _promote_on_connection(
         {"id": rebuild_run_id, "e0_pin": LEGACY_E0_EMBEDDING_MODEL_ID},
     )
 
-    conn.execute(
+    _ = conn.execute(
         text(
             """
             INSERT INTO document_revisions (
@@ -227,7 +227,7 @@ def _promote_on_connection(
         {"id": rebuild_run_id},
     )
 
-    conn.execute(
+    _ = conn.execute(
         text(
             """
             UPDATE rebuild_runs

@@ -22,7 +22,7 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-019](ADR-019-shared-frontend-i18n.md) | Shared frontend i18n package (en/es) | Accepted | 00-context (EV-004) |
 | [ADR-020](ADR-020-shared-frontend-ui.md) | Shared frontend UI component package | Accepted | 00-context (EV-004) |
 | [ADR-021](ADR-021-ev004-implementation.md) | EV-004 implementation decisions (TP-030–TP-039) | Accepted | 04-tech-plan (EV-004) |
-| [ADR-022](ADR-022-gpu-memory-snapshot-cold-start.md) | GPU Memory Snapshots for vLLM cold-start reduction | Proposed (spike) | 00-context (S001) |
+| [ADR-022](ADR-022-gpu-memory-snapshot-cold-start.md) | GPU Memory Snapshots for vLLM cold-start reduction | Accepted (EV-313 prod-only re-enable) | S001; amended EV-313 / #313 |
 | [ADR-023](ADR-023-device-only-tab-scoped-chat-persistence.md) | Device-only, tab-scoped client-side chat persistence (sessionStorage) | Superseded in part by ADR-025 | 01-requirements (S003) |
 | [ADR-024](ADR-024-chat-history-persistence-design.md) | ChatRAG chat-history persistence design (`useConversationStore` + sessionStorage) | Superseded in part by ADR-025 | 04-tech-plan (S003) |
 | [ADR-025](ADR-025-chat-history-localstorage-persistence.md) | Chat history persists via `localStorage` (durable, cross-tab) | Accepted | 07-build (S003) |
@@ -43,11 +43,13 @@ Index of accepted and proposed decisions for Vecinita. Format follows `docs/adr/
 | [ADR-046](ADR-046-anonymous-community-feedback.md) | Anonymous community feedback rows (ADR-004 amendment) | Accepted | 01-requirements (S026/EV-024 F68) |
 | [ADR-047](ADR-047-ask-energy-heuristic-car-equivalent.md) | Ask energy heuristic + car-travel equivalent | Accepted | 04-tech-plan (S026/EV-024 F65) |
 | [ADR-048](ADR-048-multilingual-384-embeddings.md) | Multilingual 384-d embeddings (ADR-008 successor) | Accepted | 01–02 (S027/EV-025 #159) |
-| [ADR-049](ADR-049-single-env-staging-as-live.md) | Single-env staging-as-live honesty | Accepted | 17-retrospective (RET-002) |
+| [ADR-049](ADR-049-single-env-staging-as-live.md) | Single-env staging-as-live honesty | Accepted (exit via ADR-054) | 17-retrospective (RET-002) |
 | [ADR-050](ADR-050-ci-cd-blocks-live-deploy.md) | CI/CD must block live deploy and promote | Accepted | 17-retrospective (RET-002 / S027) |
 | [ADR-051](ADR-051-display-title-vs-lock-flag.md) | `display_title` column vs title lock-flag | Accepted | S028/EV-026 F74 |
 | [ADR-052](ADR-052-corpus-automation-orchestration.md) | Corpus automation orchestration (triggers + schedule) | Accepted | 04-tech-plan (S030/EV-027 F75–F76; TP2–TP3) |
 | [ADR-053](ADR-053-modal-lora-finetune.md) | Modal LoRA fine-tune + human promote | Accepted | 04-tech-plan (S030/EV-027 F77; TP4–TP6) |
+| [ADR-054](ADR-054-distinct-staging-and-production.md) | Distinct staging + production (DO, Supabase, Modal) | Accepted | EV-staging-do-supabase / F83 |
+| [ADR-055](ADR-055-operational-monitoring-grafana-loki.md) | Operational monitoring metrics + staging Grafana/Loki | Accepted (spec) | EV-036 / F84 / #114 |
 
 > **ADR-004 note:** ADR-026 supersedes the *no Supabase Auth / no identity* clause of ADR-004
 > **for admin surfaces only**. ADR-004's visitor zero-PII, stateless-chat, sovereignty, and cost

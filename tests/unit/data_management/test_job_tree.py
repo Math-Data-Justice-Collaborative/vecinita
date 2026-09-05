@@ -44,7 +44,7 @@ def test_get_job_tree_returns_nested_domain_path_document() -> None:
         ],
         options={"crawl": True, "max_depth": 2, "max_pages": 25},
     )
-    store.update_job(record.job_id, status="completed")
+    _ = store.update_job(record.job_id, status="completed")
     client = _client(store)
 
     response = client.get(f"/jobs/{record.job_id}/tree")

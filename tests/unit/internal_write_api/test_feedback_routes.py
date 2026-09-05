@@ -42,7 +42,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     )
     monkeypatch.setenv("VECINITA_INTERNAL_API_KEY", _API_KEY)
     with patch(
-        "vecinita_internal_write_api.app.create_engine",
+        "vecinita_internal_write_api.deps.create_engine",
         return_value=_FakeEngine(),
     ):
         return TestClient(create_app())
@@ -57,7 +57,7 @@ def test_create_feedback_success(client: TestClient) -> None:
     feedback_id = uuid4()
     created_at = "2026-08-04T12:00:00+00:00"
     with patch(
-        "vecinita_internal_write_api.app.insert_feedback",
+        "vecinita_internal_write_api.routes.audit_feedback.insert_feedback",
         return_value=FeedbackCreateResponse(id=feedback_id, created_at=created_at),
     ):
         resp = client.post(
@@ -104,7 +104,7 @@ def test_list_feedback_success(client: TestClient) -> None:
     """GET /internal/v1/feedback returns list payload."""
     feedback_id = uuid4()
     with patch(
-        "vecinita_internal_write_api.app.list_feedback",
+        "vecinita_internal_write_api.routes.audit_feedback.list_feedback",
         return_value=FeedbackListResponse(
             items=[
                 FeedbackItem(

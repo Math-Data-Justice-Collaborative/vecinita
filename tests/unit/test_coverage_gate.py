@@ -47,7 +47,7 @@ def _write_python_coverage(
             }
         }
     }
-    (coverage_dir / "python.json").write_text(
+    _ = (coverage_dir / "python.json").write_text(
         json.dumps(payload),
         encoding="utf-8",
     )

@@ -81,7 +81,7 @@ def resolve_llm_http_config(  # noqa: PLR0913  # shared resolver surface: url/pr
         if not resolved_url:
             msg = (
                 f"{_ENV_LLM_PLAYGROUND_URL} (preferred) or {_ENV_LLM_URL} "
-                "or base_url is required for purpose='playground'"
+                + "or base_url is required for purpose='playground'"
             )
             raise LlmHttpConfigError(msg)
     else:

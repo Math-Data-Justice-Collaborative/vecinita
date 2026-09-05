@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { EnergyEstimate } from "../api/types";
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 
 const KM_TO_MI = 0.621371;
 
@@ -53,17 +53,17 @@ export function EnergyEstimatePanel({
     <aside
       className="energy-estimate"
       data-testid="energy-estimate"
-      aria-label={t(locale, "energyEstimateLabel")}
+      aria-label={t(locale, "chat.energyEstimateLabel")}
     >
       <p className="energy-chip" data-testid="energy-chip">
-        {t(locale, "energyEstimateLabel")}: {wh} Wh · {gCo2e} gCO2e
+        {t(locale, "chat.energyEstimateLabel")}: {wh} Wh · {gCo2e} gCO2e
       </p>
       <p className="energy-car-line" data-testid="energy-car-line">
-        {t(locale, "energyCarPrefix")} {meters} m (≈ {miles} mi){" "}
-        {t(locale, "energyCarSuffix")}
+        {t(locale, "chat.energyCarPrefix")} {meters} m (≈ {miles} mi){" "}
+        {t(locale, "chat.energyCarSuffix")}
       </p>
       <p className="energy-advisory" data-testid="energy-advisory" role="note">
-        {t(locale, "energyAdvisory")}
+        {t(locale, "chat.energyAdvisory")}
       </p>
       <button
         type="button"
@@ -74,11 +74,11 @@ export function EnergyEstimatePanel({
           setGuideOpen((open) => !open);
         }}
       >
-        {t(locale, "energyUseGuideToggle")}
+        {t(locale, "chat.energyUseGuideToggle")}
       </button>
       {guideOpen ? (
         <div className="energy-use-guide" data-testid="energy-use-guide">
-          <p>{t(locale, "energyUseGuideBody")}</p>
+          <p>{t(locale, "chat.energyUseGuideBody")}</p>
         </div>
       ) : null}
     </aside>

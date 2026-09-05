@@ -36,7 +36,7 @@ def _database_url() -> str:
 def spanish_only_corpus_db() -> str:
     """Corpus with only Spanish documents (staging-like)."""
     url = _database_url()
-    seed_spanish_only_corpus(database_url=url)
+    _ = seed_spanish_only_corpus(database_url=url)
     return url
 
 

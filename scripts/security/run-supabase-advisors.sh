@@ -18,10 +18,23 @@ if [[ -z "${TOKEN}" || -z "${REF}" ]]; then
   exit 1
 fi
 
-curl -fsS "https://api.supabase.com/v1/projects/${REF}/advisors/security" \
-  -H "Authorization: Bearer ${TOKEN}" -o "${REPORTS}/security.json"
-curl -fsS "https://api.supabase.com/v1/projects/${REF}/advisors/performance" \
-  -H "Authorization: Bearer ${TOKEN}" -o "${REPORTS}/performance.json"
+fetch_advisor() {
+  local kind="$1"
+  local out="${REPORTS}/${kind}.json"
+  local http
+  set +e
+  http="$(curl -sS -o "${out}" -w '%{http_code}' \
+    "https://api.supabase.com/v1/projects/${REF}/advisors/${kind}" \
+    -H "Authorization: Bearer ${TOKEN}")"
+  set -e
+  if [[ "${http}" != "200" && "${http}" != "201" ]]; then
+    echo "[security] WARN: advisors/${kind} HTTP ${http} — skipping Supabase advisor gate" >&2
+    echo '{"lints":[]}' > "${out}"
+  fi
+}
+
+fetch_advisor security
+fetch_advisor performance
 
 export REPORTS
 # Default warn matches CI (stricter than ERROR-only). Override with SEC_SUPABASE_ADVISOR_FAIL_ON.

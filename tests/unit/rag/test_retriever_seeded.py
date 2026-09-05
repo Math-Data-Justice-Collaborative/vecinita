@@ -24,7 +24,7 @@ def test_retriever_returns_seeded_chunk(
     embed_fn_food_pantry: EmbedFn,
 ) -> None:
     """Test retriever returns seeded chunk."""
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=corpus_db,
         match_substrings={"Food pantry": 0},
         default_index=1,
@@ -42,7 +42,7 @@ def test_retriever_returns_seeded_chunk(
 
 def test_retriever_applies_score_threshold(corpus_db: str, embed_fn_food_pantry: EmbedFn) -> None:
     """Test retriever applies score threshold."""
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=corpus_db,
         match_substrings={"Food pantry": 0},
         default_index=1,
@@ -61,7 +61,7 @@ def test_retriever_applies_score_threshold(corpus_db: str, embed_fn_food_pantry:
 
 def test_retriever_filters_by_language(corpus_db: str) -> None:
     """Test retriever filters by language."""
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=corpus_db,
         match_substrings={"banco de alimentos": 2, "Food pantry": 0},
         default_index=1,

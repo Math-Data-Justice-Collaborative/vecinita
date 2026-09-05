@@ -61,8 +61,8 @@ class JobOptions(BaseModel):
         default=False,
         description=(
             "Bypass content_hash skip on ingest (F47) and rebuild (F41). "
-            "When true, re-chunk and re-embed even if scraped hash matches stored hash. "
-            "For freshness_refresh, Refresh now sets force=true to bypass stale (TC-259)."
+            + "When true, re-chunk and re-embed even if scraped hash matches stored hash. "
+            + "For freshness_refresh, Refresh now sets force=true to bypass stale (TC-259)."
         ),
     )
     refresh_enabled: bool | None = Field(
@@ -93,7 +93,7 @@ class JobOptions(BaseModel):
         max_length=2,
         description=(
             "Optional target locales for ingest-time MT (F75 / #251). "
-            "Default off; when set, creates draft paired documents in target language(s)."
+            + "Default off; when set, creates draft paired documents in target language(s)."
         ),
     )
 
@@ -221,6 +221,13 @@ class JobMetrics(BaseModel):
     freshness_outcome: str | None = Field(
         default=None,
         description="F79 freshness_refresh worker outcome (ADR-052).",
+    )
+    hash_decision: Literal["skip_rechunk", "rechunk"] | None = Field(
+        default=None,
+        description=(
+            "F79 hash-aware freshness: skip_rechunk when content unchanged, "
+            "rechunk when content changed (BUG-2026-08-28)."
+        ),
     )
     documents_processed: int | None = Field(
         default=None,

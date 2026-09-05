@@ -1,11 +1,27 @@
 # Deployment Integration Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 — automations, freshness, LoRA FT stub)
+> **Last updated**: 2026-08-30 (EV-036-D15 PR into stage first + F83 / ADR-054)
 
 ## Overview
 
 Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, internal write API, both frontends, and **Managed Postgres**; **Modal** (US workspace) for Data Management ASGI, ingest workers, FastEmbed, and **vLLM** (primary LLM per RD-021). Modal workers **do not** hold `DATABASE_URL`; they call the DO internal write API.
+
+### Environments (ADR-054 / F83)
+
+| `env_role` | DO | Supabase | Modal |
+|------------|----|----------|-------|
+| `staging` | `vecinita-staging-*` apps + `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** (web suffix `staging`) |
+| `prod` | Pre-existing sole stack | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** |
+
+Distinct staging was provisioned 2026-08-28 (H1–H5 PASS). Use `env_role` `staging` |
+`prod` per ADR-054; ADR-049 remains historical for the former single-env era.
+Merge to `main` requires CI + staging deploy/smoke (ruleset; ADR-050/054). GitHub Environments:
+`staging` (pre-merge) and `production` (post-merge CD). Agents: always-applied
+`.cursor/rules/stage-before-main.mdc` (EV-033 / AC-ST8 / EV-036-D15); tracking **#212**.
+**PR into `stage` first** when `origin/stage` exists (CI on that hop); then promote
+`stage`→`main` with CI + `staging-smoke` on the main-bound PR. If `stage` is missing,
+AskQuestion to create it (do not default the first integration PR to `main`).
 
 ## Services
 
@@ -19,6 +35,7 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 | vecinita-embedding | Modal | 384-d embeddings (ADR-048) — FastEmbed preferred; ST/ONNX fallback; CPU |
 | vecinita-llm | Modal | **Prod LLM** — vLLM pinned to `qwen2.5:1.5b-instruct`; volume **`llm-models`**; generate/warm (ADR-037) |
 | vecinita-llm-playground | Modal | **Playground LLM** — vLLM + HF list/pull/staging; **same** `llm-models` volume; sandbox `model_id` reloads (TP-S010-25) |
+| vecinita-rerank | Modal | **CE rerank** — `BAAI/bge-reranker-v2-m3` on T4; HTTP score API (F45 / EV-029) |
 | ~~vecinita-ollama~~ | ~~Modal~~ | **Deprecated** — de-deployed; superseded by `vecinita-llm` (+ playground app) |
 | database | DO Managed Postgres | Smallest viable tier |
 
@@ -164,7 +181,9 @@ No redeploy required: chat-rag-backend, internal-write-api, Modal apps, Postgres
 | `VECINITA_MODAL_PROXY_KEY` | chat-rag-backend, internal-write-api + Modal secrets for **both** LLM apps | `X-Vecinita-Proxy-Key` on **all** LLM routes except `/health` (RD-165) |
 | `VECINITA_LLM_MODEL_ID` | Modal / consumers | Prod pin default (`qwen2.5:1.5b-instruct`) — RD-169 |
 
-**`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**, **`scaledown_window=300`**.
+**`vecinita-llm` runtime (ADR-037):** vLLM on **GPU T4**, **`timeout=900s`**,
+**`scaledown_window`** default **300** (tunable via deploy-time `VECINITA_LLM_SCALEDOWN_WINDOW`,
+ADR-022 EV-319 / #319; candidates 60/120/300).
 Prod app stays pinned; playground app may reload on `model_id` (~60–120s) without stomping ChatRAG.
 Both apps mount **`llm-models`**. **`vecinita-ollama` is deprecated** — do not deploy.
 

@@ -270,7 +270,7 @@ def test_write_client_rebuild_helpers_raise_on_http_error() -> None:
         http_client=httpx.Client(transport=transport, base_url="http://write.test"),
     )
     with pytest.raises(InternalWriteClientError, match="create_rebuild_run"):
-        client.create_rebuild_run({"mode": "rechunk", "dry_run": True})
+        _ = client.create_rebuild_run({"mode": "rechunk", "dry_run": True})
     with pytest.raises(InternalWriteClientError, match="upsert_shadow_batch"):
         client.upsert_shadow_batch(
             BatchUpsertRequest(

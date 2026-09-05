@@ -83,7 +83,7 @@ def _postgres_reachable(url: str) -> bool:
     engine = create_engine(url)
     try:
         with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            _ = conn.execute(text("SELECT 1"))
     except (OperationalError, OSError):
         return False
     finally:
@@ -101,9 +101,9 @@ def seeded_retriever() -> CorpusPgvectorRetriever:
         )
     if not _postgres_reachable(url):
         pytest.skip("Postgres unavailable for fixture-backed TC-185 (start compose postgres)")
-    load_corpus(database_url=url)
+    _ = load_corpus(database_url=url)
     clear_embeddings(database_url=url)
-    attach_embeddings(
+    _ = attach_embeddings(
         database_url=url,
         match_substrings={"Housing": 0, "housing": 0},
         default_index=1,

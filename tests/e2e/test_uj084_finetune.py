@@ -276,7 +276,7 @@ def test_uj082_daily_cap_blocks_train_after_approve(
         job_type="finetune_train",
         options={"approved": True},
     )
-    store.update_job(
+    _ = store.update_job(
         prior.job_id,
         status="completed",
         metrics={"finetune_outcome": "trained", "adapter_id": "prior"},

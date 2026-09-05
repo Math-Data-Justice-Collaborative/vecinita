@@ -146,7 +146,7 @@ def test_create_rebuild_run_and_shadow_batch_leaves_live_chunks(
             assert run_status == "completed"
     finally:
         with engine.begin() as conn:
-            conn.execute(
+            _ = conn.execute(
                 text(
                     """
                     DELETE FROM shadow_embeddings
@@ -157,11 +157,13 @@ def test_create_rebuild_run_and_shadow_batch_leaves_live_chunks(
                 ),
                 {"id": rebuild_run_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM shadow_chunks WHERE rebuild_run_id = :id"),
                 {"id": rebuild_run_id},
             )
-            conn.execute(text("DELETE FROM rebuild_runs WHERE id = :id"), {"id": rebuild_run_id})
+            _ = conn.execute(
+                text("DELETE FROM rebuild_runs WHERE id = :id"), {"id": rebuild_run_id}
+            )
 
 
 def test_create_rebuild_run_rejects_unknown_mode(write_client: TestClient) -> None:

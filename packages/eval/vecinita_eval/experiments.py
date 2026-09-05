@@ -57,7 +57,7 @@ def write_experiment(
         "written_at": datetime.now(UTC).isoformat(),
         **payload,
     }
-    path.write_text(json.dumps(body, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    _ = path.write_text(json.dumps(body, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return path
 
 

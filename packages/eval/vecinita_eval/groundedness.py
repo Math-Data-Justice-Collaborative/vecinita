@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
+from vecinita_rag.faithfulness_judge import score_faithfulness as score_rag_faithfulness
+
 from vecinita_eval.judges import CompletingLlm, score_faithfulness
 
 if TYPE_CHECKING:
@@ -40,6 +42,29 @@ class LlamaIndexFaithfulnessScorer:
     ) -> float:
         """Score faithfulness for one golden row."""
         return score_faithfulness(
+            llm=self._llm,
+            question=row.question,
+            answer=answer,
+            context=context,
+        )
+
+
+class OutputVerificationScorer:
+    """F82 adapter — delegates to the shared ``packages/rag`` faithfulness judge."""
+
+    def __init__(self, llm: CompletingLlm) -> None:
+        """Store the LlamaIndex-compatible LLM used for judging."""
+        self._llm = llm
+
+    def score(
+        self,
+        *,
+        row: GoldenRow,
+        answer: str,
+        context: str,
+    ) -> float:
+        """Score faithfulness using the F82 shared judge."""
+        return score_rag_faithfulness(
             llm=self._llm,
             question=row.question,
             answer=answer,

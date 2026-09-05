@@ -18,7 +18,13 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
-from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    AuthPrincipal,
+    get_principal,
+    reset_auth_config_for_tests,
+    resolve_operator_or_service,
+)
 from vecinita_shared_schemas.data_management import CreateJobRequest, JobOptions
 
 from tests.helpers.json_response import json_str, response_json_object
@@ -48,7 +54,9 @@ def _client_with_principal(
         require_proxy_auth=False,
         pipeline_runner=runner,
     )
+    ctx = AuthContext(principal=principal, is_service=False)
     app.dependency_overrides[get_principal] = lambda: principal
+    app.dependency_overrides[resolve_operator_or_service] = lambda: ctx
     return TestClient(app)
 
 
@@ -189,7 +197,7 @@ def test_approve_non_pending_returns_409() -> None:
         job_type="finetune_train",
         options={"approved": False},
     )
-    store.update_job(record.job_id, status="running")
+    _ = store.update_job(record.job_id, status="running")
     client = _client_with_principal(store, _ADMIN)
     response = client.post(f"/jobs/{record.job_id}/approve")
     assert response.status_code == HTTPStatus.CONFLICT

@@ -75,7 +75,7 @@ def test_run_lora_sft_train_writes_adapter_dir_and_metadata(tmp_path: Path) -> N
 def test_run_lora_sft_train_rejects_empty_pairs(tmp_path: Path) -> None:
     """No SFT pairs → fail closed (RD-340); do not invent training data."""
     with pytest.raises(ValueError, match="SFT pairs"):
-        run_lora_sft_train(
+        _ = run_lora_sft_train(
             job_id="job-empty",
             pairs=[],
             adapters_root=tmp_path / "adapters",
@@ -97,7 +97,7 @@ def test_run_lora_sft_train_invokes_injected_peft_train(tmp_path: Path) -> None:
     def _fake_peft(*, adapter_dir: Path, pairs: list[SftPair], base_model_id: str) -> None:
         _ = pairs, base_model_id
         calls.append(adapter_dir)
-        (adapter_dir / "adapter_model.safetensors").write_bytes(b"fake-weights")
+        _ = (adapter_dir / "adapter_model.safetensors").write_bytes(b"fake-weights")
 
     result = run_lora_sft_train(
         job_id="job-peft",

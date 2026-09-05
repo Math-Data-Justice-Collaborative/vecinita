@@ -77,13 +77,13 @@ def test_chunk_text_respects_token_budget() -> None:
 def test_chunk_text_rejects_small_chunk_size() -> None:
     """Test chunk text rejects small chunk size."""
     with pytest.raises(ValueError, match="64"):
-        chunk_text("hello world", chunk_size_tokens=MIN_CHUNK_SIZE_TOKENS - 1)
+        _ = chunk_text("hello world", chunk_size_tokens=MIN_CHUNK_SIZE_TOKENS - 1)
 
 
 def test_chunk_text_rejects_large_chunk_size() -> None:
     """Test chunk text rejects large chunk size."""
     with pytest.raises(ValueError, match="2048"):
-        chunk_text("hello world", chunk_size_tokens=MAX_CHUNK_SIZE_TOKENS + 1)
+        _ = chunk_text("hello world", chunk_size_tokens=MAX_CHUNK_SIZE_TOKENS + 1)
 
 
 def test_chunk_text_returns_empty_list_for_blank_input() -> None:
@@ -149,7 +149,7 @@ def test_fetch_url_creates_and_closes_owned_client(monkeypatch: pytest.MonkeyPat
             closed.append(True)
             original_close()
 
-        client.close = tracked_close  # type: ignore[method-assign]
+        client.close = tracked_close
         return client
 
     monkeypatch.setattr(httpx, "Client", client_factory)

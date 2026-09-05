@@ -79,7 +79,9 @@ describe("BUG-2026-05-27 dashboard Invalid Date and empty Languages on api-contr
     expect(screen.queryByText("Invalid Date")).not.toBeInTheDocument();
     expect(screen.getByText(/Ingested example\.com\/page/)).toBeInTheDocument();
 
-    const languagesCard = screen.getByText("Parity gaps").closest(".rounded-lg");
+    const languagesCard = screen
+      .getByText("Parity gaps")
+      .closest(".rounded-lg");
     expect(languagesCard).not.toBeNull();
     expect(
       within(languagesCard as HTMLElement).getByText("6"),

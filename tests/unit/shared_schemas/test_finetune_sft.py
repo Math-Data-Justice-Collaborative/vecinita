@@ -102,7 +102,7 @@ def test_promote_then_rollback_clears_prod_pin(
 def test_promote_rejects_empty_adapter_id() -> None:
     """Human promote requires a non-empty adapter id."""
     with pytest.raises(ValueError, match="non-empty"):
-        decide_adapter_pin_after_promote("   ")
+        _ = decide_adapter_pin_after_promote("   ")
 
 
 def test_parse_finetune_adapter_id_unset(

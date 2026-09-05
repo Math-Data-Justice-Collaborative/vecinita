@@ -21,7 +21,7 @@ def test_synthesize_with_system_prompt_uses_p1_source_url_headers() -> None:
             captured["prompt"] = prompt
             return SimpleNamespace(text="Answer.")
 
-    synthesize_with_system_prompt(
+    _ = synthesize_with_system_prompt(
         "When is the pantry open?",
         [
             RetrievedChunk(

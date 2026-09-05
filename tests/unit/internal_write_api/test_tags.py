@@ -49,7 +49,7 @@ def tagged_document(engine: Engine) -> Iterator[tuple[UUID, UUID]]:
             conn.execute(
                 text(
                     "INSERT INTO documents (url, title, language) "
-                    "VALUES (:url, 'Tag test', 'en') RETURNING id"
+                    + "VALUES (:url, 'Tag test', 'en') RETURNING id"
                 ),
                 {"url": doc_url},
             )
@@ -59,7 +59,7 @@ def tagged_document(engine: Engine) -> Iterator[tuple[UUID, UUID]]:
             conn.execute(
                 text(
                     "INSERT INTO chunks (document_id, chunk_index, text) "
-                    "VALUES (:doc_id, 0, 'chunk') RETURNING id"
+                    + "VALUES (:doc_id, 0, 'chunk') RETURNING id"
                 ),
                 {"doc_id": doc_id},
             )
@@ -67,7 +67,7 @@ def tagged_document(engine: Engine) -> Iterator[tuple[UUID, UUID]]:
         chunk_id = UUID(str(chunk_id_raw))
     yield doc_id, chunk_id
     with engine.begin() as conn:
-        conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+        _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
 
 
 def test_validate_document_tag_count_rejects_over_cap(

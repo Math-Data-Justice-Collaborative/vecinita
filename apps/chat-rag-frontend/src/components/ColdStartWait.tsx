@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
 import type { Locale } from "../hooks/useLocale.types";
-import { t } from "../i18n/messages";
+import { t } from "vecinita-frontend-i18n";
 import { FACT_ROTATION_MS } from "../coldstart/constants";
 import { resolveDonateUrl } from "../coldstart/donateUrl";
 import { factText, pickNextFact, type ColdStartFact } from "../coldstart/facts";
@@ -70,7 +70,7 @@ export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
   return (
     <div className="cold-start-wait" data-testid="cold-start-wait">
       <p className="status-hint" role="status">
-        {t(locale, "coldStartStatus")}
+        {t(locale, "chat.coldStartStatus")}
       </p>
       <p
         className="cold-start-fact"
@@ -86,7 +86,7 @@ export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
           rel="noopener noreferrer"
           data-testid="cold-start-donate"
         >
-          {t(locale, "coldStartDonateCta")}
+          {t(locale, "chat.coldStartDonateCta")}
         </a>
       </p>
       {showBanner ? (
@@ -94,10 +94,10 @@ export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
           className="cold-start-consent"
           data-testid="cold-start-consent"
           role="region"
-          aria-label={t(locale, "coldStartConsentLabel")}
+          aria-label={t(locale, "chat.coldStartConsentLabel")}
         >
           <p className="cold-start-consent-copy">
-            {t(locale, "coldStartConsentCopy")}
+            {t(locale, "chat.coldStartConsentCopy")}
           </p>
           <div className="cold-start-consent-actions">
             <button
@@ -108,7 +108,7 @@ export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
                 setConsent("accept");
               }}
             >
-              {t(locale, "coldStartConsentAccept")}
+              {t(locale, "chat.coldStartConsentAccept")}
             </button>
             <button
               type="button"
@@ -119,7 +119,7 @@ export function ColdStartWait({ locale, active }: ColdStartWaitProps) {
                 setConsent("opt_out");
               }}
             >
-              {t(locale, "coldStartConsentOptOut")}
+              {t(locale, "chat.coldStartConsentOptOut")}
             </button>
           </div>
         </div>

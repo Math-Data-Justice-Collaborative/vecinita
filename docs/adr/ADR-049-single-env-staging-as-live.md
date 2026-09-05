@@ -1,8 +1,8 @@
 # ADR-049: Single-env stack is live/prod (“staging-as-live”)
 
-**Status:** Accepted (RET-002 / S027 / EV-025)  
+**Status:** Accepted (RET-002 / S027 / EV-025) — **operational exit via [ADR-054](ADR-054-distinct-staging-and-production.md) (F83)** when distinct staging is healthy  
 **Date:** 2026-08-06  
-**Related:** ADR-010 (DO topology), `12-verify-deploy`, `13-deploy-smoke`, S027-D60/D61, RA-008/RA-019
+**Related:** ADR-010 (DO topology), ADR-054 (dual-env), `12-verify-deploy`, `13-deploy-smoke`, S027-D60/D61, RA-008/RA-019
 
 ## Context
 
@@ -20,12 +20,17 @@ Calling that surface “staging” caused false safety and ambiguous prod-target
    hostnames still contain `staging`.
 3. Do **not** imply a safer staging-only cutover when none exists.
 4. When a true second environment is provisioned later, resume separate staging→prod paths.
+   **Implemented by ADR-054 / F83** (DO + Supabase + Modal Environment `staging` in workspace `vecinita`).
+   Until staging H1–H5 pass and operators flip docs/CD, continue treating the sole stack as
+   live under `staging_as_live`.
 
 ## Consequences
 
 - 12/13 skills must state live/prod risk explicitly under single-env.
 - Corpus / promote gates still require explicit approval (`no-live-prod-corpus-push`).
 - Legacy `deployment.staging.*` state keys may remain; add `env_role` notes until a rename.
+- After ADR-054 cutover: resolve `env_role: staging` \| `prod` only; do not use
+  `staging_as_live` for new work.
 
 ## References
 

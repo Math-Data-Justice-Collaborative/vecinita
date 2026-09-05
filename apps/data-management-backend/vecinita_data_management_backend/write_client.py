@@ -11,6 +11,12 @@ from vecinita_shared_schemas.audit_headers import (
     AUDIT_ACTOR_ID_HEADER,
     AUDIT_ACTOR_ROLE_HEADER,
 )
+from vecinita_shared_schemas.automations import (
+    AutomationJobType,
+    AutomationRun,
+    AutomationRunCreateRequest,
+    AutomationRunStatus,
+)
 from vecinita_shared_schemas.internal_write import (
     AuditEventRequest,
     BatchUpsertRequest,
@@ -27,6 +33,7 @@ from vecinita_shared_schemas.internal_write import (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
     from uuid import UUID
 
 _ENV_WRITE_URL: Final[str] = "VECINITA_INTERNAL_WRITE_URL"
@@ -114,6 +121,33 @@ class InternalWriteClient:
             raise InternalWriteClientError(msg)
         parsed = DocumentContentHashResponse.model_validate(response.json())
         return parsed.content_hash
+
+    def post_metrics_event(  # noqa: PLR0913  # mirrors MetricsEventRequest fields
+        self,
+        *,
+        workload: str,
+        outcome: str,
+        latency_ms: int,
+        error_code: str | None = None,
+        job_id: str | None = None,
+        locale: str | None = None,
+    ) -> None:
+        """Fire-and-forget embed/chat operational metric (F84). Failures are ignored by callers."""
+        response = self._client.post(
+            "/internal/v1/metrics/events",
+            json={
+                "workload": workload,
+                "outcome": outcome,
+                "latency_ms": latency_ms,
+                "error_code": error_code,
+                "job_id": job_id,
+                "locale": locale,
+            },
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"post_metrics_event failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
 
     def create_rebuild_run(self, body: dict[str, object]) -> UUID:
         """Create a rebuild_runs row for dry-run / live rebuild tracking (TP-S017-02)."""
@@ -288,3 +322,34 @@ class InternalWriteClient:
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"execute_eval_run failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
+
+    def record_automation_run(  # noqa: PLR0913  # mirrors AutomationRunCreateRequest fields
+        self,
+        *,
+        job_type: AutomationJobType,
+        status: AutomationRunStatus,
+        started_at: datetime | None = None,
+        finished_at: datetime | None = None,
+        error: str | None = None,
+        document_id: UUID | None = None,
+        revision: str | None = None,
+    ) -> AutomationRun:
+        """POST one ``automation_runs`` row (TC-289 / AC-AU5)."""
+        body = AutomationRunCreateRequest(
+            job_type=job_type,
+            status=status,
+            started_at=started_at,
+            finished_at=finished_at,
+            error=error,
+            document_id=document_id,
+            revision=revision,
+        )
+        response = self._client.post(
+            "/internal/v1/automations/runs",
+            json=body.model_dump(mode="json"),
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"record_automation_run failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return AutomationRun.model_validate(response.json())

@@ -9,6 +9,7 @@ import { JobsPage } from "@/pages/JobsPage";
 import { AutomationsPage } from "@/pages/AutomationsPage";
 import { FinetunePage } from "@/pages/FinetunePage";
 import { HealthPage } from "@/pages/HealthPage";
+import { MonitoringPage } from "@/pages/MonitoringPage";
 import { AuditPage } from "@/pages/AuditPage";
 import { FeedbackPage } from "@/pages/FeedbackPage";
 import { LoginPage } from "@/pages/LoginPage";
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/automations" element={<AutomationsPage />} />
         <Route path="/finetune" element={<FinetunePage />} />
         <Route path="/health" element={<HealthPage />} />
+        <Route path="/monitoring" element={<MonitoringPage />} />
         <Route path="/audit" element={<AuditPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/users" element={<UsersPage />} />

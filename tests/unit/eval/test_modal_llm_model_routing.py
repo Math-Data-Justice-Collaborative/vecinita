@@ -51,7 +51,7 @@ def test_eval_runtime_for_config_sends_model_id_to_llm(
     judge, synthesis = eval_runtime_for_config(config)
     assert judge is not None
     assert synthesis is not None
-    synthesis.complete("Score this answer.")
+    _ = synthesis.complete("Score this answer.")
     assert captured["path"] == "/generate"
     assert captured["model_id"] == "qwen3:8b"
 
@@ -76,5 +76,5 @@ def test_eval_runtime_for_config_defaults_model_id(
 
     _judge, synthesis = eval_runtime_for_config(EvalConfig())
     assert synthesis is not None
-    synthesis.complete("prompt")
+    _ = synthesis.complete("prompt")
     assert captured["model_id"] == DEFAULT_EVAL_MODEL_ID

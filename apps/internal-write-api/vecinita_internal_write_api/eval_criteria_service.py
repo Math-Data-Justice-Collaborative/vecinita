@@ -55,7 +55,7 @@ def create_eval_criterion(
     criterion_id = uuid4()
     now = datetime.now(UTC)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 INSERT INTO eval_criteria (
@@ -109,7 +109,7 @@ def update_eval_criterion(
     enabled = body.enabled if body.enabled is not None else existing.enabled
     now = datetime.now(UTC)
     with engine.begin() as conn:
-        conn.execute(
+        _ = conn.execute(
             text(
                 """
                 UPDATE eval_criteria

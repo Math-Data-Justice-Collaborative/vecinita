@@ -122,13 +122,15 @@ def test_batch_upsert_persists_body_text_and_revision_stamp(
             assert row_int(revision, "chunk_size_tokens") == _CHUNK_SIZE_TOKENS
     finally:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": document_id})
-            conn.execute(
+            _ = conn.execute(
+                text("DELETE FROM audit_log WHERE entity_id = :id"), {"id": document_id}
+            )
+            _ = conn.execute(
                 text("DELETE FROM document_versions WHERE document_id = :id"),
                 {"id": document_id},
             )
-            conn.execute(
+            _ = conn.execute(
                 text("DELETE FROM document_revisions WHERE document_id = :id"),
                 {"id": document_id},
             )
-            conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": document_id})
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": document_id})

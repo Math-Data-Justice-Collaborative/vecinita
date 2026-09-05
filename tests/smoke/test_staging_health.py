@@ -48,7 +48,8 @@ def test_h3_sample_ask(staging_chat_url: str) -> None:
     response = httpx.post(
         f"{staging_chat_url}/api/v1/ask",
         json={"question": "What are the food pantry hours?"},
-        timeout=60.0,
+        # Match staging_smoke.sh (120s): post-deploy H3 may hit cold LLM after CD redeploy.
+        timeout=120.0,
     )
     assert response.status_code == HTTPStatus.OK
     payload = response_json_object(response)
