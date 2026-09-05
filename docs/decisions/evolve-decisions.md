@@ -1851,7 +1851,7 @@ after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226m
 | EV-323-D10 | “Orphan” DB | **Cancel destroy** — `vecinita-staging-restored-20260701` is **live prod** corpus (ChatRAG + write API; 119 docs) |
 | EV-323-D11 | Cluster rename | **Impossible on DO managed DB** — document alias `vecinita-prod-db` in runbooks; host FQDN stays |
 | EV-323-D12 | Staging DB | Keep `vecinita-staging-db` as staging corpus |
-| EV-323-D13 | `vecinita-staging-obs` | Pending AskQuestion (Grafana/Loki droplet ~$6/mo; ports unreachable from public net) |
+| EV-323-D13 | `vecinita-staging-obs` | **Power off** (keep disk; ~$6/mo idle avoided). ID `596408528` / `159.203.137.236`. Power on when Grafana/Loki needed. |
 
 **Cites:** [Corpus: ADR-004] [Corpus: ADR-055] [Corpus: staging] #323
 

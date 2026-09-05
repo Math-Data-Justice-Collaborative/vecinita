@@ -265,17 +265,20 @@ bash scripts/deploy/create_staging_obs_droplet.sh
 # Complete CHECKLIST-tc305-tc306.md
 ```
 
-**Live (2026-08-30):** Droplet `vecinita-staging-obs` / `159.203.137.236` (nyc3),
-`s-1vcpu-1gb` (~**$6/mo**). Services bind **loopback** — public curl to :3000/:80 times out
-by design; tunnel Grafana:
+**Live (2026-08-30 create; EV-323 power-off 2026-09-04):** Droplet `vecinita-staging-obs`
+(id `596408528`) / `159.203.137.236` (nyc3), `s-1vcpu-1gb` (~**$6/mo** when on).
+**Default cost posture (EV-323-D13):** keep droplet **powered off** until staging Grafana/Loki
+is needed; power on via DO UI or
+`doctl compute droplet-action power-on 596408528`. Services bind **loopback** — public curl
+to :3000/:80 times out by design; tunnel Grafana after power-on:
 
 ```bash
 ssh -L 3000:127.0.0.1:3000 root@159.203.137.236
 # then open http://127.0.0.1:3000  (password in /opt/vecinita-obs/.env on host)
 ```
 
-**EV-323 cost note:** Droplet still bills while powered on even if unused. Power-off or
-destroy only after AskQuestion (staging Grafana/Loki / F84).
+**EV-323 cost note:** Droplet still bills while powered on even if unused. Destroy only after
+separate AskQuestion (recreate via `create_staging_obs_droplet.sh`).
 
 TC-306 drill: Alertmanager → compose `webhook-sink` received synthetic alert with no
 chat content fields (PASS). Replace sink URL with a real staging webhook when ready.
