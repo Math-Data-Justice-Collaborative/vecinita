@@ -49,7 +49,6 @@ class AttributionArgs:
     dry_names: list[str]
     do: bool
     modal: bool
-    as_json: bool
 
 
 def is_vecinita_resource_name(name: str) -> bool:
@@ -298,13 +297,11 @@ def _parse_args(argv: list[str] | None = None) -> AttributionArgs:
     )
     _ = parser.add_argument("--do", action="store_true", help="Fetch DO inventory")
     _ = parser.add_argument("--modal", action="store_true", help="List Modal apps via CLI")
-    _ = parser.add_argument("--json", dest="as_json", action="store_true")
     ns = parser.parse_args(argv)
     return AttributionArgs(
         dry_names=list(ns.dry_names),
         do=bool(ns.do),
         modal=bool(ns.modal),
-        as_json=bool(ns.as_json),
     )
 
 
@@ -332,10 +329,8 @@ def main(argv: list[str] | None = None) -> int:
         print("Nothing to do: pass --dry-names, --do, and/or --modal", file=sys.stderr)
         return 2
 
-    if args.as_json:
-        print(json.dumps(report, indent=2, sort_keys=True))
-    else:
-        print(json.dumps(report, indent=2, sort_keys=True))
+    # Always JSON (operator inventory); no alternate human formatter this cycle.
+    print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
 

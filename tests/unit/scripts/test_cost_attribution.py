@@ -5,7 +5,10 @@
 
 from __future__ import annotations
 
-from scripts.ops.cost_attribution import classify_names, is_vecinita_resource_name
+from scripts.ops.cost_attribution import (
+    classify_names,
+    is_vecinita_resource_name,
+)
 
 
 def test_is_vecinita_resource_name_includes_vecinita_apps() -> None:
@@ -40,3 +43,10 @@ def test_classify_names_splits_included_and_excluded() -> None:
         "vecinita": ["vecinita-staging-db", "vecinita-admin-frontend"],
         "excluded": ["metar-iwxxm", "empiric-mlflow-pg"],
     }
+
+
+def test_parse_args_has_no_json_flag() -> None:
+    """--json was removed after PR review (identical output branches)."""
+    args = _parse_args(["--dry-names", "vecinita-staging-db"])
+    assert args.dry_names == ["vecinita-staging-db"]
+    assert not hasattr(args, "as_json")
