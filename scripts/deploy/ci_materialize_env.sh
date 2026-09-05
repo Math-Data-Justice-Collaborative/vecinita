@@ -9,6 +9,7 @@
 #   bash scripts/deploy/ci_materialize_env.sh --check modal
 #   bash scripts/deploy/ci_materialize_env.sh --check do
 #   bash scripts/deploy/ci_materialize_env.sh --check alembic
+#   bash scripts/deploy/ci_materialize_env.sh --check finetune
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -92,8 +93,11 @@ case "$CHECK_TARGET" in
       alembic)
         _missing "Alembic upgrade" DATABASE_URL
         ;;
+      finetune)
+        _missing "Finetune Modal secret sync" VECINITA_INTERNAL_WRITE_URL VECINITA_INTERNAL_API_KEY
+        ;;
       *)
-        echo "Usage: $0 --check {modal|do|alembic}" >&2
+        echo "Usage: $0 --check {modal|do|alembic|finetune}" >&2
         exit 2
         ;;
     esac

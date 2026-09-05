@@ -4,7 +4,7 @@
 #   GitHub    — push Actions repository secrets (sync_github_secrets.sh).
 #   Supabase  — source of truth: validate SUPABASE_URL + JWKS (ES256, ADR-028);
 #               optionally bootstrap the first admin (scripts/seed_first_admin.py).
-#   Modal     — data-mgmt secret (--merge) + llm proxy secret (sync_llm_secret.sh).
+#   Modal     — data-mgmt secret (--merge) + llm proxy secret + finetune secret.
 #   DigitalOcean — push app env from shell (do_apps.py sync-all-secrets).
 #
 # Env comes from the shell — load prod.env first (gitignored):
@@ -142,6 +142,13 @@ if [[ "$DO_MODAL" -eq 1 ]]; then
     bash scripts/deploy/sync_llm_secret.sh --apply
   else
     bash scripts/deploy/sync_llm_secret.sh
+  fi
+  echo
+  echo "==> [Modal] sync vecinita-llm-finetune secret (flags off by default)"
+  if [[ "$APPLY" -eq 1 ]]; then
+    bash scripts/deploy/sync_finetune_secret.sh --apply
+  else
+    bash scripts/deploy/sync_finetune_secret.sh
   fi
 fi
 
