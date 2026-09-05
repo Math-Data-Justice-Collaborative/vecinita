@@ -24,6 +24,7 @@ suffixes: `*_STAGING` on Environment `staging`; unsuffixed or `*_PROD` on `produ
 | `VECINITA_ENV` | `staging` on staging apps; `production` on prod |
 | `VECINITA_MODAL_WORKSPACE` | Always **`vecinita`** (both envs) |
 | `MODAL_ENVIRONMENT` | `staging` for staging deploys; `main` (or unset) for prod |
+| `VECINITA_EMBED_MIN_CONTAINERS` | Staging Modal embed deploy-import: **`0`** (AC-ST9 / EV-354). Do not set `1` on staging. Prod change = AskQuestion. |
 | `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Workspace `vecinita` token (same OK for GH Env staging + production) |
 | `SUPABASE_URL` / keys / project ref | Staging project only on staging admin FE + write API |
 | `DATABASE_URL` | Staging Postgres only on staging DO backends (never Modal) |

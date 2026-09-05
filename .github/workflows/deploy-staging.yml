@@ -139,7 +139,7 @@ jobs:
   staging-smoke:
     name: staging-smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     needs: deploy-staging
     environment: staging
     env:
@@ -167,6 +167,16 @@ jobs:
             echo "::error::VECINITA_STAGING_CHAT_URL unset — staging apps missing?" >&2
             exit 1
           fi
+
+      - name: Warm staging Modal (idle posture)
+        env:
+          VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
+          VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
+          VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}
+        run: |
+          set -euo pipefail
+          # EV-354 / #354 / TC-326 / UJ-095 — scale-to-zero staging needs warm before H1–H3
+          uv run python scripts/ops/warm_staging_for_smoke.py
 
       - name: H1–H3 staging smoke
         run: |

@@ -1,6 +1,7 @@
 # ADR-054: Distinct staging and production environments
 
-**Status:** Accepted (EV-staging-do-supabase / F83) — amended 2026-08-28 (Modal Environments)  
+**Status:** Accepted (EV-staging-do-supabase / F83) — amended 2026-08-28 (Modal Environments);
+amended 2026-09-05 (EV-354 staging idle cost posture / #354)  
 **Date:** 2026-08-28  
 **Related:** ADR-002, ADR-007, ADR-010, ADR-049, ADR-050, ADR-026/027
 
@@ -60,6 +61,21 @@ on DigitalOcean, Supabase, and Modal.
 Do **not** put staging and prod corpus on the same logical database. Immediate savings without
 architecture change: destroy unused orphan clusters (e.g. leftover `vecinita-staging` if not
 referenced) after AskQuestion confirm.
+
+### Amendment EV-354 — Staging idle cost posture (2026-09-05 / #354)
+
+**Decision:** Keep dual-env topology (ADR-054). Optimize **staging idle** without weakening
+`staging-smoke` / H1–H5:
+
+1. Staging Modal: `VECINITA_EMBED_MIN_CONTAINERS=0`; LLM / playground / FT / rerank deployed
+   but scale-to-zero (not always-warm).
+2. Obs droplet `vecinita-staging-obs`: default **powered off** (EV-323-D13).
+3. Promote path: **warm-before-smoke** (CI step and/or helper) then H1–H5 (UJ-095).
+4. Soft cost target: document staging-attributable delta; no hard staging-only $ cap this cycle.
+5. Do **not** destroy `vecinita-staging-restored-20260701` — it is **prod** corpus alias
+   (EV-323-D10). Shared Postgres still deferred (EV-STG-D7).
+
+**Acceptance:** AC-ST9–AC-ST14 · TC-325–TC-327 · UJ-095.
 
 ## Alternatives considered
 

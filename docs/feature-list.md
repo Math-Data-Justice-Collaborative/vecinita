@@ -83,7 +83,7 @@
 | F78 | Corpus change automations | Live enabled (EV-031) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133/M135 |
 | F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
-| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule | EV-staging-do-supabase; EV-033; ADR-054 |
+| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule; idle cost posture + warm-before-smoke (EV-354 / #354) | EV-staging-do-supabase; EV-033; ADR-054; EV-354 |
 | F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
 | F85 | FAQ fast-path (canned answers; skip LLM) | Implemented | ChatRAG | chat-rag-backend, shared-schemas | EV-320 #320 / #79; ADR-022 Layer D |
 
@@ -1581,22 +1581,31 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   workspace **`vecinita`** under Modal Environment **`staging`** (web suffix `staging`;
   native Environments). Restores staging→prod paths and ends operational use of
   `staging_as_live` (ADR-049) once staging is healthy. Requires GitHub ruleset so merges to
-  `main` need CI **and** staging deploy + H1–H5 smoke.
+  `main` need CI **and** staging deploy + H1–H5 smoke. **Idle cost posture (EV-354 / #354):**
+  staging Modal apps default to scale-to-zero (`VECINITA_EMBED_MIN_CONTAINERS=0`; playground /
+  FT / rerank remain deployed but not always-warm); obs droplet defaults **powered off**;
+  promote smoke may **warm** Modal services then run H1–H5 so cheaper idle does not weaken
+  the Stage→Main gate.
 - **Inputs**: Operator tokens (DO, Modal workspace `vecinita`, Supabase); GitHub Environments
   `staging` / `production`; seed corpus for staging DB only **or** selective **prod→staging
   corpus mirror** after AskQuestion (EV-338 / #338 — preferred when staging was wiped and
-  ChatRAG parity with live community content is required).
+  ChatRAG parity with live community content is required); deploy-import env for staging
+  Modal idle knobs (`VECINITA_EMBED_MIN_CONTAINERS`, optional staging LLM scaledown).
 - **Outputs**: Distinct staging URLs; `env_role: staging` \| `prod`; ADR-054; updated
-  runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212.
-- **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087; staging corpus restore AC via UJ-094 /
-  TC-321–TC-324 when mirror path used.
+  runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212;
+  documented staging cost delta (soft target — maximize safe idle savings).
+- **Acceptance**: AC-ST1–AC-ST8; AC-ST9–AC-ST14 (idle posture); TC-294–TC-298; TC-325–TC-327;
+  UJ-087; UJ-095; staging corpus restore AC via UJ-094 / TC-321–TC-324 when mirror path used.
 - **Out of scope**: Live corpus clone **or staging write** without AskQuestion; Modal provision
   during Spec band (Build gate); full hostname rename of legacy prod apps in one cutover;
-  mutating **prod** during mirror (prod remains read-only).
+  mutating **prod** during mirror (prod remains read-only); shared staging+prod Postgres or
+  Supabase Auth; destroying prod DB alias `vecinita-staging-restored-20260701` (EV-323-D10);
+  whole-stack <$30 envelope (#323) beyond staging-specific idle levers.
 - **Promotion (EV-036-D15)**: When `origin/stage` exists — feature→`stage` (CI) then
   promote `stage`→`main` (CI + `staging-smoke`). Smoke remains on main-bound PRs (ADR-054).
+  Warm-before-smoke is part of the smoke path when staging is left cold (UJ-095).
 - **Source**: EV-staging-do-supabase; EV-033-stage-before-main; EV-036-D15; ADR-054;
-  ADR-049 exit; ADR-050.
+  ADR-049 exit; ADR-050; EV-354 / #354; EV-323 (idle levers).
 
 ### F84: Admin monitoring + staging Grafana/Loki/alerts (#114)
 
