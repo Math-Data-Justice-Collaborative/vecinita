@@ -59,8 +59,11 @@ non-blocking; justified MEDIUM OpenAPI noise excludes live in
 `config/security/kics-exclude-queries.txt`.
 
 Config: `config/security/` (KICS query excludes, Grype ignores, OpenGrep notes).
-2ms ignores gitignored local secret files (`.env`, `prod.env`, operator `*-spec.yaml`
-exports); secrets in tracked files still hard-fail. Complementary: gitleaks in `ci-guards`.
+2ms ignores gitignored local secret files (`.env`, `.env.staging`, `prod.env`,
+`.staging-db-url.local`, `.staging-supabase-db-pass.local`,
+`.staging-supabase-ref.local`, `.staging-supabase-keys.local`, operator
+`*-spec.yaml` exports); secrets in tracked files still hard-fail. Complementary:
+gitleaks in `ci-guards`.
 
 ## SBOM licenses
 
@@ -74,12 +77,17 @@ Our suite enables:
 |------|-----|--------|
 | `-li true` | `SEC_SBOM_FETCH_LICENSES=1` (default) | Fetch from [ClearlyDefined](https://clearlydefined.io) (often fails with HTTP 524 on bulk) |
 | `-pm true` | same | Parse package metadata when the detector supports it (limited for npm/uv) |
-| `-lto` | `SEC_SBOM_LICENSE_TIMEOUT_SEC` (default `300`) | ClearlyDefined timeout |
+| `-lto` | `SEC_SBOM_LICENSE_TIMEOUT_SEC` (default `30`) | ClearlyDefined timeout |
 | `enrich_sbom_licenses.py` | `SEC_SBOM_ENRICH_LICENSES=1` (default) | Post-pass: resolve licenses from npm/PyPI registries into the SPDX JSON; also write `sbom/python-licenses.json` from `uv.lock` |
 
 **Python gap:** Component Detection’s UvLock detector finds packages, but `sbom-tool` currently
 emits an npm-only SPDX package list. Use `python-licenses.json` (or `audit-licenses`) for
 PyPI commercial/OSS review until upstream includes UvLock in the SPDX document.
+
+The default timeout is intentionally short so transient ClearlyDefined stalls do
+not make local `make security-scan` / `make ci-push` appear hung for minutes at
+a time. Set `SEC_SBOM_LICENSE_TIMEOUT_SEC` higher only when you intentionally
+want to wait longer for the remote license service.
 
 Set `SEC_SBOM_FETCH_LICENSES=0` / `SEC_SBOM_ENRICH_LICENSES=0` only when offline.
 
@@ -120,7 +128,10 @@ Prefer env-block interpolation (already used in hardened workflows) when editing
 Fail-on is **medium,high,critical**. Remaining LOW/INFO volume is dominated by OpenAPI
 schema shape (optional fields, INFO-level style). Justified MEDIUM excludes for
 non-actionable OpenAPI pattern/response-$ref queries live in
-`config/security/kics-exclude-queries.txt`. Re-triage when touching IaC/OpenAPI.
+`config/security/kics-exclude-queries.txt`. The exclude list also carries the
+local Docker Desktop Postgres bootstrap exception: the dev `pgvector` container
+must keep its stock init privileges so `with_local_postgres.sh` can boot on
+macOS Docker Desktop. Re-triage when touching IaC/OpenAPI or local compose.
 
 ## Related
 

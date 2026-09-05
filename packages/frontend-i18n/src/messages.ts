@@ -20,11 +20,15 @@ const enStrings = {
   "admin.tooltip.forceSignout": "Sign this operator out of all sessions",
   "chat.tooltip.newChat": "Start a new conversation",
   "chat.ask": "Ask",
-  "chat.appSubtitle": "Bilingual community Q&A — answers stay in your browser only.",
+  "chat.appSubtitle":
+    "Bilingual community Q&A — answers stay in your browser only.",
   "chat.appTitle": "Vecinita",
-  "chat.askServerError": "The assistant is temporarily unavailable. Please try again.",
-  "chat.askStartingWait": "The assistant is starting up — please wait a moment and try again.",
-  "chat.askStillStarting": "The assistant is still starting up. Please wait a moment and try again.",
+  "chat.askServerError":
+    "The assistant is temporarily unavailable. Please try again.",
+  "chat.askStartingWait":
+    "The assistant is starting up — please wait a moment and try again.",
+  "chat.askStillStarting":
+    "The assistant is still starting up. Please wait a moment and try again.",
   "chat.askUnauthorized": "You are not authorized to use the assistant.",
   "chat.asking": "Asking…",
   "chat.backToChat": "Back to chat",
@@ -32,20 +36,25 @@ const enStrings = {
   "chat.clearAllHistory": "Clear all history",
   "chat.clearHistory": "Clear history",
   "chat.coldStartConsentAccept": "Accept",
-  "chat.coldStartConsentCopy": "We’re not tracking you. We only remember which tips you’ve already seen so we don’t repeat them right away — if you allow it.",
+  "chat.coldStartConsentCopy":
+    "We’re not tracking you. We only remember which tips you’ve already seen so we don’t repeat them right away — if you allow it.",
   "chat.coldStartConsentLabel": "Cold-start message preferences",
   "chat.coldStartConsentOptOut": "No thanks",
   "chat.coldStartDonateCta": "Support the river → Donate",
-  "chat.coldStartStatus": "The assistant is starting up — this can take up to a minute on the first question…",
+  "chat.coldStartStatus":
+    "The assistant is starting up — this can take up to a minute on the first question…",
   "chat.corpusBrowseLabel": "Corpus browse",
   "chat.corpusChunk": "Corpus chunk",
   "chat.deleteConversation": "Delete conversation",
-  "chat.emptyHint": "Ask a question in English or Spanish about your community.",
-  "chat.energyAdvisory": "Approximate — based on GPU TDP x utilization x wall time, not live power meters.",
+  "chat.emptyHint":
+    "Ask a question in English or Spanish about your community.",
+  "chat.energyAdvisory":
+    "Approximate — based on GPU TDP x utilization x wall time, not live power meters.",
   "chat.energyCarPrefix": "≈",
   "chat.energyCarSuffix": "of average car travel",
   "chat.energyEstimateLabel": "Approx. energy",
-  "chat.energyUseGuideBody": "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
+  "chat.energyUseGuideBody":
+    "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
   "chat.energyUseGuideToggle": "How we estimate energy",
   "chat.feedbackCategoryLabel": "Category",
   "chat.feedbackCategory_bug": "Bug",
@@ -54,8 +63,10 @@ const enStrings = {
   "chat.feedbackCategory_wrong_answer": "Wrong answer",
   "chat.feedbackMessageLabel": "Message",
   "chat.feedbackMessageRequired": "Please enter a message.",
-  "chat.feedbackIntro": "Your note is stored anonymously for the team to review. We do not need your name or contact details.",
-  "chat.feedbackPrivacyNote": "Do not include private or sensitive information — no names, emails, phone numbers, addresses, IDs or SSNs, immigration or case details, medical information, or other personal data. Feedback is for product and experience comments only.",
+  "chat.feedbackIntro":
+    "Your note is stored anonymously for the team to review. We do not need your name or contact details.",
+  "chat.feedbackPrivacyNote":
+    "Do not include private or sensitive information — no names, emails, phone numbers, addresses, IDs or SSNs, immigration or case details, medical information, or other personal data. Feedback is for product and experience comments only.",
   "chat.feedbackSubmit": "Submit feedback",
   "chat.feedbackSubmitFailed": "Could not submit feedback. Please try again.",
   "chat.feedbackSubmitting": "Submitting…",
@@ -76,7 +87,8 @@ const enStrings = {
   "chat.previousChats": "Previous chats",
   "chat.questionPlaceholder": "e.g. Where can I get food assistance?",
   "chat.relevancePercent": "{n}% relevant",
-  "chat.relevanceTip": "How closely this source matched what you asked. Higher % means a stronger match.",
+  "chat.relevanceTip":
+    "How closely this source matched what you asked. Higher % means a stronger match.",
   "chat.requestFailed": "Request failed",
   "chat.roleAssistant": "Vecinita",
   "chat.roleUser": "You",
@@ -755,11 +767,15 @@ const esStrings = {
   "admin.tooltip.forceSignout": "Cerrar todas las sesiones de este operador",
   "chat.tooltip.newChat": "Iniciar una conversación nueva",
   "chat.ask": "Preguntar",
-  "chat.appSubtitle": "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador.",
+  "chat.appSubtitle":
+    "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador.",
   "chat.appTitle": "Vecinita",
-  "chat.askServerError": "El asistente no está disponible temporalmente. Inténtalo de nuevo.",
-  "chat.askStartingWait": "El asistente se está iniciando — espera un momento e inténtalo de nuevo.",
-  "chat.askStillStarting": "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
+  "chat.askServerError":
+    "El asistente no está disponible temporalmente. Inténtalo de nuevo.",
+  "chat.askStartingWait":
+    "El asistente se está iniciando — espera un momento e inténtalo de nuevo.",
+  "chat.askStillStarting":
+    "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
   "chat.askUnauthorized": "No tienes autorización para usar el asistente.",
   "chat.asking": "Preguntando…",
   "chat.backToChat": "Volver al chat",
@@ -767,20 +783,24 @@ const esStrings = {
   "chat.clearAllHistory": "Borrar todo el historial",
   "chat.clearHistory": "Borrar historial",
   "chat.coldStartConsentAccept": "Aceptar",
-  "chat.coldStartConsentCopy": "No te rastreamos. Solo recordamos qué consejos ya viste para no repetirlos de inmediato — si lo permites.",
+  "chat.coldStartConsentCopy":
+    "No te rastreamos. Solo recordamos qué consejos ya viste para no repetirlos de inmediato — si lo permites.",
   "chat.coldStartConsentLabel": "Preferencias de mensajes al iniciar",
   "chat.coldStartConsentOptOut": "No, gracias",
   "chat.coldStartDonateCta": "Apoya el río → Donar",
-  "chat.coldStartStatus": "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
+  "chat.coldStartStatus":
+    "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
   "chat.corpusBrowseLabel": "Explorar corpus",
   "chat.corpusChunk": "Fragmento del corpus",
   "chat.deleteConversation": "Eliminar conversación",
   "chat.emptyHint": "Pregunta en inglés o español sobre tu comunidad.",
-  "chat.energyAdvisory": "Aproximado — basado en TDP de GPU x utilización x tiempo, no medidores de potencia en vivo.",
+  "chat.energyAdvisory":
+    "Aproximado — basado en TDP de GPU x utilización x tiempo, no medidores de potencia en vivo.",
   "chat.energyCarPrefix": "≈",
   "chat.energyCarSuffix": "de viaje en auto promedio",
   "chat.energyEstimateLabel": "Energía aprox.",
-  "chat.energyUseGuideBody": "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
+  "chat.energyUseGuideBody":
+    "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
   "chat.energyUseGuideToggle": "Cómo estimamos la energía",
   "chat.feedbackCategoryLabel": "Categoría",
   "chat.feedbackCategory_bug": "Error",
@@ -789,8 +809,10 @@ const esStrings = {
   "chat.feedbackCategory_wrong_answer": "Respuesta incorrecta",
   "chat.feedbackMessageLabel": "Mensaje",
   "chat.feedbackMessageRequired": "Escribe un mensaje.",
-  "chat.feedbackIntro": "Tu nota se guarda de forma anónima para que el equipo la revise. No necesitamos tu nombre ni datos de contacto.",
-  "chat.feedbackPrivacyNote": "No incluyas información privada o sensible: ni nombres, correos, teléfonos, direcciones, identificaciones o SSN, detalles de inmigración o casos, información médica ni otros datos personales. Los comentarios son solo sobre el producto y la experiencia.",
+  "chat.feedbackIntro":
+    "Tu nota se guarda de forma anónima para que el equipo la revise. No necesitamos tu nombre ni datos de contacto.",
+  "chat.feedbackPrivacyNote":
+    "No incluyas información privada o sensible: ni nombres, correos, teléfonos, direcciones, identificaciones o SSN, detalles de inmigración o casos, información médica ni otros datos personales. Los comentarios son solo sobre el producto y la experiencia.",
   "chat.feedbackSubmit": "Enviar comentarios",
   "chat.feedbackSubmitFailed": "No se pudieron enviar. Inténtalo de nuevo.",
   "chat.feedbackSubmitting": "Enviando…",
@@ -811,7 +833,8 @@ const esStrings = {
   "chat.previousChats": "Chats anteriores",
   "chat.questionPlaceholder": "p. ej. ¿Dónde puedo conseguir ayuda con comida?",
   "chat.relevancePercent": "{n}% relevante",
-  "chat.relevanceTip": "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
+  "chat.relevanceTip":
+    "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
   "chat.requestFailed": "La solicitud falló",
   "chat.roleAssistant": "Vecinita",
   "chat.roleUser": "Tú",
@@ -819,9 +842,12 @@ const esStrings = {
   "chat.searchPlaceholder": "Buscar documentos…",
   "chat.sourcesHeading": "Fuentes",
   "chat.suggestedQuestionsLabel": "Prueba a preguntar",
-  "chat.suggestion1": "¿Dónde puedo conseguir ayuda con comida en Rhode Island?",
-  "chat.suggestion2": "¿Cómo solicito ayuda para pagar el alquiler en Providence?",
-  "chat.suggestion3": "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
+  "chat.suggestion1":
+    "¿Dónde puedo conseguir ayuda con comida en Rhode Island?",
+  "chat.suggestion2":
+    "¿Cómo solicito ayuda para pagar el alquiler en Providence?",
+  "chat.suggestion3":
+    "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
   "chat.switchToDark": "Cambiar a tema oscuro",
   "chat.switchToLight": "Cambiar a tema claro",
   "chat.themeToggleLabel": "Tema",
