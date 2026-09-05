@@ -121,6 +121,17 @@ def test_sync_staging_uses_staging_runtime_inputs() -> None:
     assert "config push --project-ref" in staging_section
 
 
+def test_sync_staging_uses_temp_project_root_for_cli_and_migrations() -> None:
+    """Staging sync should return the temp project root, not the nested supabase dir."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert 'print(root / "supabase")' not in script
+    assert "print(root)" in script
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert 'compgen -G "supabase/migrations/*.sql"' in staging_section
+
+
 def test_sync_production_soft_fails_unauthorized_token() -> None:
     """Expired Management API PAT must not hard-fail Deploy Modal (CD unblock)."""
     script = CI_SYNC.read_text(encoding="utf-8")

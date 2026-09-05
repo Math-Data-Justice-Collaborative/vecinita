@@ -122,7 +122,7 @@ if email_pattern.search(text) is None:
 text = email_pattern.sub(rf'\1"{admin_email}"', text, count=1)
 
 config_path.write_text(text, encoding="utf-8")
-print(root / "supabase")
+print(root)
 PY
 }
 
