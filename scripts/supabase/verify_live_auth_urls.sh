@@ -7,7 +7,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 PROJECT_REF="${SUPABASE_PROJECT_REF:-cfuvghdsuwactfeamtym}"
-STAGING_ADMIN_ORIGIN="https://vecinita-admin-frontend-ef4ob.ondigitalocean.app"
+STAGING_ADMIN_ORIGIN="${VECINITA_ADMIN_FRONTEND_URL:-https://vecinita-admin-frontend-ef4ob.ondigitalocean.app}"
 
 if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
   echo "ERROR: SUPABASE_ACCESS_TOKEN is not set." >&2

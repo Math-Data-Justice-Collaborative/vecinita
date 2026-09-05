@@ -17,12 +17,21 @@ useDefault = true
 description = "Deleted legacy monolith paths + gitignored local runtime secrets (QA-005)"
 paths = [
   # Gitignored local secret stores (never commit; see .gitignore + no-operator-spec-commits rule)
+  '''(?:^|/)\.env$''',
+  '''(?:^|/)\.env\.staging$''',
   '''(?:^|/)\.deploy-keys\.local$''',
   '''(?:^|/)prod\.env$''',
+  '''(?:^|/)\.staging-db-url\.local$''',
+  '''(?:^|/)\.staging-supabase-db-pass\.local$''',
+  '''(?:^|/)\.staging-supabase-ref\.local$''',
+  '''(?:^|/)\.staging-supabase-keys\.local$''',
   '''(?:^|/)apps/[^/]+-frontend/\.env$''',
   '''(?:^|/)supabase/\.env$''',
   '''(?:^|/)\.tmp(?:/.*)?$''',
   '''(?:^|/)(?:admin-fe-spec|internal-write-api-spec|chat-rag-spec)\.yaml$''',
+  # Generated local security outputs / vendored rule packs
+  '''(?:^|/)\.security-reports(?:/.*)?$''',
+  '''(?:^|/)\.tools/security/assets(?:/.*)?$''',
   # Removed backend / scraper-worker tree
   '''(?:^|/)backend(?:/.*)?$''',
   '''(?:^|/)apps/scraper-worker(?:/.*)?$''',

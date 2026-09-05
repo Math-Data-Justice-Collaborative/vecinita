@@ -52,6 +52,21 @@ def test_deploy_modal_includes_supabase_sync_before_deploy() -> None:
     assert "bash scripts/supabase/ci_sync.sh sync-production" in text
 
 
+def test_deploy_staging_includes_supabase_sync_before_modal_and_do() -> None:
+    """F83 staging deploy must sync staging Supabase before Modal/DO redeploy."""
+    workflow = REPO_ROOT / ".github/workflows" / "deploy-staging.yml"
+    text = workflow.read_text(encoding="utf-8")
+    assert "SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}" in text
+    assert "SUPABASE_SMTP_PASS: ${{ secrets.SUPABASE_SMTP_PASS }}" in text
+    assert "RESEND_SENDER_EMAIL: ${{ secrets.RESEND_SENDER_EMAIL }}" in text
+    assert "bash scripts/supabase/ci_sync.sh sync-staging" in text
+    sync_idx = text.index("bash scripts/supabase/ci_sync.sh sync-staging")
+    modal_idx = text.index("Deploy Modal apps to Environment staging")
+    do_idx = text.index("Sync staging DO secrets")
+    assert sync_idx < modal_idx
+    assert sync_idx < do_idx
+
+
 def test_deploy_digitalocean_chained_after_modal() -> None:
     """DO deploy runs after Modal deploy succeeds on main (or manual dispatch)."""
     text = _read("deploy_digitalocean")

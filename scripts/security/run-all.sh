@@ -83,8 +83,13 @@ run 2ms 2ms filesystem --path "${ROOT}" \
   --ignore-pattern '.pytest_cache' \
   --ignore-pattern '.ruff_cache' \
   --ignore-pattern '.env' \
+  --ignore-pattern '.env.staging' \
   --ignore-pattern '*.env' \
   --ignore-pattern 'prod.env' \
+  --ignore-pattern '.staging-db-url.local' \
+  --ignore-pattern '.staging-supabase-db-pass.local' \
+  --ignore-pattern '.staging-supabase-keys.local' \
+  --ignore-pattern '.staging-supabase-ref.local' \
   --ignore-pattern '.deploy-keys.local' \
   --ignore-pattern '.tmp' \
   --ignore-pattern 'admin-fe-spec.yaml' \
@@ -134,7 +139,7 @@ if [[ "${SEC_SKIP_SBOM:-0}" != "1" ]]; then
     SBOM_ARGS+=(
       -li true
       -pm true
-      -lto "${SEC_SBOM_LICENSE_TIMEOUT_SEC:-300}"
+      -lto "${SEC_SBOM_LICENSE_TIMEOUT_SEC:-30}"
     )
   fi
   run SBOM sbom-tool "${SBOM_ARGS[@]}"

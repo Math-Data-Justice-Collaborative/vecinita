@@ -11,6 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LLM_APP = REPO_ROOT / "infra" / "modal" / "llm_app.py"
+LLM_SERVICE_CORE = REPO_ROOT / "infra" / "modal" / "llm_service_core.py"
 CHAT_CONFIG = REPO_ROOT / "apps" / "chat-rag-backend" / "vecinita_chat_rag_backend" / "config.py"
 CHAT_SERVICE = REPO_ROOT / "apps" / "chat-rag-backend" / "vecinita_chat_rag_backend" / "service.py"
 
@@ -39,10 +40,14 @@ def _sampling_params_call_has_repetition_penalty(func: ast.FunctionDef) -> bool:
 
 def test_llm_sampling_params_include_repetition_penalty() -> None:
     """VLLM must penalize token repetition to avoid assistant boilerplate loops."""
-    tree = ast.parse(LLM_APP.read_text(encoding="utf-8"))
-    generate_text = _find_method_body(tree, "LlmService", "_generate_text")
+    tree = ast.parse(LLM_SERVICE_CORE.read_text(encoding="utf-8"))
+    generate_text = _find_method_body(tree, "LlmServiceCore", "_generate_text")
+    stream_text = _find_method_body(tree, "LlmServiceCore", "_stream_text_deltas")
     assert _sampling_params_call_has_repetition_penalty(generate_text), (
-        "SamplingParams in _generate_text must set repetition_penalty"
+        "SamplingParams in LlmServiceCore._generate_text must set repetition_penalty"
+    )
+    assert _sampling_params_call_has_repetition_penalty(stream_text), (
+        "SamplingParams in LlmServiceCore._stream_text_deltas must set repetition_penalty"
     )
 
 

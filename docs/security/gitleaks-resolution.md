@@ -82,11 +82,18 @@ committed:
 
 | Path | Purpose |
 |------|---------|
+| `.env` / `.env.staging` | Local operator env files |
 | `prod.env` | Staging/prod env vars for smokes and deploy scripts |
 | `apps/*-frontend/.env` | Local Vite env (Supabase publishable key, dev API URLs) |
 | `supabase/.env` | Local Supabase CLI secrets |
+| `.staging-db-url.local` | Local staging DB URL scratch file |
+| `.staging-supabase-db-pass.local` | Local staging Supabase DB password scratch file |
+| `.staging-supabase-ref.local` | Local staging Supabase ref scratch file |
+| `.staging-supabase-keys.local` | Local staging Supabase key scratch file |
 | `.deploy-keys.local` | Generated API keys for local deploy |
 | `.tmp/` | Ephemeral operator artifacts (e.g. DO secret JSON exports) |
+| `.security-reports/` | Generated local security scanner output |
+| `.tools/security/assets/` | Vendored local security rule assets |
 | `*-spec.yaml` (root) | Local `doctl apps spec get` exports (encrypted secrets) |
 
 These paths are allowlisted in `.gitleaks.toml` so `gitleaks detect --no-git` passes locally

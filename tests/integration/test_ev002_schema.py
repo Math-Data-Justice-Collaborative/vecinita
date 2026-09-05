@@ -80,10 +80,11 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    # Tip is the EV-027 + EV-030 merge head; branch tips and EV-002 remain in history.
+    current_rev = current.stdout.strip().split()[0]
+    head_rev = heads.stdout.strip().split()[0]
+    assert current_rev == head_rev
+    # Tip can advance as new migrations land; EV-002 and prior branch tips must remain in history.
     # [Corpus: feature-list.md §F75-F80] [Spec: docs/sessions/S030-corpus-automations/reports/qa-report.md §QA-S030-001]
-    assert "20260823_0017" in current.stdout
-    assert "20260823_0017" in heads.stdout
     assert "20260823_0017" in history.stdout
     assert "20260812_0016" in history.stdout
     assert "20260822_0015" in history.stdout

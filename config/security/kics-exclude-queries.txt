@@ -28,3 +28,11 @@ a92be1d5-d762-484a-86d6-8cd0907ba100
 # Volume Has Sensitive Host Directory: Alloy mounts host /var/log:ro for staging
 # syslog/journal shipping only; Grafana UI stays loopback. Not a secret path.
 1c1325ff-831d-43a1-973e-839ae57dfcc0
+#
+# --- Local Docker Desktop Postgres bootstrap ---
+# The local pgvector Postgres container must retain its stock entrypoint ability
+# to chmod the volume and switch to the postgres user during init. Removing the
+# hardening knobs is intentional for dev/test bootstrap only; the service still
+# binds loopback and is not a deploy target.
+610e266e-6c12-4bca-9925-1ed0cd29742b
+ce76b7d0-9e77-464d-b86f-c5c48e03e22d
