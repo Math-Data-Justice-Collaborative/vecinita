@@ -75,6 +75,7 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_LLM_LORA_RESOLVE` | string | `post_restore` | No | Prod LoRA bind mode when GPU snapshots are used (ADR-022 EV-316 / #316). `post_restore` (default) = resolve+SHA-256-verify after restore; `snapshot_bound` = legacy/debug only (not recommended when adapter volume mutates). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_LLM_ENFORCE_EAGER` | string | `true` | No | vLLM `enforce_eager` A/B for CUDA graphs vs snapshot experiments (S001 T7 / ADR-022). Independent of `VECINITA_LLM_GPU_SNAPSHOT`. |
 | `VECINITA_LLM_SCALEDOWN_WINDOW` | int (seconds) | `300` | No | Prod `vecinita-llm` `LlmService.scaledown_window` (ADR-022 EV-319 / #319). Candidates **60 / 120 / 300**. **Must be set in the `modal deploy` environment** (baked at import); Modal Secret alone does not retune a already-deployed class decorator. Invalid values fail closed at import. Easy revert: set `300`. Do **not** use for `min_containers` / always-on. Playground may keep hardcoded 300 this cycle. |
+| `VECINITA_EMBED_MIN_CONTAINERS` | int | `0` (preferred) / historically `1` | No | Modal `embedding_api` ASGI `min_containers` (EV-323 / #323). Default **0** = scale-to-zero for cost (ADR-004). **1** keeps a warm ASGI worker (faster `/health`, idle CPU/memory). Must be set at `modal deploy` import time. Staging first; prod change = AskQuestion. |
 | `VECINITA_MODAL_TOKEN_ID` | string | — | Yes (DO→Modal) | Modal credential (DO secret) |
 | `VECINITA_MODAL_TOKEN_SECRET` | string | — | Yes | Modal credential |
 | `VECINITA_LLM_BACKEND` | string | `vllm` | No | `vllm` primary; `ollama` fallback only per ADR-009 |
@@ -394,6 +395,7 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_FINETUNE_ADAPTER_HASH` empty or 64-char lowercase hex SHA-256 | When set, must pair with `VECINITA_FINETUNE_ADAPTER_ID`; restore fail-closed on mismatch |
 | `VECINITA_LLM_ENFORCE_EAGER` in `true`, `false` (also `1`/`0`/`on`/`off`) | Modal LLM engine kwargs (S001 T7 / ADR-022) |
 | `VECINITA_LLM_SCALEDOWN_WINDOW` integer seconds in **[60, 600]** (candidates 60/120/300) | Modal `vecinita-llm` prod `LlmService` at deploy-import (ADR-022 EV-319 / #319); invalid fails closed |
+| `VECINITA_EMBED_MIN_CONTAINERS` integer in **{0, 1}** (default 0) | Modal `embedding_api` at deploy-import (EV-323 / #323); invalid fails closed |
 | `VECINITA_FAQ_FASTPATH_ENABLED` in `true`, `false` (also `1`/`0`/`on`/`off`) | ChatRAG ask path (F85 / EV-320); default true |
 | `VECINITA_FAQ_STORE_PATH` non-empty path when override set | ChatRAG FAQ store file (F85); must be readable YAML/JSON |
 | `SUPABASE_URL` set when `VECINITA_AUTH_REQUIRED=true` | Admin backend startup (F34; JWKS from URL) |

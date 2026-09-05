@@ -228,9 +228,11 @@ Python runtime). Image pins (M139):
 
 No new Python PyPI deps required for F84 metrics APIs (FastAPI + SQLAlchemy existing).
 
-**Staging Droplet (EV-036-D13, 2026-08-30):** `vecinita-staging-obs` (`s-1vcpu-1gb`, nyc3).
-Compose lives at `/opt/vecinita-obs` on the host. Grafana/Loki/AM bind **127.0.0.1** —
-use SSH tunnel. Create helper: `scripts/deploy/create_staging_obs_droplet.sh`
+**Staging Droplet (EV-036-D13, 2026-08-30; EV-323-D13 power-off 2026-09-04):**
+`vecinita-staging-obs` (`s-1vcpu-1gb`, nyc3, id `596408528`). Prefer **powered off** when idle
+(~$6/mo saved). Compose lives at `/opt/vecinita-obs` on the host. Grafana/Loki/AM bind
+**127.0.0.1** — use SSH tunnel after power-on. Create helper:
+`scripts/deploy/create_staging_obs_droplet.sh`
 (auth via `DIGITALOCEAN_TOKEN` / `DIGITALOCEAN_ACCESS_TOKEN`).
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)

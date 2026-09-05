@@ -41,6 +41,7 @@ When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
 | Topic | Path |
 |-------|------|
 | Env / secrets matrix | [staging-secrets-matrix.md](staging-secrets-matrix.md) |
+| Hosting / cost envelope | [hosting-migration-summary.md](hosting-migration-summary.md) — cite `[Corpus: hosting]` or `[Corpus: ADR-004]` |
 | Local dev | [LOCAL_DEV.md](LOCAL_DEV.md) |
 | Eval golden set | [eval-golden-set.md](eval-golden-set.md) |
 | OpenAPI (write API) | [../openapi/internal-write.yaml](../openapi/internal-write.yaml) |

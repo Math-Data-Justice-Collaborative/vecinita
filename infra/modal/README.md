@@ -186,6 +186,10 @@ If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins 
 - **Volume:** `embedding-models` (HF cache)
 - **Endpoints:** `GET /health`, `POST /embed`, `POST /embed/batch`
 - **Consumer env:** `VECINITA_MODAL_EMBED_URL` on DO backends (`packages/embedding-client`)
+- **ASGI `min_containers` (EV-323 / #323):** Deploy-import env `VECINITA_EMBED_MIN_CONTAINERS`
+  (`0` default = scale-to-zero / ADR-004; `1` = warm ASGI for faster `/health`). Example:
+  `VECINITA_EMBED_MIN_CONTAINERS=0 modal deploy --env staging infra/modal/embedding_app.py`
+  Prod flip requires AskQuestion.
 
 First deploy downloads weights into the Modal volume; allow several minutes on cold start.
 

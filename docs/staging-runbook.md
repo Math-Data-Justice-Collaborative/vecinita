@@ -10,8 +10,8 @@
 
 | Role | Resources |
 |------|-----------|
-| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging` (`camkatfbjguwvymfgdme`); Modal workspace **`vecinita`** Environment **`staging`** |
-| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`; corpus DB historically `vecinita-staging-restored-20260701`); Modal **`vecinita`** / **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
+| **staging** | DO project **first-project** — apps `vecinita-staging-*` + Postgres **`vecinita-staging-db`** (nyc); Droplet `vecinita-staging-obs`; Supabase `vecinita-staging` (`camkatfbjguwvymfgdme`); Modal Environment **`staging`** |
+| **prod** | DO project **vecinita** — apps without `vecinita-staging-` prefix; Postgres display name **`vecinita-staging-restored-20260701`** (operator alias **`vecinita-prod-db`** — DO cannot rename managed clusters; EV-323); Modal Environment **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
 
 Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
 live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
@@ -265,13 +265,20 @@ bash scripts/deploy/create_staging_obs_droplet.sh
 # Complete CHECKLIST-tc305-tc306.md
 ```
 
-**Live (2026-08-30):** Droplet `vecinita-staging-obs` / `159.203.137.236` (nyc3).
-Services bind loopback — tunnel Grafana:
+**Live (2026-08-30 create; EV-323 power-off 2026-09-04):** Droplet `vecinita-staging-obs`
+(id `596408528`) / `159.203.137.236` (nyc3), `s-1vcpu-1gb` (~**$6/mo** when on).
+**Default cost posture (EV-323-D13):** keep droplet **powered off** until staging Grafana/Loki
+is needed; power on via DO UI or
+`doctl compute droplet-action power-on 596408528`. Services bind **loopback** — public curl
+to :3000/:80 times out by design; tunnel Grafana after power-on:
 
 ```bash
 ssh -L 3000:127.0.0.1:3000 root@159.203.137.236
 # then open http://127.0.0.1:3000  (password in /opt/vecinita-obs/.env on host)
 ```
+
+**EV-323 cost note:** Droplet still bills while powered on even if unused. Destroy only after
+separate AskQuestion (recreate via `create_staging_obs_droplet.sh`).
 
 TC-306 drill: Alertmanager → compose `webhook-sink` received synthetic alert with no
 chat content fields (PASS). Replace sink URL with a real staging webhook when ready.
@@ -491,7 +498,17 @@ Never commit secret values. Use `--merge` on Modal pushes so rotation does not d
 
 ## Corpus protection (DO Managed Postgres)
 
-The **corpus lives only on DO Managed Postgres** (`vecinita-staging` via `DATABASE_URL`).
+The **corpus lives only on DO Managed Postgres**.
+
+| Env | Cluster display name (DO) | Operator alias | Typical env |
+|-----|---------------------------|----------------|-------------|
+| Staging | `vecinita-staging-db` | staging corpus | `VECINITA_STAGING_DATABASE_URL` |
+| Production | `vecinita-staging-restored-20260701` | **`vecinita-prod-db`** (cannot rename on DO) | `DATABASE_URL` on prod DO apps |
+
+**EV-323:** Do **not** destroy the restored-named cluster — it is live prod (ChatRAG + write API).
+Confirm hosts differ before any wipe/mirror ([corpus-db-safety](../.cursor/skills/corpus-db-safety/SKILL.md)).
+
+`DATABASE_URL` / staging URLs whose host ends in `.ondigitalocean.com` are **Managed**.
 Supabase holds auth identity only — corpus documents were never stored there.
 
 ### Prevent accidental wipes
