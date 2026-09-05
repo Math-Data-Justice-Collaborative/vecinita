@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.service import ChatRagService
-from vecinita_rag.multi_query import multi_query_retrieve
+from vecinita_rag.chat_retrieve import retrieve_chat_chunks
 from vecinita_rag.types import RetrievedChunk
 
 from tests.helpers.json_response import json_list, json_str, response_json_object
@@ -21,6 +21,12 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 pytestmark = [pytest.mark.e2e, pytest.mark.integration]
+_EXPECTED_MULTI_QUERY_COUNT = 3
+
+
+class _KnobsLike(Protocol):
+    multi_query: bool
+    multi_query_count: int
 
 
 class _CapturingLlm:
@@ -80,7 +86,7 @@ def uj055_client() -> tuple[TestClient, _CapturingLlm]:
         llm_url="http://llm.test",
         request_timeout_s=30.0,
         rag_multi_query=True,
-        rag_multi_query_count=3,
+        rag_multi_query_count=_EXPECTED_MULTI_QUERY_COUNT,
         rag_packer="p1",
     )
     llm = _CapturingLlm()
@@ -117,8 +123,8 @@ def test_uj055_ask_invokes_h7_multi_query_by_default(
     """TC-173: H7 fan-out is invoked on the ask path when enabled."""
     client, _llm = uj055_client
     with patch(
-        "vecinita_chat_rag_backend.service.multi_query_retrieve",
-        wraps=multi_query_retrieve,
+        "vecinita_chat_rag_backend.service.retrieve_chat_chunks",
+        wraps=retrieve_chat_chunks,
     ) as mocked:
         response = client.post(
             "/api/v1/ask",
@@ -126,4 +132,8 @@ def test_uj055_ask_invokes_h7_multi_query_by_default(
         )
     assert response.status_code == HTTPStatus.OK
     assert mocked.called
-    assert mocked.call_args.kwargs.get("enabled") is True
+    raw_knobs = mocked.call_args.kwargs.get("knobs")
+    assert raw_knobs is not None
+    knobs = cast("_KnobsLike", raw_knobs)
+    assert knobs.multi_query is True
+    assert knobs.multi_query_count == _EXPECTED_MULTI_QUERY_COUNT

@@ -325,10 +325,10 @@ def test_ask_stream_yields_no_context_when_empty() -> None:
 
 
 def test_ask_stream_yields_llm_tokens() -> None:
-    """F82 / AC-OV5: stream buffers full generation then emits once (TC-288)."""
+    """Verify-off path should surface incremental stream tokens from the LLM client."""
     service = _service(chunks=[_chunk()])
     tokens = list(service.ask_stream(AskRequest(question="clinic hours")))
-    assert tokens == ["Streamed"]
+    assert tokens == ["Stream", "ed"]
 
 
 def test_ask_applies_output_verify_when_enabled() -> None:

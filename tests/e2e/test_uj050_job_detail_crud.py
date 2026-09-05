@@ -16,7 +16,13 @@ import pytest
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
-from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    AuthPrincipal,
+    get_principal,
+    reset_auth_config_for_tests,
+    resolve_operator_or_service,
+)
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 from tests.helpers.json_response import json_str, response_json_object
@@ -51,6 +57,10 @@ def _client(
         sse_max_cycles=sse_max_cycles,
     )
     app.dependency_overrides[get_principal] = lambda: principal
+    app.dependency_overrides[resolve_operator_or_service] = lambda: AuthContext(
+        principal=principal,
+        is_service=False,
+    )
     return TestClient(app)
 
 
