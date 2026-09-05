@@ -139,9 +139,9 @@ if [[ "$DO_MODAL" -eq 1 ]]; then
   echo
   echo "==> [Modal] sync vecinita-llm secret (proxy key for prod + playground)"
   if [[ "$APPLY" -eq 1 ]]; then
-    bash scripts/deploy/sync_llm_secret.sh --apply
+    bash scripts/deploy/sync_llm_secret.sh --merge --apply
   else
-    bash scripts/deploy/sync_llm_secret.sh
+    bash scripts/deploy/sync_llm_secret.sh --merge
   fi
   echo
   echo "==> [Modal] sync vecinita-llm-finetune secret (flags off by default)"

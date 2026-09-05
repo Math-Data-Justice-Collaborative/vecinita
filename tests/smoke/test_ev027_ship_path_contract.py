@@ -96,3 +96,6 @@ def test_llm_secret_sync_preserves_live_adapter_pins() -> None:
     assert "reading live ${secret_name} secret to preserve existing keys" in sync_llm
     assert 'MODAL_SECRET_EXPORT_NAME="$secret_name"' in sync_llm
     assert "modal-${secret_name}.env" in sync_llm
+
+    sync_env = _read("scripts", "deploy", "sync_env.sh")
+    assert "bash scripts/deploy/sync_llm_secret.sh --merge --apply" in sync_env

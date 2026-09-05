@@ -77,6 +77,7 @@ sync_optional_secret() {
   local secret_name="$1"
   shift
   local -a optional_keys=("$@")
+  local merge_export_ok=0
 
   if [[ "$MERGE" -eq 1 ]]; then
     echo "==> --merge: reading live ${secret_name} secret to preserve existing keys"
@@ -84,9 +85,10 @@ sync_optional_secret() {
     mkdir -p "${ROOT}/.tmp"
     if MODAL_SECRET_EXPORT_NAME="$secret_name" \
       uv run --with modal modal run scripts/deploy/export_modal_secret.py >/dev/null 2>&1; then
-      :
+      merge_export_ok=1
     fi
     if [[ -f "$export_file" ]]; then
+      merge_export_ok=1
       while IFS='=' read -r k v; do
         [[ -z "$k" || "$k" == \#* ]] && continue
         if [[ -z "${!k:-}" ]]; then
@@ -107,6 +109,14 @@ sync_optional_secret() {
       pairs+=("$key=$val")
     fi
   done
+
+  if [[ "$MERGE" -eq 1 && "$merge_export_ok" -ne 1 \
+    && -z "${VECINITA_FINETUNE_ADAPTER_ID:-}" \
+    && -z "${VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID:-}" ]]; then
+    echo "ERROR: Refusing to replace ${secret_name} without live export or explicit adapter pins." >&2
+    echo "Set VECINITA_FINETUNE_ADAPTER_ID / VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID, or retry when Modal export works." >&2
+    exit 1
+  fi
 
   # Modal secrets need at least one key; default eager flag keeps the store valid.
   if [[ ${#pairs[@]} -eq 0 ]]; then
