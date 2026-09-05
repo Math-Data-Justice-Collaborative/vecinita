@@ -43,6 +43,13 @@ bash scripts/deploy/staging_smoke.sh
 CI: `deploy-staging.yml` `staging-smoke` runs `scripts/ops/warm_staging_for_smoke.py`
 before H1–H3 (TC-326 / UJ-095).
 
+**Staging Supabase sync (CI):** `deploy-staging.yml` now pushes the staging Supabase
+project before Modal/DO redeploy via `bash scripts/supabase/ci_sync.sh sync-staging`.
+That step derives the current staging admin frontend origin from the DO app URLs so
+invite/recovery redirects stay aligned with the live staging host, and it requires
+GitHub Environment `staging` secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_SMTP_PASS`,
+`SUPABASE_SECRET_KEY`, `SUPABASE_URL`, and `RESEND_SENDER_EMAIL`.
+
 **Operational status (2026-08-28):** Distinct staging H1–H5 passed. Resolve `env_role` as
 `staging` or `prod` — do **not** use `staging_as_live` for the new `vecinita-staging-*`
 stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.
@@ -859,8 +866,9 @@ Replace any prior staging `RESEND_*` that still matched prod (EV-feedback-notify
 > **Warning:** Root `supabase/config.toml` is **prod-oriented** (`site_url` / redirects /
 > `admin_email`). Do **not** run `supabase config push --project-ref camkatfbjguwvymfgdme`
 > from the repo root without a staging override workdir (staging admin FE URLs +
-> `noreply+staging@…` From). A bare push overwrites staging Auth redirects with prod
-> (caught and restored in EV-305).
+> `noreply+staging@…` From). Use `bash scripts/supabase/ci_sync.sh sync-staging`
+> or an equivalent temp-config flow; a bare push overwrites staging Auth redirects with
+> prod (caught and restored in EV-305).
 
 ### Staging enable
 

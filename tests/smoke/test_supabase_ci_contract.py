@@ -102,6 +102,25 @@ def test_supabase_ci_sync_accepts_supabase_project_id_alias() -> None:
     assert "SUPABASE_PROJECT_ID" in script
 
 
+def test_supabase_ci_sync_supports_staging_sync_command() -> None:
+    """Staging deploy needs an explicit sync command for the staging project."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert "sync-staging" in script
+    assert "sync_staging()" in script
+
+
+def test_sync_staging_uses_staging_runtime_inputs() -> None:
+    """Staging sync should derive the target project and sender from staging env."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert "SUPABASE_URL" in staging_section
+    assert "RESEND_SENDER_EMAIL" in staging_section
+    assert "VECINITA_ADMIN_FRONTEND_URL" in staging_section
+    assert "config push --project-ref" in staging_section
+
+
 def test_sync_production_soft_fails_unauthorized_token() -> None:
     """Expired Management API PAT must not hard-fail Deploy Modal (CD unblock)."""
     script = CI_SYNC.read_text(encoding="utf-8")

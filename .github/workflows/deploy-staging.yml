@@ -38,6 +38,9 @@ jobs:
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_SMTP_PASS: ${{ secrets.SUPABASE_SMTP_PASS }}
+      RESEND_SENDER_EMAIL: ${{ secrets.RESEND_SENDER_EMAIL }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
       VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
@@ -87,17 +90,39 @@ jobs:
       - name: Sync dependencies
         run: uv sync --group dev
 
+      - name: Ensure staging DO apps exist
+        run: |
+          set -euo pipefail
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env staging
+
+      - name: Export staging URLs
+        id: urls
+        run: |
+          set -euo pipefail
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend \
+            | tee /tmp/staging-urls.env
+          # shellcheck disable=SC1091
+          set -a && source /tmp/staging-urls.env && set +a
+          echo "chat_url=${VECINITA_STAGING_CHAT_URL:-}" >> "$GITHUB_OUTPUT"
+          echo "admin_frontend_url=${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" >> "$GITHUB_OUTPUT"
+
+      - name: Sync staging Supabase auth/config
+        env:
+          VECINITA_ADMIN_FRONTEND_URL: ${{ steps.urls.outputs.admin_frontend_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VECINITA_ADMIN_FRONTEND_URL:-}" ]; then
+            echo "::error::VECINITA_ADMIN_FRONTEND_URL unresolved from staging DO app URLs." >&2
+            exit 1
+          fi
+          bash scripts/supabase/ci_sync.sh sync-staging
+
       - name: Deploy Modal apps to Environment staging
         run: |
           set -euo pipefail
           export VECINITA_MODAL_WORKSPACE=vecinita
           export MODAL_ENVIRONMENT=staging
           bash scripts/deploy/modal.sh
-
-      - name: Ensure staging DO apps exist
-        run: |
-          set -euo pipefail
-          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env staging
 
       - name: Require mirrored-corpus embed URL (vecinita--)
         # EV-338 / BUG-2026-09-03 — prod→staging mirrored vectors need prod embed pin.
@@ -125,16 +150,6 @@ jobs:
             echo "==> Deploying ${app}"
             uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}"
           done
-
-      - name: Export staging URLs
-        id: urls
-        run: |
-          set -euo pipefail
-          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend \
-            | tee /tmp/staging-urls.env
-          # shellcheck disable=SC1091
-          set -a && source /tmp/staging-urls.env && set +a
-          echo "chat_url=${VECINITA_STAGING_CHAT_URL:-}" >> "$GITHUB_OUTPUT"
 
   staging-smoke:
     name: staging-smoke
