@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from scripts.ops.cost_attribution import (
+    _parse_args,  # pyright: ignore[reportPrivateUsage]
     classify_names,
     is_vecinita_resource_name,
 )
