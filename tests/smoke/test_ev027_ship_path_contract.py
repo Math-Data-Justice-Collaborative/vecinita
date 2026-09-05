@@ -79,3 +79,20 @@ def test_sync_scripts_cover_finetune_secret_and_adapter_pins() -> None:
     assert "sync_finetune_secret.sh" in modal_env
     assert "VECINITA_FINETUNE_ADAPTER_ID" in modal_env
     assert "VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID" in modal_env
+
+
+def test_llm_secret_sync_preserves_live_adapter_pins() -> None:
+    """CI/operator sync must merge live GPU keys before re-pushing the LLM secret.
+
+    [Corpus: feature-list.md §F77]
+    [Spec: docs/adr/ADR-053-modal-lora-finetune.md]
+    [Spec: docs/staging-secrets-matrix.md §EV-027]
+    """
+    workflow = _read(".github", "workflows", "deploy-modal.yml")
+    assert "bash scripts/deploy/sync_llm_secret.sh --merge --apply" in workflow
+
+    sync_llm = _read("scripts", "deploy", "sync_llm_secret.sh")
+    assert "--merge" in sync_llm
+    assert "reading live ${secret_name} secret to preserve existing keys" in sync_llm
+    assert 'MODAL_SECRET_EXPORT_NAME="$secret_name"' in sync_llm
+    assert "modal-${secret_name}.env" in sync_llm

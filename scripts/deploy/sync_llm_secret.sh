@@ -22,9 +22,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 APPLY=0
+MERGE=0
 for arg in "$@"; do
   case "$arg" in
     --apply) APPLY=1 ;;
+    --merge) MERGE=1 ;;
   esac
 done
 
@@ -76,6 +78,27 @@ sync_optional_secret() {
   shift
   local -a optional_keys=("$@")
 
+  if [[ "$MERGE" -eq 1 ]]; then
+    echo "==> --merge: reading live ${secret_name} secret to preserve existing keys"
+    local export_file="${ROOT}/.tmp/modal-${secret_name}.env"
+    mkdir -p "${ROOT}/.tmp"
+    if MODAL_SECRET_EXPORT_NAME="$secret_name" \
+      uv run --with modal modal run scripts/deploy/export_modal_secret.py >/dev/null 2>&1; then
+      :
+    fi
+    if [[ -f "$export_file" ]]; then
+      while IFS='=' read -r k v; do
+        [[ -z "$k" || "$k" == \#* ]] && continue
+        if [[ -z "${!k:-}" ]]; then
+          export "$k=$v"
+        fi
+      done < "$export_file"
+      echo "    merged live keys from ${export_file#"$ROOT"/}"
+    else
+      echo "WARN: could not export live secret; proceeding with shell env only." >&2
+    fi
+  fi
+
   local -a pairs=()
   local key val
   for key in "${optional_keys[@]}"; do
@@ -114,6 +137,7 @@ sync_optional_secret "vecinita-llm-gpu" \
 
 if [[ "$APPLY" -ne 1 ]]; then
   echo "Dry run. Re-run with --apply to write secrets."
+  echo "Use --merge to preserve live adapter pins when shell env omits optional GPU keys."
   echo "Note: VECINITA_LLM_GPU_SNAPSHOT is deploy-time env for modal deploy — not stored here."
   exit 0
 fi

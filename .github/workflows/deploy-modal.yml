@@ -154,7 +154,7 @@ jobs:
           fi
 
       - name: Sync Modal vecinita-llm secret
-        run: bash scripts/deploy/sync_llm_secret.sh --apply
+        run: bash scripts/deploy/sync_llm_secret.sh --merge --apply
 
       - name: Sync Modal vecinita-llm-finetune secret
         run: |
