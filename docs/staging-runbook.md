@@ -696,6 +696,19 @@ See [no-live-prod-corpus-push.mdc](../.cursor/rules/no-live-prod-corpus-push.mdc
 
 **Rollback:** kill-switch ON → `*_ENABLED=false` → DO redeploy → H1–H5.
 
+### Remaining live gate: F80 prod promote
+
+After EV-031, the remaining live EV-027/F80 step is **prod adapter promote** on
+`vecinita-llm`; F78/F79 live enable and the F80 eval path are already complete.
+
+| Step | Action |
+|------|--------|
+| 1 | Review base-vs-adapter eval evidence and operator judgment |
+| 2 | AskQuestion `[Decision]` for live prod promote; recommended default remains defer / runbook-only until explicitly approved |
+| 3 | Set the chosen `VECINITA_FINETUNE_ADAPTER_ID` and matching `VECINITA_FINETUNE_ADAPTER_HASH`, sync secrets, and redeploy prod `vecinita-llm` |
+| 4 | Verify the prod pin via the finetune adapter read path / health metadata, then run post-promote smoke H1–H5 |
+| 5 | If rollback is needed, clear the adapter pin back to base, redeploy, and re-run the same smoke H1–H5 path |
+
 ## Feedback operator notify — Resend (F68 / #214)
 
 Code ships with EV-214. Email notify stays **off** until secrets are set on internal-write.

@@ -1,7 +1,7 @@
 # Vecinita — GitHub Project Board
 
 > [Math-Data-Justice-Collaborative/vecinita](https://github.com/Math-Data-Justice-Collaborative/vecinita) · Paste into Project → ⋯ → Settings → README  
-> **Updated:** 2026-05-30
+> **Updated:** 2026-09-04
 
 **Vecinita** is a bilingual community Q&A (ChatRAG) and corpus admin platform — six apps, hybrid **DigitalOcean + Modal**, zero PII ([ADR-004](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/docs/adr/ADR-004-cost-sovereignty-zero-personal-data.md)). See [README](https://github.com/Math-Data-Justice-Collaborative/vecinita/blob/main/README.md) for architecture.
 
@@ -84,7 +84,13 @@ Hotfixes: bug report in `docs/bug-reports/` + repro test (red → green).
 ## Priorities
 
 1. Bugs breaking CI or staging smokes beat new features.
-2. Backlog from roadmap Phase 6 and evolve cycles — not ad-hoc work without a feature ID.
-3. Constraints: zero PII, US hosting, ~$50/mo pilot cap (ADR-004).
+2. **Effort split (Carrie):** ~**75%** base community UX / delivery readiness; ~**25%** future directions (auth models, agentic/SNAP, commercialization).
+3. **WRWC limited beta** (#352) + **tester one-pager** (#345) — present at next Vecina meeting.
+4. **ChatRAG access / auth models** (#91) — Hugo drafts comparison; circulate before shared notes.
+5. **UI advisory** (#349) — usual wait + environmental/cost trade-off copy; infra cold-start remains #311.
+6. **SNAP pilot decision** (#350) — corpus vs agent tool; **Hugo library review** (#351).
+7. Backlog research: user profiles (#346); sustainability / paid tier (#347); agentic-tools (#348).
+8. Other backlog from roadmap / evolve cycles — not ad-hoc work without a feature ID.
+9. Constraints: zero PII, US hosting, ~$50/mo pilot cap (ADR-004).
 
 *Update **Status** when an evolve cycle ships or staging changes.*

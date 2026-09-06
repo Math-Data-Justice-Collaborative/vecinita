@@ -10,7 +10,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 
 **Shipped (do not treat as “planned”):** Corpus browse and tagging, admin dashboard suite, shared frontend i18n/UI packages (bilingual chrome), multilingual embedding pin.
 
-**Still building / planned:** Browser-local chat history, some admin auth polish items, website scrape/crawl tree, corpus catch-up + freshness (in progress), LoRA fine-tune + human promote.
+**Still building / planned:** Browser-local chat history, some admin auth polish items, website scrape/crawl tree, and the remaining live prod LoRA promote/rollback gate after EV-031 enabled corpus automations/freshness and the F80 eval path.
 
 **Excludes (CI default):** Real Modal GPU invocations in GitHub Actions, multimodal ingest.
 
@@ -1799,6 +1799,19 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **Given** F80 eval path enabled without promote
 - **When** prod `vecinita-llm` health/models is queried
 - **Then** `VECINITA_FINETUNE_ADAPTER_ID` is unset / base model only
+
+### TC-325: Prod adapter promote smoke (F80, AC-FT12)
+
+- **Given** eval evidence exists and the operator explicitly approves prod promote
+- **When** the chosen adapter is promoted onto prod `vecinita-llm`
+- **Then** the prod adapter pin/health surfaces reflect the selected adapter and post-promote
+  smoke/health checks pass
+
+### TC-326: Prod adapter rollback smoke (F80, AC-FT12)
+
+- **Given** a promoted adapter is active on prod `vecinita-llm`
+- **When** the operator clears the pin for rollback to base
+- **Then** prod returns to the base model and the same smoke/health checks pass after rollback
 
 ### TC-294: Staging stack H1–H5 (UJ-087, F83)
 - **Objective**: Distinct staging DO + DB pass liveness, DB, RAG, CORS, frontend host checks without prod `DATABASE_URL`.
