@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Deploy all Modal apps (embedding, data-management, LLM). Requires: modal CLI, authenticated.
-# Workspace: vecinita. Environment: MODAL_ENVIRONMENT / VECINITA_MODAL_ENVIRONMENT (main|staging).
+# Deploy all Modal apps (embedding, data-management, LLM, rerank, finetune).
+# Requires: modal CLI, authenticated. Workspace: vecinita. Environment:
+# MODAL_ENVIRONMENT / VECINITA_MODAL_ENVIRONMENT (main|staging).
 # See scripts/modal_ensure_workspace.sh and docs/adr/ADR-054-distinct-staging-and-production.md.
 set -euo pipefail
 
@@ -39,7 +40,7 @@ echo "Deploying vecinita-llm-playground (shared llm-models; TP-S010-25)..."
 echo "Deploying vecinita-rerank (CE rerank; F45 / EV-029)..."
 "${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/rerank_app.py
 
-echo "Deploying vecinita-llm-finetune (LoRA FT; F80 / EV-031)..."
+echo "Deploying vecinita-llm-finetune (flags off by default; ADR-053)..."
 "${MODAL_CMD[@]}" deploy "${ENV_ARGS[@]}" infra/modal/finetune_app.py
 
 echo "Done. vecinita-ollama is deprecated — do not deploy (ADR-037)."

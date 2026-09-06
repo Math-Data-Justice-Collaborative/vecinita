@@ -49,6 +49,33 @@ services:
       - key: VECINITA_MODAL_LLM_PLAYGROUND_URL
         scope: RUN_TIME
         type: SECRET
+      - key: VECINITA_AUTOMATIONS_ENABLED
+        scope: RUN_TIME
+        value: "false"
+      - key: VECINITA_AUTOMATIONS_KILL_SWITCH
+        scope: RUN_TIME
+        value: "false"
+      - key: VECINITA_AUTOMATIONS_MAX_CONCURRENT
+        scope: RUN_TIME
+        value: "2"
+      - key: VECINITA_FRESHNESS_ENABLED
+        scope: RUN_TIME
+        value: "false"
+      - key: VECINITA_FRESHNESS_STALE_DAYS
+        scope: RUN_TIME
+        value: "30"
+      - key: VECINITA_FINETUNE_ENABLED
+        scope: RUN_TIME
+        value: "false"
+      - key: VECINITA_FINETUNE_REQUIRE_APPROVE
+        scope: RUN_TIME
+        value: "true"
+      - key: VECINITA_FINETUNE_MAX_CONCURRENT
+        scope: RUN_TIME
+        value: "1"
+      - key: VECINITA_FINETUNE_MAX_RUNS_PER_DAY
+        scope: RUN_TIME
+        value: "3"
       - key: VECINITA_CHAT_RAG_URL
         scope: RUN_TIME
         value: https://vecinita-chat-rag-backend-jvqso.ondigitalocean.app

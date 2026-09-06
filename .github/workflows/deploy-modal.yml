@@ -90,6 +90,17 @@ jobs:
       VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
       VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
       VECINITA_MODAL_DATA_MGMT_URL: ${{ secrets.VECINITA_MODAL_DATA_MGMT_URL }}
+      VECINITA_AUTOMATIONS_ENABLED: ${{ secrets.VECINITA_AUTOMATIONS_ENABLED }}
+      VECINITA_AUTOMATIONS_KILL_SWITCH: ${{ secrets.VECINITA_AUTOMATIONS_KILL_SWITCH }}
+      VECINITA_AUTOMATIONS_MAX_CONCURRENT: ${{ secrets.VECINITA_AUTOMATIONS_MAX_CONCURRENT }}
+      VECINITA_FRESHNESS_ENABLED: ${{ secrets.VECINITA_FRESHNESS_ENABLED }}
+      VECINITA_FRESHNESS_STALE_DAYS: ${{ secrets.VECINITA_FRESHNESS_STALE_DAYS }}
+      VECINITA_FINETUNE_ENABLED: ${{ secrets.VECINITA_FINETUNE_ENABLED }}
+      VECINITA_FINETUNE_ADAPTER_ID: ${{ secrets.VECINITA_FINETUNE_ADAPTER_ID }}
+      VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID: ${{ secrets.VECINITA_PLAYGROUND_FINETUNE_ADAPTER_ID }}
+      VECINITA_FINETUNE_REQUIRE_APPROVE: ${{ secrets.VECINITA_FINETUNE_REQUIRE_APPROVE }}
+      VECINITA_FINETUNE_MAX_CONCURRENT: ${{ secrets.VECINITA_FINETUNE_MAX_CONCURRENT }}
+      VECINITA_FINETUNE_MAX_RUNS_PER_DAY: ${{ secrets.VECINITA_FINETUNE_MAX_RUNS_PER_DAY }}
       VECINITA_INTERNAL_WRITE_URL: ${{ secrets.VECINITA_INTERNAL_WRITE_URL }}
       VECINITA_ADMIN_FRONTEND_URL: ${{ secrets.VECINITA_ADMIN_FRONTEND_URL }}
       VECINITA_CHAT_FRONTEND_URL: ${{ secrets.VECINITA_CHAT_FRONTEND_URL }}
@@ -142,19 +153,22 @@ jobs:
             echo "::warning::Modal deploy env incomplete — skipping secret sync. Push secrets via sync_github_secrets.sh --apply"
           fi
 
+      - name: Sync Modal vecinita-llm secret
+        run: bash scripts/deploy/sync_llm_secret.sh --merge --apply
+
       - name: Sync Modal vecinita-llm-finetune secret
         run: |
           set -euo pipefail
           if bash scripts/deploy/ci_materialize_env.sh --check finetune; then
             bash scripts/deploy/sync_finetune_secret.sh --apply
           else
-            echo "::warning::Finetune secret env incomplete — skipping. Push F80 keys via sync_github_secrets.sh --apply"
+            echo "::warning::Finetune deploy env incomplete — skipping FT secret sync. Push EV-027 keys via sync_github_secrets.sh --apply"
           fi
 
       - name: Verify Modal secrets and volumes
         run: bash scripts/deploy/verify_secrets.sh
 
-      - name: Deploy Modal apps (embedding, data-management, llm)
+      - name: Deploy Modal apps (embedding, data-management, llm, rerank, finetune)
         run: bash scripts/deploy/modal.sh
 
       - name: List deployed apps

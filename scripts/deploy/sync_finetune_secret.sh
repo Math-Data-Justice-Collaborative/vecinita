@@ -7,7 +7,7 @@
 # Usage:
 #   set -a && source .env && set +a
 #   bash scripts/deploy/sync_finetune_secret.sh            # dry run
-#   bash scripts/deploy/sync_finetune_secret.sh --apply  # write secret
+#   bash scripts/deploy/sync_finetune_secret.sh --apply    # write secret
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -25,13 +25,15 @@ source "${ROOT}/scripts/modal_ensure_workspace.sh"
 
 SECRET_NAME="vecinita-llm-finetune"
 REQUIRED_KEYS=(
+  VECINITA_INTERNAL_WRITE_URL
+  VECINITA_INTERNAL_API_KEY
+)
+OPTIONAL_KEYS=(
   VECINITA_AUTOMATIONS_KILL_SWITCH
   VECINITA_FINETUNE_ENABLED
   VECINITA_FINETUNE_REQUIRE_APPROVE
   VECINITA_FINETUNE_MAX_CONCURRENT
   VECINITA_FINETUNE_MAX_RUNS_PER_DAY
-  VECINITA_INTERNAL_WRITE_URL
-  VECINITA_INTERNAL_API_KEY
 )
 
 PAIRS=()
@@ -51,6 +53,17 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
   echo "Source .env (set -a && source .env && set +a). See infra/modal/.env.example." >&2
   exit 1
 fi
+
+# Safe rollout defaults per ADR-052 / ADR-053: deploy the path first, keep FT off.
+: "${VECINITA_AUTOMATIONS_KILL_SWITCH:=false}"
+: "${VECINITA_FINETUNE_ENABLED:=false}"
+: "${VECINITA_FINETUNE_REQUIRE_APPROVE:=true}"
+: "${VECINITA_FINETUNE_MAX_CONCURRENT:=1}"
+: "${VECINITA_FINETUNE_MAX_RUNS_PER_DAY:=3}"
+
+for key in "${OPTIONAL_KEYS[@]}"; do
+  PAIRS+=("$key=${!key}")
+done
 
 echo "==> Modal secret: ${SECRET_NAME}"
 echo "    Keys to push (values hidden):"
