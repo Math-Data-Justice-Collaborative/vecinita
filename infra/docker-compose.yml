@@ -6,6 +6,8 @@ services:
     container_name: vecinita-postgres
     # Keep the local DB bound to loopback, but allow the stock image entrypoint
     # to chmod the data dir and switch to the postgres user during init.
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_USER: vecinita
       POSTGRES_PASSWORD: vecinita

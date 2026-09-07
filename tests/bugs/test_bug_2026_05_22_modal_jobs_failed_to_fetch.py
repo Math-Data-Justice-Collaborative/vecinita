@@ -6,6 +6,7 @@ browser shows Failed to fetch. App-level Modal-Key auth must replace edge proxy 
 
 from __future__ import annotations
 
+import os
 import re
 from http import HTTPStatus
 from pathlib import Path
@@ -19,7 +20,11 @@ from tests.helpers.json_response import header_str
 
 ADMIN_ORIGIN = "https://vecinita-admin-frontend.example.com"
 _MODAL_APP = Path(__file__).resolve().parents[2] / "infra" / "modal" / "data_management_app.py"
-_LIVE_MODAL_JOBS = "https://vecinita--vecinita-data-management-fastapi-app.modal.run/jobs"
+
+
+def _env(name: str) -> str | None:
+    value = os.environ.get(name, "").strip()
+    return value or None
 
 
 @pytest.fixture(autouse=True)
@@ -62,10 +67,14 @@ def test_data_mgmt_options_preflight_without_modal_key_succeeds() -> None:
 @pytest.mark.live
 def test_live_modal_jobs_options_preflight_succeeds() -> None:
     """Production H4: OPTIONS /jobs from admin origin must not return 401 at edge."""
+    admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
+    admin_origin = _env("VECINITA_STAGING_ADMIN_FRONTEND_URL")
+    if admin_api is None or admin_origin is None:
+        pytest.skip("Set VECINITA_STAGING_ADMIN_API_URL and VECINITA_STAGING_ADMIN_FRONTEND_URL")
     response = httpx.options(
-        _LIVE_MODAL_JOBS,
+        f"{admin_api.rstrip('/')}/jobs",
         headers={
-            "Origin": "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+            "Origin": admin_origin,
             "Access-Control-Request-Method": "POST",
             "Access-Control-Request-Headers": "content-type, x-vecinita-proxy-key",
         },
@@ -75,7 +84,4 @@ def test_live_modal_jobs_options_preflight_succeeds() -> None:
         f"Expected 200 CORS preflight, got {response.status_code}: {response.text[:200]}"
     )
     origin = header_str(response.headers, "access-control-allow-origin")
-    assert origin in (
-        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
-        "*",
-    ), f"Missing Allow-Origin: {origin!r}"
+    assert origin in (admin_origin, "*"), f"Missing Allow-Origin: {origin!r}"

@@ -59,11 +59,9 @@ non-blocking; justified MEDIUM OpenAPI noise excludes live in
 `config/security/kics-exclude-queries.txt`.
 
 Config: `config/security/` (KICS query excludes, Grype ignores, OpenGrep notes).
-2ms ignores gitignored local secret files (`.env`, `.env.staging`, `prod.env`,
-`.staging-db-url.local`, `.staging-supabase-db-pass.local`,
-`.staging-supabase-ref.local`, `.staging-supabase-keys.local`, operator
-`*-spec.yaml` exports); secrets in tracked files still hard-fail. Complementary:
-gitleaks in `ci-guards`.
+2ms ignores gitignored local secret files (`.env`, `.env.*`, `prod.env`,
+`.staging-*.local`, operator `*-spec.yaml` exports); secrets in tracked files still
+hard-fail. Complementary: gitleaks in `ci-guards`.
 
 ## SBOM licenses
 
@@ -128,10 +126,10 @@ Prefer env-block interpolation (already used in hardened workflows) when editing
 Fail-on is **medium,high,critical**. Remaining LOW/INFO volume is dominated by OpenAPI
 schema shape (optional fields, INFO-level style). Justified MEDIUM excludes for
 non-actionable OpenAPI pattern/response-$ref queries live in
-`config/security/kics-exclude-queries.txt`. The exclude list also carries the
-local Docker Desktop Postgres bootstrap exception: the dev `pgvector` container
-must keep its stock init privileges so `with_local_postgres.sh` can boot on
-macOS Docker Desktop. Re-triage when touching IaC/OpenAPI or local compose.
+`config/security/kics-exclude-queries.txt`. Re-triage when touching IaC/OpenAPI.
+The exclude list also carries the local F18 Postgres dev-compose capability exception:
+loopback-only bind is retained, while `cap_drop: [ALL]` stays excluded because it broke
+Docker Desktop/macOS volume startup for the pgvector image.
 
 ## Related
 
