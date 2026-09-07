@@ -433,6 +433,10 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
   content hash (`VECINITA_FINETUNE_ADAPTER_HASH`) with constant-time compare; fail closed on
   mismatch; `/health` exposes ready metadata; kill-switch `VECINITA_LLM_LORA_RESOLVE`
   (default `post_restore`) (EV-316 / #316, TC-316-01, TC-316-02, ADR-022).
+- [ ] **AC-FT12**: Live prod adapter promote remains a separate operator gate after EV-031 eval
+  path. After explicit AskQuestion approval, prod `vecinita-llm` pins the chosen adapter and
+  passes post-promote smoke/health; rollback clears the pin back to base and re-passes the same
+  smoke/health path (TC-325, TC-326).
 
 ### Cold-start Layer E harness (EV-314 / #314)
 
