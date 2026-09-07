@@ -100,6 +100,11 @@ These paths are allowlisted in `.gitleaks.toml` so `gitleaks detect --no-git` pa
 while CI still scans all **tracked** paths. Blocking gate remains `scripts/check_secrets.sh`
 under `apps/`, `packages/`, `tests/`, `infra/`, `openapi/`.
 
+Additional local-only allowlists cover repo-root `.env` / `.env.*`,
+`.staging-supabase-keys.local`, `.tools/security/`, and generated `.security-reports/`
+artifacts because they are gitignored operator or tool-cache files and should not fail the
+working-tree gate.
+
 ## QA-S007-001 (2026-07-01) — false positives in working tree
 
 | Finding | Resolution |

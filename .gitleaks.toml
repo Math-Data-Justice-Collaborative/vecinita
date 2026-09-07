@@ -19,6 +19,7 @@ paths = [
   # Gitignored local secret stores (never commit; see .gitignore + no-operator-spec-commits rule)
   '''(?:^|/)\.env$''',
   '''(?:^|/)\.env\.staging$''',
+  '''(?:^|/)\.env\.[^/]+$''',
   '''(?:^|/)\.deploy-keys\.local$''',
   '''(?:^|/)prod\.env$''',
   '''(?:^|/)\.staging-db-url\.local$''',
@@ -29,9 +30,9 @@ paths = [
   '''(?:^|/)supabase/\.env$''',
   '''(?:^|/)\.tmp(?:/.*)?$''',
   '''(?:^|/)(?:admin-fe-spec|internal-write-api-spec|chat-rag-spec)\.yaml$''',
-  # Generated local security outputs / vendored rule packs
-  '''(?:^|/)\.security-reports(?:/.*)?$''',
   '''(?:^|/)\.tools/security/assets(?:/.*)?$''',
+  '''(?:^|/)\.tools/security(?:/.*)?$''',
+  '''(?:^|/)\.security-reports(?:/.*)?$''',
   # Removed backend / scraper-worker tree
   '''(?:^|/)backend(?:/.*)?$''',
   '''(?:^|/)apps/scraper-worker(?:/.*)?$''',

@@ -12,5 +12,10 @@ def resolve_repo_root(fallback: Path = MODAL_PKG_ROOT) -> Path:
     """Repo root when deploying from ``infra/modal``; ``fallback`` when Modal mounts the app module."""
     here = Path(__file__).resolve()
     if here.parent.name == "modal" and here.parent.parent.name == "infra":
-        return here.parents[2]
+        candidate = here.parents[2]
+        try:
+            if (candidate / "apps").is_dir() and (candidate / "packages").is_dir():
+                return candidate
+        except PermissionError:
+            return fallback
     return fallback

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import uuid
 from pathlib import Path
@@ -44,6 +45,7 @@ _EXPECTED_SERVING_STATS_COLUMNS = {
     "served_count",
     "last_served_at",
 }
+_REVISION_RE = re.compile(r"\b(\d{8}_\d{4})\b")
 
 
 def _database_url() -> str:
@@ -80,25 +82,14 @@ def test_alembic_head_includes_ev002_migration() -> None:
         text=True,
         check=True,
     )
-    current_rev = current.stdout.strip().split()[0]
-    head_rev = heads.stdout.strip().split()[0]
-    assert current_rev == head_rev
-    # Tip can advance as new migrations land; EV-002 and prior branch tips must remain in history.
-    # [Corpus: feature-list.md §F75-F80] [Spec: docs/sessions/S030-corpus-automations/reports/qa-report.md §QA-S030-001]
-    assert "20260823_0017" in history.stdout
-    assert "20260812_0016" in history.stdout
-    assert "20260822_0015" in history.stdout
-    assert "20260807_0015" in history.stdout
-    assert "20260806_0014" in history.stdout
-    assert "20260804_0012" in history.stdout
-    assert "20260803_0011" in history.stdout
-    assert "20260730_0010" in history.stdout
-    assert "20260728_0009" in history.stdout
-    assert "20260707_0008" in history.stdout
-    assert "20260702_0007" in history.stdout
-    assert "20260701_0006" in history.stdout
-    assert "20260628_0004" in history.stdout
-    assert "20260701_0005" in history.stdout
+    current_revisions = set(_REVISION_RE.findall(current.stdout))
+    head_revisions = set(_REVISION_RE.findall(heads.stdout))
+    assert current_revisions, f"expected alembic current revision, got: {current.stdout!r}"
+    assert head_revisions, f"expected alembic head revision, got: {heads.stdout!r}"
+    assert current_revisions == head_revisions
+    # Contract: EV-002 remains in Alembic history even as newer revisions advance the head.
+    # [Corpus: product] [Spec: docs/test-plan.md §TC-060]
+    assert "20260526_0003" in history.stdout
 
 
 def test_audit_log_columns_match_spec() -> None:

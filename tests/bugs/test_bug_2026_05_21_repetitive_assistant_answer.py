@@ -10,7 +10,6 @@ import ast
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-LLM_APP = REPO_ROOT / "infra" / "modal" / "llm_app.py"
 LLM_SERVICE_CORE = REPO_ROOT / "infra" / "modal" / "llm_service_core.py"
 CHAT_CONFIG = REPO_ROOT / "apps" / "chat-rag-backend" / "vecinita_chat_rag_backend" / "config.py"
 CHAT_SERVICE = REPO_ROOT / "apps" / "chat-rag-backend" / "vecinita_chat_rag_backend" / "service.py"

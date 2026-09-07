@@ -25,6 +25,15 @@ def test_resolve_repo_root_uses_fallback_outside_repo_layout(
     assert repo_paths.resolve_repo_root(fallback=fallback) == fallback
 
 
+def test_resolve_repo_root_uses_fallback_when_modal_mount_lacks_repo_tree(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Mounted Modal single-file deploy falls back when /root only contains infra."""
+    fallback = Path("/opt/vecinita")
+    monkeypatch.setattr(repo_paths, "__file__", "/root/infra/modal/data_management_app.py")
+    assert repo_paths.resolve_repo_root(fallback=fallback) == fallback
+
+
 def test_modal_mount_constants() -> None:
     """Shared mount roots match Modal image conventions."""
     assert Path("/opt/vecinita") == MODAL_PKG_ROOT
