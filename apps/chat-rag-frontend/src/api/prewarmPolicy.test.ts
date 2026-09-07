@@ -351,8 +351,12 @@ describe("prewarm trigger-policy evidence", () => {
         throw new Error("blocked");
       });
 
-    expect(() => { recordPrewarmRequested("focus"); }).not.toThrow();
-    expect(() => { recordAskStarted(); }).not.toThrow();
+    expect(() => {
+      recordPrewarmRequested("focus");
+    }).not.toThrow();
+    expect(() => {
+      recordAskStarted();
+    }).not.toThrow();
     expect(readPrewarmPolicyEvidence()).toEqual({
       version: 1,
       prewarm_requested: 0,
