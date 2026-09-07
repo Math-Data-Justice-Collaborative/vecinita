@@ -57,8 +57,8 @@ function isStoredPolicyCounters(value: unknown): value is StoredPolicyCounters {
   }
   const candidate = value as Record<string, unknown>;
   return (
-    typeof candidate.prewarm_requested === "number" &&
-    typeof candidate.ask_started === "number"
+    typeof candidate["prewarm_requested"] === "number" &&
+    typeof candidate["ask_started"] === "number"
   );
 }
 
@@ -81,18 +81,18 @@ function readEnvelope(): StoredPrewarmPolicyEnvelope {
     }
     const candidate = parsed as Record<string, unknown>;
     if (
-      candidate.version !== 1 ||
-      typeof candidate.prewarm_requested !== "number" ||
-      typeof candidate.ask_started !== "number" ||
-      !candidate.policies ||
-      typeof candidate.policies !== "object"
+      candidate["version"] !== 1 ||
+      typeof candidate["prewarm_requested"] !== "number" ||
+      typeof candidate["ask_started"] !== "number" ||
+      !candidate["policies"] ||
+      typeof candidate["policies"] !== "object"
     ) {
       return createEmptyEnvelope();
     }
-    const policies = candidate.policies as Record<string, unknown>;
-    const mount = policies.mount;
-    const dwell = policies.dwell;
-    const focus = policies.focus;
+    const policies = candidate["policies"] as Record<string, unknown>;
+    const mount = policies["mount"];
+    const dwell = policies["dwell"];
+    const focus = policies["focus"];
     const firstKeystroke = policies["first-keystroke"];
     if (
       !isStoredPolicyCounters(mount) ||
@@ -102,13 +102,13 @@ function readEnvelope(): StoredPrewarmPolicyEnvelope {
     ) {
       return createEmptyEnvelope();
     }
-    const pendingPolicy = isPrewarmTriggerPolicy(candidate.pending_policy)
-      ? candidate.pending_policy
+    const pendingPolicy = isPrewarmTriggerPolicy(candidate["pending_policy"])
+      ? candidate["pending_policy"]
       : null;
     return {
       version: 1,
-      prewarm_requested: candidate.prewarm_requested,
-      ask_started: candidate.ask_started,
+      prewarm_requested: candidate["prewarm_requested"],
+      ask_started: candidate["ask_started"],
       pending_policy: pendingPolicy,
       policies: {
         mount,
@@ -172,27 +172,27 @@ export function readPrewarmPolicyEvidence(): PrewarmPolicyEvidence {
     ),
     policies: {
       mount: {
-        prewarm_requested: envelope.policies.mount.prewarm_requested,
-        ask_started: envelope.policies.mount.ask_started,
+        prewarm_requested: envelope.policies["mount"].prewarm_requested,
+        ask_started: envelope.policies["mount"].ask_started,
         prewarm_to_ask_hit_rate: rate(
-          envelope.policies.mount.ask_started,
-          envelope.policies.mount.prewarm_requested,
+          envelope.policies["mount"].ask_started,
+          envelope.policies["mount"].prewarm_requested,
         ),
       },
       dwell: {
-        prewarm_requested: envelope.policies.dwell.prewarm_requested,
-        ask_started: envelope.policies.dwell.ask_started,
+        prewarm_requested: envelope.policies["dwell"].prewarm_requested,
+        ask_started: envelope.policies["dwell"].ask_started,
         prewarm_to_ask_hit_rate: rate(
-          envelope.policies.dwell.ask_started,
-          envelope.policies.dwell.prewarm_requested,
+          envelope.policies["dwell"].ask_started,
+          envelope.policies["dwell"].prewarm_requested,
         ),
       },
       focus: {
-        prewarm_requested: envelope.policies.focus.prewarm_requested,
-        ask_started: envelope.policies.focus.ask_started,
+        prewarm_requested: envelope.policies["focus"].prewarm_requested,
+        ask_started: envelope.policies["focus"].ask_started,
         prewarm_to_ask_hit_rate: rate(
-          envelope.policies.focus.ask_started,
-          envelope.policies.focus.prewarm_requested,
+          envelope.policies["focus"].ask_started,
+          envelope.policies["focus"].prewarm_requested,
         ),
       },
       "first-keystroke": {
