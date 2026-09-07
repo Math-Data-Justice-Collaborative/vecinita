@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { PREWARM_POLICY_STORAGE_KEY } from "../api/prewarmPolicy";
 import { ChatPanel } from "../components/ChatPanel";
 import { renderWithLocale } from "./renderWithLocale";
 
@@ -120,6 +121,32 @@ describe("ChatPanel", () => {
         }),
       }),
     );
+  });
+
+  it("records privacy-safe prewarm evidence when the user asks after mount", async () => {
+    const sse =
+      'data: {"token":"The pantry opens at 9."}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Where is the pantry?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+
+    await waitFor(() => {
+      const raw = sessionStorage.getItem(PREWARM_POLICY_STORAGE_KEY);
+      expect(raw).not.toBeNull();
+      expect(raw).not.toContain("Where is the pantry?");
+    });
   });
 
   it("shows warm-up status when the first ask attempt fails transiently", async () => {

@@ -50,6 +50,52 @@ def _proxy_headers(proxy_key: str) -> dict[str, str]:
     }
 
 
+def summarize_prewarm_trigger_policy(
+    *,
+    policy: str,
+    prewarm_requested: int,
+    ask_started: int,
+    scaledown_window_s: int,
+    gpu_usd_per_hour: float,
+) -> dict[str, object]:
+    """Build a privacy-safe bounded-cost summary for one browser-entry prewarm policy."""
+    if prewarm_requested < 0:
+        msg = "prewarm_requested must be >= 0"
+        raise ValueError(msg)
+    if ask_started < 0:
+        msg = "ask_started must be >= 0"
+        raise ValueError(msg)
+    if ask_started > prewarm_requested:
+        msg = "ask_started cannot exceed prewarm_requested"
+        raise ValueError(msg)
+    if scaledown_window_s < 0:
+        msg = "scaledown_window_s must be >= 0"
+        raise ValueError(msg)
+    if gpu_usd_per_hour < 0:
+        msg = "gpu_usd_per_hour must be >= 0"
+        raise ValueError(msg)
+
+    bounce_count = prewarm_requested - ask_started
+    bounded_idle_t4_seconds = bounce_count * scaledown_window_s
+    hit_rate = 0.0
+    if prewarm_requested > 0:
+        hit_rate = ask_started / prewarm_requested
+    bounded_idle_cost_usd = round(
+        bounded_idle_t4_seconds * (gpu_usd_per_hour / 3600.0),
+        4,
+    )
+    return {
+        "policy": policy,
+        "prewarm_requested": prewarm_requested,
+        "ask_started": ask_started,
+        "prewarm_to_ask_hit_rate": round(hit_rate, 4),
+        "bounce_count": bounce_count,
+        "scaledown_window_s": scaledown_window_s,
+        "bounded_idle_t4_seconds": bounded_idle_t4_seconds,
+        "bounded_idle_cost_usd": bounded_idle_cost_usd,
+    }
+
+
 def _post_generate(
     url: str,
     body: dict[str, object],

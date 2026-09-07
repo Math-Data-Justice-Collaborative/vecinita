@@ -9,6 +9,7 @@ import {
   isTokenEvent,
   streamAsk,
 } from "../api/ask";
+import { recordAskStarted } from "../api/prewarmPolicy";
 import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
 import { SLOW_STREAM_WAIT_MS } from "../coldstart/constants";
@@ -104,6 +105,7 @@ function ChatPanelView({
     setWaitUxActive(false);
     sawFirstTokenRef.current = false;
     setLoading(true);
+    recordAskStarted();
     appendUserMessage(trimmed);
     setQuestion("");
     const assistantId = appendAssistantPlaceholder();
