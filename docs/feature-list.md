@@ -827,6 +827,10 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `POST /api/v1/warm` contract (ADR-022 prewarm lever). F40 does **not** own that work.
   Sibling latency ops (also not F40): EV-315 seed snapshots (#315), EV-317 thin CPU ingress
   (#317), EV-319 scaledown_window (#319) under ADR-022 / parent #311.
+- **Follow-on policy question**: Browser-entry prewarm currently triggers on **mount**.
+  EV-359 / `#359` is the cost/latency follow-on that will decide whether mount stays the
+  default or shifts to dwell / focus / first-keystroke based on privacy-safe bounce-rate
+  evidence. Until that slice lands, current mount behavior remains the standing contract.
 - **Out of scope (F40)**: Changing Modal spawn semantics (see #318); CMS/API-backed facts;
   admin UI; analytics of which facts were shown; focus/typing warm predictors.
 - **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15);
