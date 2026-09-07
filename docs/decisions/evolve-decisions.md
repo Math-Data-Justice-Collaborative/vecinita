@@ -1890,9 +1890,12 @@ after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226m
 | EV-LCE-D7 | Staging slice | `#354` remains a staging-idle posture slice that must preserve F83 / `staging-smoke` credibility |
 | EV-LCE-D8 | Broad cost research | `#323` stays last as a research/output slice, not a host-migration mandate |
 | EV-LCE-D9 | Draft-docs delta | Minimal standing-doc delta only; add the missing `#359` journey/test/acceptance mapping |
+| EV-LCE-D10 | `#323` evidence waiver | Proceed with a plan-level whole-stack cost recommendation without the exact Supabase invoice / compute sizing; do not claim a verified `< $30/mo` envelope on that basis |
 
 **Artifacts:** Session requirements note at
 `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-latency-cost-efficiency/reports/requirements-slice.md`
+plus `reports/prewarm-trigger-policy.md`, `reports/whole-stack-cost-baseline.md`, and
+`reports/whole-stack-cost-recommendation.md`
 
 **Cites:** [Corpus: feature-list.md §F40] [Corpus: staging] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Corpus: ADR-004]
 
