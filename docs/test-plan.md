@@ -41,6 +41,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
 | UJ-094 Staging corpus mirror from prod | ops checklist + corpus guards | TC-321–TC-324 | — |
 | UJ-095 Cold staging + warm-before-smoke | config unit + CI/helper contract | TC-325–TC-327 | — |
+| UJ-096 Browser-entry prewarm trigger policy | evidence/report contract + optional staging counters | TC-328 | — |
 | UJ-088 Monitoring rates | `tests/e2e/test_uj088_monitoring_metrics.py` | TC-299–TC-304 | Vitest Monitoring page |
 | UJ-089 Staging Grafana/Loki | staging obs checklist / smoke | TC-305–TC-306 | — |
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
@@ -2202,4 +2203,16 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Setup**: Docs guard or checklist assert in runbook §EV-036 / idle posture.
 - **Expected**: Default cost posture = powered off; recreate/destroy still AskQuestion.
 - **Refs**: AC-ST11 · UJ-095 · [Corpus: staging] · ADR-055
+
+### TC-328: Browser-entry prewarm trigger policy evidence is privacy-safe and decision-ready (EV-359 / #359)
+
+- **Objective**: Ensure the trigger-policy analysis for ChatRAG prewarm compares mount,
+  dwell, focus, and first-keystroke using privacy-safe evidence and explicit cost framing.
+- **Setup**: Session evidence and/or staging counters for `prewarm_requested`,
+  `ask_started`, and `prewarm_to_ask_hit_rate`; bounded idle-cost estimate for the active
+  `scaledown_window` posture.
+- **Expected**: A documented recommendation for one trigger policy; no raw prompts,
+  identities, or chat bodies in the evidence; existing mount-prewarm contract remains in
+  force until a later build-approved implementation change.
+- **Refs**: AC-359-01 · AC-359-02 · AC-359-03 · UJ-096 · [Corpus: ADR-004] · [Corpus: config]
 

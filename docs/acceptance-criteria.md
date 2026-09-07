@@ -540,6 +540,19 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [ ] **AC-ST13**: Staging-attributable cost delta documented (soft target — maximize safe idle savings; no hard staging-only $ cap) (EV-354).
 - [ ] **AC-ST14**: No staging→prod secret cross-wire; prod DB alias `vecinita-staging-restored-20260701` not destroyed this cycle (EV-323-D10).
 
+### EV-359 — Browser-entry prewarm trigger policy (F40 delta / #359)
+
+- [ ] **AC-359-01**: Standing docs compare the current **mount** trigger with candidate
+  **dwell**, **focus**, and **first-keystroke** policies; no silent behavior change before a
+  later build-gate approval (TC-328, UJ-096).
+- [ ] **AC-359-02**: Evidence for the recommendation uses privacy-safe counters or bounded
+  estimates only (`prewarm_requested`, `ask_started`, `prewarm_to_ask_hit_rate`,
+  `scaledown_window` cost framing); no prompts, identity, or chat bodies are logged
+  (TC-328, ADR-004).
+- [ ] **AC-359-03**: The chosen recommendation explicitly states its interaction with
+  `scaledown_window` and whether staging/prod may temporarily differ while evidence remains
+  thin (TC-328, UJ-096).
+
 ### EV-036 — Admin monitoring + staging Grafana/Loki (F84 / ADR-055 / #114)
 
 - [ ] **AC-MON1**: Admin `/monitoring` shows ingest, chat, and embed success rates for ≥ `24h` and `7d` (TC-299, TC-303).

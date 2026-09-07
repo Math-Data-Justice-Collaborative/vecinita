@@ -94,6 +94,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-093 | FAQ fast-path canned answer (skip LLM) | Community member | ChatRAG ask/stream → FAQ match → faq_bypass | F85 EV-320 #320 / #79 | local |
 | UJ-094 | Re-seed staging corpus from prod mirror | Operator | Prod read-only dump → staging restore → H2/H3 | F83 EV-338 #338 | staging |
 | UJ-095 | Promote with cold staging + warm-before-smoke | Operator | Idle staging → warm Modal → H1–H5 / `staging-smoke` → merge `main` | F83 EV-354 #354 | staging |
+| UJ-096 | Choose browser-entry prewarm trigger from bounce-cost evidence | Operator | Compare mount / dwell / focus / keystroke trigger policies | F40 delta EV-359 #359 | staging |
 
 ## Visual journey maps
 
@@ -2507,4 +2508,39 @@ TC-327 (runbook/docs guard); live smoke after warm (Build).
 
 **Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: ADR-004]
 [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] #354
+
+### UJ-096: Choose browser-entry prewarm trigger from bounce-cost evidence (F40 delta / EV-359 / #359)
+
+**Actor**: Operator / maintainer
+
+**Goal**: Decide whether ChatRAG browser-entry prewarm should stay on **mount** or move to
+**dwell**, **focus**, or **first keystroke** based on privacy-safe evidence about bounce
+visits, hidden latency, and idle T4 cost.
+
+**Preconditions**: Existing `POST /api/v1/warm` contract remains available; staging or
+production-safe counters can distinguish `prewarm_requested` from `ask_started` without
+logging prompts or identity data; `scaledown_window` posture for the evaluated environment is
+known or bounded.
+
+**Steps**:
+
+1. Record the current default policy (`mount`) and the candidate alternatives (`dwell`,
+   `focus`, `first keystroke`).
+2. Measure or bound the rate of prewarms that do **not** lead to an ask.
+3. Estimate or observe isolated idle-T4 cost under candidate `scaledown_window` settings.
+4. Compare whether each trigger hides restore latency enough to justify its bounce cost.
+5. Pick one recommended trigger policy and document whether staging/prod should temporarily
+   differ while evidence is still thin.
+6. Keep the existing mount trigger unchanged until a later build gate approves a change.
+
+**Acceptance**: One recommended trigger policy, explicit privacy-safe metrics only, and a
+documented interaction with `scaledown_window`; no silent change to the live prewarm trigger.
+
+**Automated tests**: TC-328 (evidence/report contract). Existing mount-prewarm contract stays
+covered by TC-318-02 / UJ-090 until a later implementation slice changes behavior.
+
+**E2E tier**: staging (analysis / ops).
+
+**Refs**: [Corpus: feature-list.md §F40] [Corpus: ADR-022 §Amendment EV-318]
+[Corpus: ADR-004] [Corpus: config] #359
 

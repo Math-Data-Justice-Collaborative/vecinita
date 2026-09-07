@@ -1874,3 +1874,28 @@ after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226m
 **Acceptance:** AC-ST9–AC-ST14 · UJ-095 · TC-325–TC-327  
 **Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Spec: ADR-054] [Corpus: ADR-004]
 
+## EV-latency-cost-efficiency — Milestone 7 latency and cost efficiency (2026-09-07)
+
+**Session:** `EV-latency-cost-efficiency`  
+**Tickets:** `#311` parent frame, then `#317`, `#319`, `#359`, `#354`, and `#323`
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-LCE-D1 | Resume mode | Advance from `spec-development/context` into requirements using the approved issue order |
+| EV-LCE-D2 | Goal frame | Reduce latency while preserving low idle cost, reliability, and Stage->Main safety |
+| EV-LCE-D3 | Session shape | Ordered planning/spec cycle first; build gate stays closed until later approval |
+| EV-LCE-D4 | First slice | `#317` thin Modal CPU ingress first as the smallest behavior-preserving cold-path lever |
+| EV-LCE-D5 | Second slice | `#319` scaledown tuning after `#317`, using privacy-safe timestamp-only gap evidence |
+| EV-LCE-D6 | Prewarm policy slice | `#359` is a follow-on decision slice about trigger policy, not an immediate change to the mount-prewarm contract |
+| EV-LCE-D7 | Staging slice | `#354` remains a staging-idle posture slice that must preserve F83 / `staging-smoke` credibility |
+| EV-LCE-D8 | Broad cost research | `#323` stays last as a research/output slice, not a host-migration mandate |
+| EV-LCE-D9 | Draft-docs delta | Minimal standing-doc delta only; add the missing `#359` journey/test/acceptance mapping |
+| EV-LCE-D10 | `#323` evidence waiver | Proceed with a plan-level whole-stack cost recommendation without the exact Supabase invoice / compute sizing; do not claim a verified `< $30/mo` envelope on that basis |
+
+**Artifacts:** Session requirements note at
+`~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-latency-cost-efficiency/reports/requirements-slice.md`
+plus `reports/prewarm-trigger-policy.md`, `reports/whole-stack-cost-baseline.md`, and
+`reports/whole-stack-cost-recommendation.md`
+
+**Cites:** [Corpus: feature-list.md §F40] [Corpus: staging] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Corpus: ADR-004]
+
