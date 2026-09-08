@@ -13,6 +13,7 @@ from vecinita_shared_schemas.json_types import as_json_object
 from tests.helpers.json_response import response_json_object
 
 pytestmark = [pytest.mark.e2e, pytest.mark.live]
+_RETIRED_STAGING_SUPABASE_URL = "https://camkatfbjguwvymfgdme.supabase.co"
 
 
 def _env(name: str) -> str | None:
@@ -29,18 +30,17 @@ def _first_env(*names: str) -> str | None:
 
 
 def _require_staging_operator_creds() -> tuple[str, str, str, str]:
-    supabase = _first_env(
-        "SUPABASE_STAGING_URL",
-        "VITE_SUPABASE_STAGING_URL",
-        "SUPABASE_URL",
-        "VITE_SUPABASE_URL",
-    )
-    anon = _first_env(
-        "SUPABASE_STAGING_PUBLISHABLE_KEY",
-        "VITE_SUPABASE_STAGING_PUBLISHABLE_KEY",
-        "SUPABASE_PUBLISHABLE_KEY",
-        "VITE_SUPABASE_PUBLISHABLE_KEY",
-    )
+    staging_supabase = _first_env("SUPABASE_STAGING_URL", "VITE_SUPABASE_STAGING_URL")
+    generic_supabase = _first_env("SUPABASE_URL", "VITE_SUPABASE_URL")
+    if staging_supabase and staging_supabase.rstrip("/") != _RETIRED_STAGING_SUPABASE_URL:
+        supabase = staging_supabase
+        anon = _first_env(
+            "SUPABASE_STAGING_PUBLISHABLE_KEY",
+            "VITE_SUPABASE_STAGING_PUBLISHABLE_KEY",
+        )
+    else:
+        supabase = generic_supabase
+        anon = _first_env("SUPABASE_PUBLISHABLE_KEY", "VITE_SUPABASE_PUBLISHABLE_KEY")
     email = _env("SUPABASE_ADMIN_EMAIL")
     password = _env("SUPABASE_ADMIN_PASSWORD")
     if not supabase or not anon or not email or not password:
@@ -113,6 +113,30 @@ def test_require_staging_operator_creds_prefers_staging_aliases_over_generic(
     assert _require_staging_operator_creds() == (
         "https://staging.supabase.co",
         "staging-publishable",
+        "admin@example.com",
+        "test-password",
+    )
+
+
+def test_require_staging_operator_creds_ignores_retired_staging_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Legacy camkat staging aliases must not override the active branch-backed target."""
+
+    def fail_skip(message: str) -> None:
+        raise AssertionError(message)
+
+    monkeypatch.setattr(pytest, "skip", fail_skip)
+    monkeypatch.setenv("SUPABASE_STAGING_URL", _RETIRED_STAGING_SUPABASE_URL)
+    monkeypatch.setenv("VITE_SUPABASE_STAGING_PUBLISHABLE_KEY", "retired-publishable")
+    monkeypatch.setenv("SUPABASE_URL", "https://staging-branch.supabase.co")
+    monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "branch-publishable")
+    monkeypatch.setenv("SUPABASE_ADMIN_EMAIL", "admin@example.com")
+    monkeypatch.setenv("SUPABASE_ADMIN_PASSWORD", "test-password")
+
+    assert _require_staging_operator_creds() == (
+        "https://staging-branch.supabase.co",
+        "branch-publishable",
         "admin@example.com",
         "test-password",
     )

@@ -84,10 +84,11 @@ future ADR switches to asymmetric keys (§1 trade-off).
 
 ### 6. Environment syncing — Supabase **Pro + Git-driven branching**; **cost cap raised to ~$75/mo**
 
-Env-sync uses Supabase **branching** (Pro plan, $25/mo) with **ephemeral preview branches**
-(created for a migration/PR, torn down after) to bound branch-hours; auth/schema **migrations live
-in the repo** and are applied via the **Supabase CLI** (CI-friendly, MCP-independent — unblocks
-R53). Secrets are delivered via Modal secrets + DO env, never committed.
+Env-sync uses Supabase **branching** (Pro plan, $25/mo) with one **long-lived `staging` branch**
+plus **ephemeral preview branches** (created for migration/PR review, torn down after) to bound
+branch-hours; auth/schema **migrations live in the repo** and are applied via the **Supabase CLI**
+(CI-friendly, MCP-independent — unblocks R53). Secrets are delivered via Modal secrets + DO env,
+never committed.
 
 **Cost impact (supersedes ADR-004 cost line):** Supabase Pro ($25/mo, incl. $10 compute credits) on
 top of the existing ~$42–48/mo (DO + Modal, TP-009) yields an all-in **~$67–75/mo**. This **exceeds
@@ -100,8 +101,9 @@ the prior $50/mo hard cap**. Per the cost-constraint protocol the change was rai
 | Monthly **hard cap** | **$50** | **~$75** |
 
 Branching billing detail: `$0.01344` per preview branch per hour (~$0.32/day; ~$9.60/mo if left
-running). Mitigation: keep preview branches ephemeral; keep the org **spend cap ON** for non-branch
-usage (branches are billed outside the cap, so they must be torn down promptly).
+running). Mitigation: keep preview branches ephemeral; treat the named `staging` branch as the only
+persistent non-prod auth branch; keep the org **spend cap ON** for non-branch usage (branches are
+billed outside the cap, so previews must be torn down promptly).
 
 ### 7. Invitation delivery — `inviteUserByEmail` + **custom SMTP**
 

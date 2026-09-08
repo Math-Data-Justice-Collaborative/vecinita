@@ -58,6 +58,8 @@ _CHAT_BACKEND_NAMES = frozenset({"vecinita-chat-rag-backend", "vecinita-staging-
 _WRITE_API_NAMES = frozenset({"vecinita-internal-write-api", "vecinita-staging-write-api"})
 _CHAT_FE_NAMES = frozenset({"vecinita-chat-rag-frontend", "vecinita-staging-chat-fe"})
 _ADMIN_FE_NAMES = frozenset({"vecinita-admin-frontend", "vecinita-staging-admin-fe"})
+_PROD_SUPABASE_PROJECT_REF = "cfuvghdsuwactfeamtym"
+_RETIRED_STAGING_SUPABASE_PROJECT_REF = "camkatfbjguwvymfgdme"
 
 
 def specs_for_env(env: str) -> list[Path]:
@@ -209,6 +211,39 @@ def _apply_env_from_os(spec: dict[str, Any], keys: list[str], scope: str = "RUN_
                     )
 
 
+def validate_supabase_url_for_target(
+    name: str,
+    supabase_url: str,
+    *,
+    env_key: str = "SUPABASE_URL",
+) -> None:
+    """Fail closed when a staging-targeted auth app is pointed at disallowed Supabase refs.
+
+    Staging admin auth now lives on a branch-backed staging path under the
+    canonical project. Refuse both the canonical prod project ref and the
+    retired standalone staging project ref so staging frontend/backend secrets
+    cannot drift back to either unsupported auth target.
+    """
+    trimmed = supabase_url.strip().rstrip("/")
+    if not trimmed:
+        return
+    parsed = urlparse(trimmed)
+    host = parsed.netloc.lower()
+    if not name.startswith("vecinita-staging-"):
+        return
+    if _PROD_SUPABASE_PROJECT_REF in host:
+        raise SystemExit(
+            f"{name}: {env_key} points at the prod Supabase project "
+            + f"({_PROD_SUPABASE_PROJECT_REF}). Refuse to sync prod Supabase auth into staging."
+        )
+    if _RETIRED_STAGING_SUPABASE_PROJECT_REF in host:
+        raise SystemExit(
+            f"{name}: {env_key} points at the retired standalone staging Supabase project "
+            + f"({_RETIRED_STAGING_SUPABASE_PROJECT_REF}). Refuse to sync the old staging auth "
+            + "project into branch-backed staging."
+        )
+
+
 def cmd_sync_secrets(client, name: str) -> int:
     """Push env vars from shell into the live app spec via apps.update.
 
@@ -221,6 +256,18 @@ def cmd_sync_secrets(client, name: str) -> int:
     if not app:
         raise SystemExit(f"No app named {name!r}")
     spec = app.get("spec") or {}
+    if name == "vecinita-staging-write-api":
+        validate_supabase_url_for_target(
+            name,
+            os.environ.get("SUPABASE_URL", ""),
+            env_key="SUPABASE_URL",
+        )
+    if name == "vecinita-staging-admin-fe":
+        validate_supabase_url_for_target(
+            name,
+            os.environ.get("VITE_SUPABASE_URL", ""),
+            env_key="VITE_SUPABASE_URL",
+        )
     if name in _CHAT_BACKEND_NAMES:
         _apply_env_from_os(
             spec,

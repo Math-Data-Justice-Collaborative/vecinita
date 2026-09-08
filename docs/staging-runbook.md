@@ -10,7 +10,7 @@
 
 | Role | Resources |
 |------|-----------|
-| **staging** | DO project **first-project** — apps `vecinita-staging-*` + Postgres **`vecinita-staging-db`** (nyc); Droplet `vecinita-staging-obs`; Supabase `vecinita-staging` (`camkatfbjguwvymfgdme`); Modal Environment **`staging`** |
+| **staging** | DO project **first-project** — apps `vecinita-staging-*` + Postgres **`vecinita-staging-db`** (nyc); Droplet `vecinita-staging-obs`; Supabase canonical project `cfuvghdsuwactfeamtym` via long-lived branch `staging`; Modal Environment **`staging`** |
 | **prod** | DO project **vecinita** — apps without `vecinita-staging-` prefix; Postgres display name **`vecinita-staging-restored-20260701`** (operator alias **`vecinita-prod-db`** — DO cannot rename managed clusters; EV-323); Modal Environment **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
 
 Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
@@ -43,17 +43,31 @@ bash scripts/deploy/staging_smoke.sh
 CI: `deploy-staging.yml` `staging-smoke` runs `scripts/ops/warm_staging_for_smoke.py`
 before H1–H3 (TC-326 / UJ-095).
 
-**Staging Supabase sync (CI):** `deploy-staging.yml` now pushes the staging Supabase
-project before Modal/DO redeploy via `bash scripts/supabase/ci_sync.sh sync-staging`.
-That step derives the current staging admin frontend origin from the DO app URLs so
-invite/recovery redirects stay aligned with the live staging host, and it requires
-GitHub Environment `staging` secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_SMTP_PASS`,
-`SUPABASE_SECRET_KEY`, `SUPABASE_URL`, and `RESEND_SENDER_EMAIL`.
+**Staging Supabase sync (CI):** `deploy-staging.yml` now ensures the long-lived Supabase
+branch `staging` exists on the canonical project before Modal/DO redeploy via
+`bash scripts/supabase/ci_sync.sh sync-staging`. That step derives the current staging
+admin frontend origin from the DO app URLs so invite/recovery redirects stay aligned
+with the live staging host, and it requires GitHub Environment `staging` secrets
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_SMTP_PASS`, `SUPABASE_SECRET_KEY`, `SUPABASE_URL`,
+and `RESEND_SENDER_EMAIL`. `SUPABASE_URL` must match the resolved branch URL, not prod
+and not retired `camkatfbjguwvymfgdme`.
 
 **Operational status (2026-08-28):** Distinct staging H1–H5 passed. Resolve `env_role` as
 `staging` or `prod` — do **not** use `staging_as_live` for the new `vecinita-staging-*`
 stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.
 [ADR-049](adr/ADR-049-single-env-staging-as-live.md) is historical for the single-env era.
+
+### Retire standalone Supabase staging project
+
+Once the canonical project's `staging` branch is live and staging smoke is green:
+
+1. Confirm GitHub Environment `staging`, staging DO apps, and Modal Environment `staging`
+   all use the resolved branch `SUPABASE_URL` and branch-scoped keys.
+2. Confirm no secret or operator shell input still references retired project
+   `camkatfbjguwvymfgdme`.
+3. Pause the standalone Supabase project and leave it idle through one additional
+   staging deploy/smoke cycle as a rollback buffer.
+4. If the next cycle stays green, close out the standalone project permanently.
 
 ## Branch protection / merge gate (F83 / ADR-050 / ADR-054 / EV-033)
 
@@ -878,10 +892,10 @@ Replace any prior staging `RESEND_*` that still matched prod (EV-feedback-notify
 
 > **Warning:** Root `supabase/config.toml` is **prod-oriented** (`site_url` / redirects /
 > `admin_email`). Do **not** run `supabase config push --project-ref camkatfbjguwvymfgdme`
-> from the repo root without a staging override workdir (staging admin FE URLs +
-> `noreply+staging@…` From). Use `bash scripts/supabase/ci_sync.sh sync-staging`
-> or an equivalent temp-config flow; a bare push overwrites staging Auth redirects with
-> prod (caught and restored in EV-305).
+> against the retired standalone staging project, and do not push the canonical prod ref
+> directly from the repo root for staging. Use `bash scripts/supabase/ci_sync.sh sync-staging`
+> or an equivalent temp-config flow so the repo config is rewritten for the canonical
+> project's `staging` branch (staging admin FE URLs + `noreply+staging@…` From).
 
 ### Staging enable
 

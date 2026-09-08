@@ -8,6 +8,7 @@ cd "$ROOT"
 
 # Supabase docs use SUPABASE_PROJECT_ID; repo workflow also sets SUPABASE_PROJECT_REF.
 PROJECT_REF="${SUPABASE_PROJECT_REF:-${SUPABASE_PROJECT_ID:-cfuvghdsuwactfeamtym}}"
+RETIRED_STAGING_PROJECT_REF="camkatfbjguwvymfgdme"
 
 require_token() {
   if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
@@ -131,6 +132,17 @@ preview_branch_exists() {
   supabase branches get "$branch_name" --project-ref "$PROJECT_REF" --experimental -o json >/dev/null 2>&1
 }
 
+ensure_staging_branch() {
+  local branch_name="$1"
+  link_project
+  if preview_branch_exists "$branch_name"; then
+    echo "==> Staging branch already exists: ${branch_name}"
+  else
+    echo "==> Creating persistent staging branch: ${branch_name}"
+    supabase branches create "$branch_name" --project-ref "$PROJECT_REF" --experimental --yes
+  fi
+}
+
 wait_for_preview_branch() {
   local branch_name="$1"
   local attempts="${PREVIEW_BRANCH_READY_ATTEMPTS:-30}"
@@ -176,6 +188,30 @@ apply_repo_state_to_preview_branch() {
   supabase config push --project-ref "$branch_ref" --yes
 }
 
+validate_staging_supabase_url() {
+  local expected_url="$1"
+  local provided_url="${2:-}"
+  local trimmed_expected="${expected_url%/}"
+  local trimmed_provided="${provided_url%/}"
+
+  if [[ -z "$trimmed_provided" ]]; then
+    echo "ERROR: SUPABASE_URL is required and must point at the staging branch URL (${trimmed_expected})." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_provided" == *"${PROJECT_REF}.supabase.co" ]]; then
+    echo "ERROR: SUPABASE_URL points at the canonical prod Supabase project (${PROJECT_REF}). Use the staging branch URL (${trimmed_expected}) instead." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_provided" == *"${RETIRED_STAGING_PROJECT_REF}.supabase.co" ]]; then
+    echo "ERROR: SUPABASE_URL points at the retired standalone staging Supabase project (${RETIRED_STAGING_PROJECT_REF}). Use the staging branch URL (${trimmed_expected}) instead." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_provided" != "$trimmed_expected" ]]; then
+    echo "ERROR: SUPABASE_URL (${trimmed_provided}) does not match the resolved staging branch URL (${trimmed_expected}). Re-sync staging secrets from the branch before deploy." >&2
+    exit 1
+  fi
+}
+
 sync_production() {
   require_token
   # Expired/revoked Management API PATs must not block Modal/DO CD. Same soft-fail
@@ -212,29 +248,36 @@ sync_staging() {
   require_env "SUPABASE_URL"
   require_env "RESEND_SENDER_EMAIL"
   require_env "VECINITA_ADMIN_FRONTEND_URL"
+  require_jq
 
-  local project_ref="${SUPABASE_PROJECT_REF:-${SUPABASE_PROJECT_ID:-}}"
-  if [[ -z "$project_ref" ]]; then
-    project_ref="$(branch_project_ref_from_url "${SUPABASE_URL}")"
-  fi
-  if [[ -z "$project_ref" ]]; then
-    echo "ERROR: could not derive staging SUPABASE_PROJECT_REF from SUPABASE_URL" >&2
-    exit 1
-  fi
-
+  local branch_name="${SUPABASE_STAGING_BRANCH_NAME:-staging}"
   local admin_origin="${VECINITA_ADMIN_FRONTEND_URL%/}"
+  local branch_json
+  local project_ref
+  local branch_url
   local staging_root
   local previous_dir="$PWD"
+
+  ensure_staging_branch "$branch_name"
+  branch_json="$(wait_for_preview_branch "$branch_name")"
+  branch_url="$(jq -r '.SUPABASE_URL // empty' <<<"$branch_json")"
+  project_ref="$(branch_project_ref_from_url "$branch_url")"
+  if [[ -z "$project_ref" || -z "$branch_url" ]]; then
+    echo "ERROR: could not resolve staging branch connection details for ${branch_name}" >&2
+    exit 1
+  fi
+  validate_staging_supabase_url "$branch_url" "${SUPABASE_URL}"
+
   staging_root="$(prepare_staging_config_root "$project_ref" "$admin_origin" "${RESEND_SENDER_EMAIL}")"
-  trap 'rm -rf "$staging_root"' RETURN
+  trap "rm -rf '$staging_root'" RETURN
 
   PROJECT_REF="$project_ref"
   cd "$staging_root"
   link_project
-  echo "==> Pushing staging auth/config from temp config.toml"
+  echo "==> Pushing staging auth/config from temp config.toml to branch ${branch_name}"
   supabase config push --project-ref "$PROJECT_REF" --yes
   if compgen -G "supabase/migrations/*.sql" > /dev/null; then
-    echo "==> Applying SQL migrations to staging project"
+    echo "==> Applying SQL migrations to staging branch ${branch_name}"
     supabase db push --yes
   else
     echo "No supabase/migrations/*.sql — skipping db push"
@@ -289,7 +332,7 @@ Usage: $(basename "$0") <command> [args]
 
 Commands:
   sync-production          Push config (+ migrations when present) to canonical project
-  sync-staging             Push config (+ migrations) to the staging project
+  sync-staging             Ensure the persistent staging branch exists, then push config (+ migrations)
   preview-branch <name>    Create ephemeral preview branch and apply repo state
   delete-preview <name>    Tear down an ephemeral preview branch
 
@@ -297,6 +340,7 @@ Environment:
   SUPABASE_ACCESS_TOKEN    Required for cloud commands (skip gracefully when unset)
   SUPABASE_PROJECT_REF     Canonical project ref (default: cfuvghdsuwactfeamtym)
   SUPABASE_PROJECT_ID      Alias for SUPABASE_PROJECT_REF (Supabase docs convention)
+  SUPABASE_STAGING_BRANCH_NAME  Optional staging branch name (default: staging)
   SUPABASE_DB_PASSWORD     Optional — passed to supabase link when set
 EOF
 }
