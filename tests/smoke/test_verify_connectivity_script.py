@@ -44,3 +44,11 @@ def test_verify_connectivity_script_exists_and_documents_skip() -> None:
     text = script.read_text(encoding="utf-8")
     assert "SKIP live H4/H5" in text
     assert "VECINITA_STAGING_CHAT_URL" in text
+
+
+def test_staging_env_example_documents_active_supabase_bundle_host() -> None:
+    """F83/TC-296: staging connectivity env example must document the active staging auth host."""
+    env_example = REPO_ROOT / "infra" / "staging" / ".env.example"
+    text = env_example.read_text(encoding="utf-8")
+    assert "SUPABASE_STAGING_URL" in text
+    assert "VITE_SUPABASE_STAGING_URL" in text
