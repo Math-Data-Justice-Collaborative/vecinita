@@ -16,8 +16,37 @@ function usersHeaders(options: UsersClientOptions): Record<string, string> {
   return headers;
 }
 
+function normalizedValidationMessage(body: string): string | null {
+  try {
+    const parsed = JSON.parse(body) as {
+      detail?: { msg?: unknown }[] | { msg?: unknown };
+    };
+    const detail = parsed.detail;
+    if (Array.isArray(detail)) {
+      const first = detail[0];
+      if (typeof first?.msg === "string") {
+        return first.msg.replace(/^Value error,\s*/i, "");
+      }
+    }
+    if (detail !== undefined && "msg" in detail) {
+      const msg = detail.msg;
+      if (typeof msg === "string") {
+        return msg.replace(/^Value error,\s*/i, "");
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 async function parseError(response: Response, label: string): Promise<never> {
   const detail = await response.text();
+  const normalized = normalizedValidationMessage(detail);
+  if (normalized) {
+    const sentence = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+    throw new Error(sentence);
+  }
   throw new Error(detail || `${label} failed (${String(response.status)})`);
 }
 

@@ -58,6 +58,18 @@ describe("config", () => {
     setOperatorAccessToken(null);
   });
 
+  it("requireInternalWriteReadConfig uses operator access token when set", async () => {
+    const { requireInternalWriteReadConfig, setOperatorAccessToken } =
+      await import("./config");
+    setOperatorAccessToken("operator-jwt");
+    expect(requireInternalWriteReadConfig()).toEqual({
+      baseUrl: "http://localhost:8002",
+      apiKey: "test-corpus-key",
+      accessToken: "operator-jwt",
+    });
+    setOperatorAccessToken(null);
+  });
+
   it("requireCorpusConfig accepts token-only when api key unset", async () => {
     vi.stubEnv("VITE_VECINITA_CORPUS_API_KEY", "");
     const { requireCorpusConfig, setOperatorAccessToken } =

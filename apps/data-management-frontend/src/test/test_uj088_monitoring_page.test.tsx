@@ -4,10 +4,14 @@
  * [Spec: docs/acceptance-criteria.md §AC-MON1–AC-MON5]
  */
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { fetchInputUrl } from "./fetch-mock";
 import { renderAppRoutesReady, useMediaQueryMock } from "./renderAppHelpers";
+import { renderWithProviders } from "./renderWithProviders";
+import { setSupabaseClientForTests } from "@/auth/supabaseClient";
+import { MonitoringPage } from "@/pages/MonitoringPage";
 
 const SUMMARY_24H = {
   window: "24h",
@@ -498,5 +502,29 @@ describe("UJ-088 Monitoring page (TC-303, TC-304, F84)", () => {
       ).length;
       expect(after).toBeGreaterThan(before);
     });
+  });
+
+  it("shows auth-loading copy before session bootstrap finishes", () => {
+    setSupabaseClientForTests({
+      auth: {
+        getSession: vi
+          .fn()
+          .mockImplementation(() => new Promise(() => undefined)),
+        onAuthStateChange: vi.fn().mockReturnValue({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        }),
+        signInWithPassword: vi.fn(),
+        signOut: vi.fn(),
+      },
+    } as never);
+
+    renderWithProviders(
+      <MemoryRouter>
+        <MonitoringPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId("monitoring-page")).toHaveTextContent("Loading");
+    expect(vi.mocked(fetch).mock.calls).toHaveLength(0);
   });
 });

@@ -1,8 +1,10 @@
 import { cleanup, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { waitFor } from "@testing-library/react";
 
 import { renderWithProviders } from "./renderWithProviders";
+import { installAuthenticatedSupabaseMock } from "./supabaseMock";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { HealthPage } from "@/pages/HealthPage";
 import { AuditPage } from "@/pages/AuditPage";
@@ -29,6 +31,7 @@ describe("BUG-2026-06-29 admin page unmount during load", () => {
 
   for (const { name, Component } of PAGES) {
     it(`does not set state after ${name} unmounts while fetch is pending`, async () => {
+      installAuthenticatedSupabaseMock();
       const unhandled: unknown[] = [];
       const onRejection = (reason: unknown) => {
         unhandled.push(reason);
@@ -48,6 +51,9 @@ describe("BUG-2026-06-29 admin page unmount during load", () => {
           </MemoryRouter>,
         );
         expect(screen.getByText(/loading/i)).toBeInTheDocument();
+        await waitFor(() => {
+          expect(globalThis.fetch).toHaveBeenCalled();
+        });
 
         unmount();
 
@@ -84,6 +90,7 @@ describe("BUG-2026-06-29 admin page unmount during load", () => {
     });
 
     it(`does not set state after ${name} unmounts while fetch rejects`, async () => {
+      installAuthenticatedSupabaseMock();
       const unhandled: unknown[] = [];
       const onRejection = (reason: unknown) => {
         unhandled.push(reason);
@@ -103,6 +110,9 @@ describe("BUG-2026-06-29 admin page unmount during load", () => {
           </MemoryRouter>,
         );
         expect(screen.getByText(/loading/i)).toBeInTheDocument();
+        await waitFor(() => {
+          expect(globalThis.fetch).toHaveBeenCalled();
+        });
 
         unmount();
         rejectFetch(new Error("network down"));

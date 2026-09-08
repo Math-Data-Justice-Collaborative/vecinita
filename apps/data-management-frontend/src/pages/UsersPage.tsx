@@ -76,6 +76,10 @@ const ROLE_KEY: Record<UserRole, StringMessageKey> = {
 const MIN_SEARCH_CHARS = 3;
 const DEFAULT_PAGE_SIZE = 50;
 
+function isValidEmailAddress(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(value);
+}
+
 export function UsersPage() {
   const tr = useAdminT();
   const { locale } = useLocale();
@@ -93,6 +97,9 @@ export function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<UserRole>("viewer");
   const [inviteBusy, setInviteBusy] = useState(false);
+  const [inviteValidationError, setInviteValidationError] = useState<
+    string | null
+  >(null);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [signoutFallback, setSignoutFallback] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState("");
@@ -155,11 +162,17 @@ export function UsersPage() {
   }
 
   async function handleInvite() {
+    const normalizedEmail = inviteEmail.trim();
+    if (!isValidEmailAddress(normalizedEmail)) {
+      setInviteValidationError(tr("admin.users.inviteEmailInvalid"));
+      return;
+    }
     setInviteBusy(true);
+    setInviteValidationError(null);
     setError(null);
     try {
       const client = requireAdminConfig();
-      await inviteUser(client, inviteEmail.trim(), inviteRole);
+      await inviteUser(client, normalizedEmail, inviteRole);
       setInviteOpen(false);
       setInviteEmail("");
       setInviteRole("viewer");
@@ -630,7 +643,15 @@ export function UsersPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+      <Dialog
+        open={inviteOpen}
+        onOpenChange={(open) => {
+          setInviteOpen(open);
+          if (!open) {
+            setInviteValidationError(null);
+          }
+        }}
+      >
         <DialogContent data-testid="users-invite-dialog">
           <DialogHeader>
             <DialogTitle>{tr("admin.users.inviteTitle")}</DialogTitle>
@@ -650,8 +671,15 @@ export function UsersPage() {
                 data-testid="users-invite-email"
                 onChange={(e) => {
                   setInviteEmail(e.target.value);
+                  setInviteValidationError(null);
                 }}
+                aria-invalid={inviteValidationError !== null}
               />
+              {inviteValidationError ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {inviteValidationError}
+                </p>
+              ) : null}
             </div>
             <div className="space-y-2">
               <Label htmlFor="invite-role">

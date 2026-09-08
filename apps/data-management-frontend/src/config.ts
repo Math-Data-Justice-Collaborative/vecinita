@@ -67,3 +67,16 @@ export function requireCorpusConfig(): {
     accessToken: token,
   };
 }
+
+/**
+ * Shared auth/config for admin pages that read from the internal-write API.
+ * Keeps a single call site so authenticated admin views do not drift between
+ * direct JWT auth and build-time service-key fallback behavior.
+ */
+export function requireInternalWriteReadConfig(): {
+  baseUrl: string;
+  apiKey?: string | undefined;
+  accessToken?: string | undefined;
+} {
+  return requireCorpusConfig();
+}

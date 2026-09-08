@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { type HealthAggregate, fetchHealthAggregate } from "@/api/admin";
-import { requireCorpusConfig } from "@/config";
+import { useAuth } from "@/auth/auth-context";
+import { requireInternalWriteReadConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 export function HealthPage() {
   const tr = useAdminT();
   const { locale } = useLocale();
+  const { loading: authLoading, accessToken } = useAuth();
   const [health, setHealth] = useState<HealthAggregate | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function HealthPage() {
       setLoading(true);
       setError(null);
       try {
-        const client = requireCorpusConfig();
+        const client = requireInternalWriteReadConfig();
         const data = await fetchHealthAggregate(client);
         if (!isActive()) return;
         setHealth(data);
@@ -40,14 +42,17 @@ export function HealthPage() {
   );
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     let active = true;
     void load(() => active);
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [authLoading, accessToken, load]);
 
-  if (loading && !health) {
+  if ((authLoading || loading) && !health) {
     return (
       <div className="space-y-6">
         <div>

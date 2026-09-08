@@ -64,6 +64,57 @@ def test_list_documents_filters_by_query(
     assert any(item.title == "Browse fixture" for item in page.items)
 
 
+def test_list_documents_hides_synthetic_artifact_urls(engine: Engine) -> None:
+    """Public browse skips fixture/example.com documents (artifact guardrail)."""
+    doc_url = "https://artifact-visible.example.com/"
+    with engine.begin() as conn:
+        _ = conn.execute(
+            text(
+                """
+                INSERT INTO documents (url, title, language)
+                VALUES (:url, 'Artifact doc', 'en')
+                """
+            ),
+            {"url": doc_url},
+        )
+    try:
+        page = list_documents(engine, q="Artifact doc", page=1, page_size=20)
+        assert page.total == 0
+        assert page.items == []
+    finally:
+        with engine.begin() as conn:
+            _ = conn.execute(text("DELETE FROM documents WHERE url = :url"), {"url": doc_url})
+
+
+def test_list_documents_prefers_display_title_for_public_rows(engine: Engine) -> None:
+    """F74: public browse uses display_title when present and non-blank."""
+    doc_id = uuid.uuid4()
+    with engine.begin() as conn:
+        _ = conn.execute(
+            text(
+                """
+                INSERT INTO documents (id, url, title, display_title, language)
+                VALUES (
+                    :id,
+                    'https://browse-display-title.vecinita.test/',
+                    'Noisy scraped title',
+                    'Clean operator title',
+                    'en'
+                )
+                """
+            ),
+            {"id": doc_id},
+        )
+    try:
+        page = list_documents(engine, q="Clean operator title", page=1, page_size=20)
+        assert any(item.document_id == doc_id for item in page.items)
+        item = next(item for item in page.items if item.document_id == doc_id)
+        assert item.title == "Clean operator title"
+    finally:
+        with engine.begin() as conn:
+            _ = conn.execute(text("DELETE FROM documents WHERE id = :id"), {"id": doc_id})
+
+
 def test_get_document_returns_detail(
     engine: Engine,
     browse_document: tuple[UUID, str],

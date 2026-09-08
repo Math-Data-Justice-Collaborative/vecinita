@@ -408,6 +408,59 @@ describe("ChatPanel", () => {
     );
   });
 
+  it("submits the focused textarea on Enter", async () => {
+    const sse =
+      'data: {"token":"Sent"}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    const textarea = screen.getByLabelText(/your question/i);
+    fireEvent.change(textarea, {
+      target: { value: "Send with keyboard" },
+    });
+    fireEvent.keyDown(textarea, { key: "Enter", code: "Enter" });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "http://localhost:8000/api/v1/ask/stream",
+        expect.objectContaining({
+          body: JSON.stringify({
+            question: "Send with keyboard",
+            language: "en",
+          }),
+        }),
+      );
+    });
+    expect(screen.getByText(/^Sent$/)).toBeInTheDocument();
+  });
+
+  it("keeps Shift+Enter for multiline drafting without submit", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
+
+    renderWithLocale(<ChatPanel />);
+    const textarea = screen.getByLabelText(/your question/i);
+    fireEvent.change(textarea, {
+      target: { value: "Line 1" },
+    });
+    fireEvent.keyDown(textarea, {
+      key: "Enter",
+      code: "Enter",
+      shiftKey: true,
+    });
+
+    expect(fetch).not.toHaveBeenCalledWith(
+      expect.stringContaining("/api/v1/ask/stream"),
+      expect.anything(),
+    );
+  });
+
   it("includes the sidebar-selected tags in the ask request", async () => {
     const sse =
       'data: {"token":"Ok"}\n\n' +
@@ -455,6 +508,38 @@ describe("ChatPanel", () => {
     fireEvent.click(firstChip);
     expect(screen.getByLabelText(/your question/i)).toHaveValue(
       firstChip.textContent,
+    );
+  });
+
+  it("renders assistant markdown for emphasis, lists, and links", async () => {
+    const sse =
+      'data: {"token":"**Bold**\\n\\n- One\\n- Two\\n\\n[Help](https://example.org/help)"}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Show markdown" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Bold")).toBeInTheDocument();
+    });
+    expect(document.querySelector(".message-content strong")?.textContent).toBe(
+      "Bold",
+    );
+    expect(screen.getByText("One")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Help" })).toHaveAttribute(
+      "href",
+      "https://example.org/help",
     );
   });
 

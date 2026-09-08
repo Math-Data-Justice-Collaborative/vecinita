@@ -12,13 +12,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { type StatsSummary, fetchStatsSummary } from "@/api/admin";
-import { requireCorpusConfig } from "@/config";
+import { useAuth } from "@/auth/auth-context";
+import { requireInternalWriteReadConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 
 export function DashboardPage() {
   const tr = useAdminT();
   const { locale } = useLocale();
+  const { loading: authLoading, accessToken } = useAuth();
   const [stats, setStats] = useState<StatsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const client = requireCorpusConfig();
+        const client = requireInternalWriteReadConfig();
         const data = await fetchStatsSummary(client);
         if (!isActive()) return;
         setStats(data);
@@ -45,14 +47,17 @@ export function DashboardPage() {
   );
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     let active = true;
     void load(() => active);
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [authLoading, accessToken, load]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="space-y-6">
         <div>
