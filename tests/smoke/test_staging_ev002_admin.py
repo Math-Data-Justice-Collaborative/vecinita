@@ -20,14 +20,34 @@ def _env(name: str) -> str | None:
     return value or None
 
 
+def _first_env(*names: str) -> str | None:
+    for name in names:
+        value = _env(name)
+        if value:
+            return value
+    return None
+
+
 def _require_staging_operator_creds() -> tuple[str, str, str, str]:
-    supabase = _env("SUPABASE_URL")
-    anon = _env("SUPABASE_PUBLISHABLE_KEY") or _env("VITE_SUPABASE_PUBLISHABLE_KEY")
+    supabase = _first_env(
+        "SUPABASE_STAGING_URL",
+        "VITE_SUPABASE_STAGING_URL",
+        "SUPABASE_URL",
+        "VITE_SUPABASE_URL",
+    )
+    anon = _first_env(
+        "SUPABASE_STAGING_PUBLISHABLE_KEY",
+        "VITE_SUPABASE_STAGING_PUBLISHABLE_KEY",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "VITE_SUPABASE_PUBLISHABLE_KEY",
+    )
     email = _env("SUPABASE_ADMIN_EMAIL")
     password = _env("SUPABASE_ADMIN_PASSWORD")
     if not supabase or not anon or not email or not password:
         pytest.skip(
-            "Set staging SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY/"
+            "Set staging Supabase env via SUPABASE_URL or SUPABASE_STAGING_URL, "
+            + "publishable key via SUPABASE_PUBLISHABLE_KEY or "
+            + "VITE_SUPABASE_STAGING_PUBLISHABLE_KEY, plus "
             + "SUPABASE_ADMIN_EMAIL/SUPABASE_ADMIN_PASSWORD"
         )
     return supabase, anon, email, password
@@ -47,6 +67,55 @@ def _mint_operator_access_token() -> str:
     assert isinstance(access_raw, str)
     assert access_raw
     return access_raw
+
+
+def test_require_staging_operator_creds_uses_staging_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Staging smoke helpers accept staging-specific Supabase aliases from local env files."""
+
+    def fail_skip(message: str) -> None:
+        raise AssertionError(message)
+
+    monkeypatch.setattr(pytest, "skip", fail_skip)
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_PUBLISHABLE_KEY", raising=False)
+    monkeypatch.delenv("VITE_SUPABASE_PUBLISHABLE_KEY", raising=False)
+    monkeypatch.setenv("SUPABASE_STAGING_URL", "https://staging.supabase.co")
+    monkeypatch.setenv("VITE_SUPABASE_STAGING_PUBLISHABLE_KEY", "staging-publishable")
+    monkeypatch.setenv("SUPABASE_ADMIN_EMAIL", "admin@example.com")
+    monkeypatch.setenv("SUPABASE_ADMIN_PASSWORD", "test-password")
+
+    assert _require_staging_operator_creds() == (
+        "https://staging.supabase.co",
+        "staging-publishable",
+        "admin@example.com",
+        "test-password",
+    )
+
+
+def test_require_staging_operator_creds_prefers_staging_aliases_over_generic(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Staging smoke helpers prefer staging aliases when generic env names are prod-scoped."""
+
+    def fail_skip(message: str) -> None:
+        raise AssertionError(message)
+
+    monkeypatch.setattr(pytest, "skip", fail_skip)
+    monkeypatch.setenv("SUPABASE_URL", "https://prod.supabase.co")
+    monkeypatch.setenv("SUPABASE_PUBLISHABLE_KEY", "prod-publishable")
+    monkeypatch.setenv("SUPABASE_STAGING_URL", "https://staging.supabase.co")
+    monkeypatch.setenv("VITE_SUPABASE_STAGING_PUBLISHABLE_KEY", "staging-publishable")
+    monkeypatch.setenv("SUPABASE_ADMIN_EMAIL", "admin@example.com")
+    monkeypatch.setenv("SUPABASE_ADMIN_PASSWORD", "test-password")
+
+    assert _require_staging_operator_creds() == (
+        "https://staging.supabase.co",
+        "staging-publishable",
+        "admin@example.com",
+        "test-password",
+    )
 
 
 @pytest.fixture
@@ -129,12 +198,12 @@ def test_t3_top_served(write_api: str, auth_headers: dict[str, str]) -> None:
 
 def test_t3_modal_jobs_with_operator_jwt() -> None:
     """UJ-023/UJ-026: staging Modal jobs accept a signed-in operator JWT."""
-    base = _env("VECINITA_MODAL_DATA_MGMT_URL")
+    base = _first_env("VECINITA_STAGING_MODAL_DATA_MGMT_URL", "VECINITA_MODAL_DATA_MGMT_URL")
     proxy = _env("VECINITA_MODAL_PROXY_KEY")
     if not base or not proxy:
         pytest.skip(
-            "Set VECINITA_MODAL_DATA_MGMT_URL/VECINITA_MODAL_PROXY_KEY and staging "
-            + "SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY/SUPABASE_ADMIN_EMAIL/SUPABASE_ADMIN_PASSWORD"
+            "Set VECINITA_MODAL_DATA_MGMT_URL or VECINITA_STAGING_MODAL_DATA_MGMT_URL, "
+            + "VECINITA_MODAL_PROXY_KEY, and staging Supabase auth env"
         )
     access_raw = _mint_operator_access_token()
 
