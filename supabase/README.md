@@ -21,23 +21,33 @@ PII lives in Supabase; the Vecinita corpus DB stays PII-free (ADR-026).
 
 ## Environment syncing (branching)
 
-Per ADR-027 §6 — **Supabase Pro + ephemeral preview branches**:
+Per ADR-027 §6 — **Supabase Pro + one persistent `staging` branch plus ephemeral preview branches**:
 
-1. **Link** the CLI to the canonical project (one-time per machine):
+1. **Persistent staging branch** on the canonical project:
+   ```bash
+   supabase login
+   supabase link --project-ref cfuvghdsuwactfeamtym
+   bash scripts/supabase/ci_sync.sh sync-staging
+   ```
+   `sync-staging` ensures the long-lived `staging` branch exists, resolves its branch URL,
+   and fails closed if the staging deploy secrets still point at prod or the retired
+   standalone staging project.
+
+2. **Link** the CLI to the canonical project (one-time per machine):
    ```bash
    supabase login
    supabase link --project-ref cfuvghdsuwactfeamtym
    ```
-2. **Preview branch** for a PR / migration review (ephemeral — tear down after merge):
+3. **Preview branch** for a PR / migration review (ephemeral — tear down after merge):
    ```bash
    supabase branches create preview-pr-47 --experimental
    supabase db push --db-url "$SUPABASE_URI"   # when schema migrations exist
    ```
-3. **Delete** the branch when done (~$0.32/day if left running):
+4. **Delete** the branch when done (~$0.32/day if left running):
    ```bash
    supabase branches delete preview-pr-47 --experimental
    ```
-4. **Production** config changes: merge `supabase/config.toml` to `main`, then
+5. **Production** config changes: merge `supabase/config.toml` to `main`, then
    `supabase config push` (or apply via Dashboard) during deploy smoke.
 
 Auth settings (invite-only, SMTP) are versioned in **`supabase/config.toml`** in this repo.

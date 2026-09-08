@@ -11,7 +11,7 @@ Hybrid deployment: **DigitalOcean** (US `nyc1` or `sfo3`) for ChatRAG Backend, i
 
 | `env_role` | DO | Supabase | Modal |
 |------------|----|----------|-------|
-| `staging` | `vecinita-staging-*` apps + `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** (web suffix `staging`) |
+| `staging` | `vecinita-staging-*` apps + `vecinita-staging-db` | canonical project `cfuvghdsuwactfeamtym` via long-lived branch `staging` | Workspace **`vecinita`**, Environment **`staging`** (web suffix `staging`) |
 | `prod` | Pre-existing sole stack | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** |
 
 Distinct staging was provisioned 2026-08-28 (H1–H5 PASS). Use `env_role` `staging` |
