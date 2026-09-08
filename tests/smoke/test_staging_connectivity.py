@@ -14,6 +14,7 @@ from tests.helpers.connectivity import (
 )
 
 pytestmark = [pytest.mark.e2e, pytest.mark.live]
+_RETIRED_STAGING_SUPABASE_URL = "https://camkatfbjguwvymfgdme.supabase.co"
 
 
 def _env(name: str) -> str | None:
@@ -23,6 +24,37 @@ def _env(name: str) -> str | None:
 
 def _staging_admin_api_url() -> str | None:
     return _env("VECINITA_STAGING_ADMIN_API_URL") or _env("VECINITA_MODAL_DATA_MGMT_URL")
+
+
+def _staging_supabase_url() -> str | None:
+    """Return the active staging Supabase URL, ignoring the retired staging alias."""
+    staging_url = _env("SUPABASE_STAGING_URL") or _env("VITE_SUPABASE_STAGING_URL")
+    if staging_url and staging_url.rstrip("/") != _RETIRED_STAGING_SUPABASE_URL:
+        return staging_url.rstrip("/")
+    generic_url = _env("SUPABASE_URL") or _env("VITE_SUPABASE_URL")
+    if generic_url:
+        return generic_url.rstrip("/")
+    return None
+
+
+def test_staging_supabase_url_prefers_active_staging_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Distinct staging should prefer active staging aliases over generic prod-scoped values."""
+    monkeypatch.setenv("SUPABASE_STAGING_URL", "https://staging-branch.supabase.co")
+    monkeypatch.setenv("SUPABASE_URL", "https://prod.supabase.co")
+
+    assert _staging_supabase_url() == "https://staging-branch.supabase.co"
+
+
+def test_staging_supabase_url_ignores_retired_staging_alias(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Retired camkat staging aliases must not override the active branch-backed target."""
+    monkeypatch.setenv("SUPABASE_STAGING_URL", _RETIRED_STAGING_SUPABASE_URL)
+    monkeypatch.setenv("SUPABASE_URL", "https://active-branch.supabase.co")
+
+    assert _staging_supabase_url() == "https://active-branch.supabase.co"
 
 
 @pytest.fixture
@@ -345,9 +377,11 @@ def test_h5_admin_frontend_bundle_uses_staging_supabase_and_not_prod(
     """F83/TC-296: staging admin bundle must embed staging auth/backend hosts only."""
     write_url = _env("VECINITA_STAGING_WRITE_URL")
     admin_api = _staging_admin_api_url()
-    supabase_url = _env("SUPABASE_URL")
+    supabase_url = _staging_supabase_url()
     if not write_url or not admin_api or not supabase_url:
-        pytest.skip("Set VECINITA_STAGING_WRITE_URL, staging admin API URL, and SUPABASE_URL")
+        pytest.skip(
+            "Set VECINITA_STAGING_WRITE_URL, staging admin API URL, and an active staging Supabase URL"
+        )
 
     js_url = fetch_main_js_url(admin_frontend)
     js = httpx.get(js_url, timeout=30.0).text

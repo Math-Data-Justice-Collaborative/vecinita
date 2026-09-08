@@ -262,12 +262,109 @@ Database migrations are **not** automated — run `alembic upgrade head` per the
 | `VECINITA_STAGING_CHAT_FRONTEND_URL` | H4, H5 | No — skip H4/H5 chat wiring if unset |
 | `VECINITA_STAGING_ADMIN_FRONTEND_URL` | H4, H5 | No — skip admin wiring if unset |
 | `VECINITA_STAGING_ADMIN_API_URL` | H4 (Modal jobs CORS) | No |
+| `SUPABASE_STAGING_URL` | H5 (admin bundle auth host) | Recommended for distinct staging; overrides generic `SUPABASE_URL` |
+| `VITE_SUPABASE_STAGING_URL` | H5 (admin bundle auth host) | Optional alias when the shell mirrors frontend build-time vars |
 | `VECINITA_STAGING_DATABASE_URL` | H2 | No — falls back to `DATABASE_URL` |
 | `VECINITA_STAGING_INTERNAL_API_KEY` | T3 (EV-002 admin) | No — skip `test_staging_ev002_admin.py` if unset |
 | `DATABASE_URL` | H2 | No — used when staging-specific URL unset |
 | `VECINITA_CORS_ORIGINS` | H4 (on API containers) | **Yes** on each FastAPI deploy — comma-separated frontend origins |
 
 Never commit connection strings or API keys.
+
+## Staging write API DB target audit
+
+Use this when the staging admin/write path disagrees with `VECINITA_STAGING_DATABASE_URL`,
+for example when ChatRAG browse shows a clean corpus but `/internal/v1/documents` still lists
+synthetic `example.com` rows.
+
+[Corpus: staging] [Corpus: feature-list.md §F83]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+[Spec: docs/adr/ADR-007-modal-do-database-write-boundary.md]
+[Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push]
+
+**Symptoms**
+
+- H5 admin bundle passes only after exporting the active staging Supabase branch host instead
+  of assuming generic `SUPABASE_URL`.
+- `VECINITA_STAGING_DATABASE_URL` row counts do **not** match the staging write API corpus.
+- `GET /internal/v1/health/all` may return `status: degraded` when `modal_data_management`
+  times out even though the write API itself is reachable.
+- Repeated `freshness_refresh` failures with upstream `403 Forbidden` indicate source-policy
+  issues, not necessarily staging-wide outage.
+
+**Do not clean up artifacts yet**
+
+If the write API corpus and `VECINITA_STAGING_DATABASE_URL` disagree, stop before running
+`cleanup_corpus_test_artifacts.py`. Deleting through the API could hit the wrong database,
+and deleting through the local URL could miss the polluted rows entirely.
+
+**Audit procedure**
+
+1. Export the current staging hints and confirm the public hosts you are testing:
+
+   ```bash
+   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend
+   ```
+
+2. Inspect the live `vecinita-staging-write-api` `DATABASE_URL` in the DigitalOcean dashboard
+   or via a local operator-only spec export. Do **not** commit exported root `*-spec.yaml`
+   files; they can contain encrypted secrets.
+
+3. Compare hostnames only:
+
+   ```bash
+   python3 - <<'PY'
+   import os
+   from urllib.parse import urlparse
+   for key in ("VECINITA_STAGING_DATABASE_URL", "DATABASE_URL"):
+       raw = (os.environ.get(key) or "").strip()
+       host = urlparse(raw).hostname if raw else None
+       print(f"{key}: {host or '(unset)'}")
+   PY
+   ```
+
+   Then compare those hosts to the write-api app's live `DATABASE_URL` target from step 2.
+
+4. If the write API is cross-wired, fix the secret/env wiring first and redeploy the
+   staging write API before any cleanup:
+
+   ```bash
+   set -a && source prod.env && set +a
+   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py \
+     sync-secrets --name vecinita-staging-write-api
+   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py \
+     deploy --name vecinita-staging-write-api
+   ```
+
+5. Re-run live verification against the same staging URLs:
+
+   ```bash
+   bash scripts/deploy/verify_connectivity.sh
+   uv run pytest tests/smoke/test_staging_connectivity.py -q
+   uv run pytest tests/smoke/test_staging_ev002_admin.py tests/smoke/test_staging_f84_metrics.py \
+     -k 'not test_require_staging_operator_creds' -m live -q
+   ```
+
+6. Only after the write API and `VECINITA_STAGING_DATABASE_URL` point at the **same** host,
+   dry-run the artifact audit on that exact database:
+
+   ```bash
+   uv run python scripts/ops/cleanup_corpus_test_artifacts.py \
+     --database-url "$VECINITA_STAGING_DATABASE_URL"
+   ```
+
+7. If the dry-run matches the polluted rows and the target is confirmed to be staging,
+   apply cleanup with the staging corpus-reset acknowledgement:
+
+   ```bash
+   export VECINITA_ALLOW_CORPUS_RESET=1
+   export VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed
+   uv run python scripts/ops/cleanup_corpus_test_artifacts.py \
+     --database-url "$VECINITA_STAGING_DATABASE_URL" --apply
+   ```
+
+8. Re-run H2/H4/H5 plus admin corpus browse. Freshness `403` failures should be triaged
+   separately per source host after the DB target is corrected.
 
 ## Phase 4 gate checklist
 
