@@ -250,7 +250,7 @@ export function JobsPage() {
         </div>
       </div>
 
-      {error ? (
+      {error && jobs.length > 0 ? (
         <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
@@ -269,7 +269,24 @@ export function JobsPage() {
           <CardTitle>{tr("admin.jobs.title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading && jobs.length === 0 ? (
+          {error && jobs.length === 0 ? (
+            <div className="space-y-3">
+              <p
+                role="alert"
+                className="text-sm text-destructive"
+                data-testid="jobs-inline-error"
+              >
+                {error}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => void load()}
+                data-testid="jobs-inline-retry"
+              >
+                {tr("shared.refresh")}
+              </Button>
+            </div>
+          ) : loading && jobs.length === 0 ? (
             <p className="text-muted-foreground">{tr("shared.loading")}</p>
           ) : jobs.length === 0 ? (
             <p className="text-sm text-muted-foreground">

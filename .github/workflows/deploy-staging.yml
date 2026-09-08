@@ -34,6 +34,7 @@ jobs:
     environment: staging
     outputs:
       chat_url: ${{ steps.urls.outputs.chat_url }}
+      admin_frontend_url: ${{ steps.urls.outputs.admin_frontend_url }}
     env:
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
@@ -159,7 +160,14 @@ jobs:
     environment: staging
     env:
       VECINITA_STAGING_CHAT_URL: ${{ needs.deploy-staging.outputs.chat_url }}
+      VECINITA_STAGING_ADMIN_FRONTEND_URL: ${{ needs.deploy-staging.outputs.admin_frontend_url }}
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      VECINITA_MODAL_DATA_MGMT_URL: ${{ secrets.VECINITA_MODAL_DATA_MGMT_URL }}
+      VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_ADMIN_EMAIL: ${{ secrets.SUPABASE_ADMIN_EMAIL }}
+      SUPABASE_ADMIN_PASSWORD: ${{ secrets.SUPABASE_ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
 
@@ -168,20 +176,24 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Resolve staging chat URL
+      - name: Resolve staging URLs
         run: |
           set -euo pipefail
-          if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ]; then
+          if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ] || [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
             uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging \
               | tee /tmp/staging-urls.env
             # shellcheck disable=SC1091
             set -a && source /tmp/staging-urls.env && set +a
-            echo "VECINITA_STAGING_CHAT_URL=${VECINITA_STAGING_CHAT_URL}" >> "$GITHUB_ENV"
           fi
           if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ]; then
             echo "::error::VECINITA_STAGING_CHAT_URL unset — staging apps missing?" >&2
             exit 1
           fi
+          echo "VECINITA_STAGING_CHAT_URL=${VECINITA_STAGING_CHAT_URL}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_CHAT_FRONTEND_URL=${VECINITA_STAGING_CHAT_FRONTEND_URL:-}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_ADMIN_FRONTEND_URL=${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_WRITE_URL=${VECINITA_STAGING_WRITE_URL:-}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_ADMIN_API_URL=${VECINITA_STAGING_ADMIN_API_URL:-}" >> "$GITHUB_ENV"
 
       - name: Warm staging Modal (idle posture)
         env:
@@ -193,7 +205,12 @@ jobs:
           # EV-354 / #354 / TC-326 / UJ-095 — scale-to-zero staging needs warm before H1–H3
           uv run python scripts/ops/warm_staging_for_smoke.py
 
-      - name: H1–H3 staging smoke
+      - name: H1–H3 + admin staging smoke
         run: |
           set -euo pipefail
-          uv run pytest tests/smoke/test_staging_health.py -m live -q --tb=short
+          uv run pytest \
+            tests/smoke/test_staging_health.py \
+            tests/smoke/test_staging_connectivity.py \
+            tests/smoke/test_staging_ev002_admin.py \
+            tests/smoke/test_staging_f84_metrics.py \
+            -m live -q --tb=short
