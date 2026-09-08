@@ -106,8 +106,10 @@
 | **tailwind-merge** | Tailwind class dedup | MIT | shadcn/ui utility |
 | **lucide-react** | Icons | ISC | shadcn/ui icons |
 | **recharts** | ^2.15.x Eval dashboard charts (`data-management-frontend`) | MIT | ADR-034 / EV-008 M64 |
+| **react-markdown** | Render assistant markdown in public ChatRAG responses | MIT | ChatRAG frontend only; markdown lists/links/code |
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
+| **remark-gfm** | GitHub-flavored markdown tables/lists/task syntax | MIT | `react-markdown` plugin for ChatRAG responses |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
 | **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI + Tooltip/ActionIcon (EV-024); `isSafeHttpUrl` / `citationHref` (EV-026 F72) | — | EV-004 F31; EV-024 F66/F67; EV-026 F72; depends on frontend-i18n; `@radix-ui/react-tooltip` |
 | **@supabase/supabase-js** | `^2.108.2` Supabase Auth browser session (DM frontend SPA) | MIT | **EV-005 F34** (ADR-026/027); admin frontend only; pinned 04-tech-plan (TP-S004-04) |

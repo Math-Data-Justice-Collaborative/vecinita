@@ -1,24 +1,28 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ReactElement, ReactNode } from "react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LocaleProvider } from "vecinita-frontend-ui";
 
 import { EvaluationPage } from "@/pages/EvaluationPage";
 
 import { fetchInputUrl } from "./fetch-mock";
 import { mockPlaygroundApiFetch } from "./helpers/mockPlaygroundApi";
+import { renderWithProviders } from "./renderWithProviders";
+import { installAuthenticatedSupabaseMock } from "./supabaseMock";
 
 const setSearchParams =
   vi.fn<(updater: (prev: URLSearchParams) => URLSearchParams) => void>();
 
-vi.mock("@/config", () => ({
-  requireCorpusConfig: () => ({
-    baseUrl: "http://localhost:8002",
-    apiKey: "test-corpus-key",
-  }),
-}));
+vi.mock("@/config", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/config")>();
+  return {
+    ...actual,
+    requireCorpusConfig: () => ({
+      baseUrl: "http://localhost:8002",
+      apiKey: "test-corpus-key",
+    }),
+  };
+});
 
 vi.mock("@/components/ui/tabs", () => {
   const TabsContext = React.createContext<{
@@ -88,15 +92,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-function renderPage(ui: ReactElement) {
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <LocaleProvider>
-      <MemoryRouter>{children}</MemoryRouter>
-    </LocaleProvider>
-  );
-  return render(ui, { wrapper });
-}
-
 const LIST_BODY = {
   items: [],
   page: 1,
@@ -107,6 +102,7 @@ const LIST_BODY = {
 describe("EvaluationPage search params", () => {
   beforeEach(() => {
     setSearchParams.mockReset();
+    installAuthenticatedSupabaseMock();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation((input: RequestInfo | URL) => {
@@ -149,7 +145,11 @@ describe("EvaluationPage search params", () => {
   });
 
   it("calls setSearchParams when switching evaluation tabs", async () => {
-    renderPage(<EvaluationPage />);
+    renderWithProviders(
+      <MemoryRouter>
+        <EvaluationPage />
+      </MemoryRouter>,
+    );
     await waitFor(() => {
       expect(screen.getByTestId("eval-tab-explore")).toBeInTheDocument();
     });

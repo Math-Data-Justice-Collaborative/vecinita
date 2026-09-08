@@ -40,6 +40,15 @@ _TAG_SQL = text(
     """
 )
 
+_ARTIFACT_URL_SQL = """
+(
+    d.url NOT ILIKE '%example.com%'
+    AND d.url NOT ILIKE 'fixture://%'
+    AND d.url NOT ILIKE '%localhost%'
+    AND d.url NOT ILIKE '%127.0.0.1%'
+)
+"""
+
 
 def _tag_summaries(conn: Connection, document_id: UUID) -> list[TagSummary]:
     tag_rows = conn.execute(_TAG_SQL, {"document_id": document_id}).mappings().all()
@@ -61,7 +70,7 @@ def list_documents(
     page_size: int = 20,
 ) -> DocumentBrowsePage:
     """Paginated public document browse with optional tag and text filters."""
-    filters: list[str] = []
+    filters: list[str] = [_ARTIFACT_URL_SQL]
     params: dict[str, object] = {
         "limit": page_size,
         "offset": (page - 1) * page_size,
@@ -82,7 +91,14 @@ def list_documents(
         params["tag_slugs"] = tuple(tags)
 
     if q:
-        filters.append("(d.title ILIKE :q_pattern OR d.url ILIKE :q_pattern)")
+        filters.append(
+            """
+            (
+                COALESCE(NULLIF(BTRIM(d.display_title), ''), d.title) ILIKE :q_pattern
+                OR d.url ILIKE :q_pattern
+            )
+            """
+        )
         params["q_pattern"] = f"%{q.strip()}%"
 
     where_clause = f"WHERE {' AND '.join(filters)}" if filters else ""
@@ -93,7 +109,10 @@ def list_documents(
     )
     list_sql = text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
         f"""
-        SELECT d.id, d.title, d.url, d.language,
+        SELECT d.id,
+               COALESCE(NULLIF(BTRIM(d.display_title), ''), d.title) AS title,
+               d.url,
+               d.language,
                d.source_domain, d.source_path, d.parent_url, d.canonical_url
         FROM documents d
         {where_clause}
@@ -139,10 +158,17 @@ def get_document(engine: Engine, document_id: UUID) -> DocumentBrowseDetail | No
     """Fetch one document for public browse detail."""
     doc_sql = text(
         """
-        SELECT id, title, url, language,
+        SELECT id,
+               COALESCE(NULLIF(BTRIM(display_title), ''), title) AS title,
+               url,
+               language,
                source_domain, source_path, parent_url, canonical_url
         FROM documents
         WHERE id = :document_id
+          AND url NOT ILIKE '%example.com%'
+          AND url NOT ILIKE 'fixture://%'
+          AND url NOT ILIKE '%localhost%'
+          AND url NOT ILIKE '%127.0.0.1%'
         """
     )
     with engine.connect() as conn:

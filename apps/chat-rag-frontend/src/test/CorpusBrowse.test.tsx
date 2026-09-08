@@ -89,6 +89,17 @@ describe("CorpusBrowse", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows loading state without rendering an empty corpus list", () => {
+    vi.mocked(browse.fetchDocuments).mockImplementation(
+      () => new Promise(() => undefined),
+    );
+
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Loading documents");
+    expect(screen.queryByTestId("corpus-list")).not.toBeInTheDocument();
+  });
+
   it("shows localized error when document fetch fails", async () => {
     vi.mocked(browse.fetchDocuments).mockRejectedValueOnce(
       new Error("Browse failed (500)"),
@@ -123,6 +134,78 @@ describe("CorpusBrowse", () => {
     expect(
       screen.queryByRole("button", { name: "Vivienda" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders document tag labels in the active locale when the API item label is mixed-language", async () => {
+    localStorage.setItem("vecinita.locale", "es");
+    vi.mocked(browse.fetchTags).mockResolvedValueOnce({
+      tags: [
+        {
+          slug: "food",
+          label: "Food",
+          language: "en",
+          document_count: 1,
+        },
+        {
+          slug: "food",
+          label: "Comida",
+          language: "es",
+          document_count: 1,
+        },
+      ],
+    });
+    vi.mocked(browse.fetchDocuments).mockResolvedValueOnce({
+      items: [
+        {
+          document_id: "00000000-0000-0000-0000-000000000010",
+          title: "Banco de alimentos",
+          url: "https://example.org/food",
+          language: "es",
+          tags: [{ slug: "food", label: "Food" }],
+        },
+      ],
+      page: 1,
+      page_size: 20,
+      total: 1,
+    });
+
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+
+    const documentTagLine = await screen.findByText(
+      (_content, element) => element?.className === "corpus-tags",
+    );
+    expect(documentTagLine).toHaveTextContent("Comida");
+    expect(screen.queryByText(/^Food$/)).not.toBeInTheDocument();
+  });
+
+  it("hides synthetic test-artifact documents from the public corpus list", async () => {
+    vi.mocked(browse.fetchDocuments).mockResolvedValueOnce({
+      items: [
+        {
+          document_id: "00000000-0000-0000-0000-000000000011",
+          title: "Fixture artifact",
+          url: "https://fixture-visible.example.com/seed",
+          language: "en",
+          tags: [],
+        },
+        {
+          document_id: "00000000-0000-0000-0000-000000000012",
+          title: "Real pantry",
+          url: "https://example.org/pantry",
+          language: "en",
+          tags: [],
+        },
+      ],
+      page: 1,
+      page_size: 20,
+      total: 2,
+    });
+
+    renderWithLocale(<CorpusBrowse onNavigateHome={() => undefined} />);
+
+    expect(await screen.findByText("Real pantry")).toBeInTheDocument();
+    expect(screen.queryByText("Fixture artifact")).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("corpus-source-link")).toHaveLength(1);
   });
 
   it("toggles tag filters and refetches documents", async () => {

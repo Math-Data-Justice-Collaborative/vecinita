@@ -16,6 +16,7 @@ import {
   fetchMetricsSummary,
   fetchMetricsTimeseries,
 } from "@/api/admin";
+import { useAuth } from "@/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { requireCorpusConfig } from "@/config";
+import { requireInternalWriteReadConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 
 const WINDOWS: MetricsWindow[] = ["1h", "24h", "7d", "30d"];
@@ -59,6 +60,7 @@ function workloadStats(
 
 export function MonitoringPage() {
   const tr = useAdminT();
+  const { loading: authLoading, accessToken } = useAuth();
   const [window, setWindow] = useState<MetricsWindow>("24h");
   const [summary, setSummary] = useState<MetricsSummary | null>(null);
   const [timeseries, setTimeseries] = useState<MetricsTimeseries | null>(null);
@@ -70,7 +72,7 @@ export function MonitoringPage() {
       setLoading(true);
       setError(null);
       try {
-        const client = requireCorpusConfig();
+        const client = requireInternalWriteReadConfig();
         const [summaryData, seriesData] = await Promise.all([
           fetchMetricsSummary(client, selected),
           fetchMetricsTimeseries(client, "ingest_success_rate", selected),
@@ -102,14 +104,17 @@ export function MonitoringPage() {
   );
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     let active = true;
     void load(() => active, window);
     return () => {
       active = false;
     };
-  }, [load, window]);
+  }, [authLoading, accessToken, load, window]);
 
-  if (!summary) {
+  if (authLoading || !summary) {
     return (
       <div className="space-y-6" data-testid="monitoring-page">
         <div>
