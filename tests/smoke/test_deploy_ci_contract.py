@@ -67,6 +67,20 @@ def test_deploy_staging_includes_supabase_sync_before_modal_and_do() -> None:
     assert sync_idx < do_idx
 
 
+def test_staging_smoke_includes_admin_auth_surfaces() -> None:
+    """Staging smoke should cover admin auth regressions, not health-only reachability."""
+    workflow = REPO_ROOT / ".github/workflows" / "deploy-staging.yml"
+    text = workflow.read_text(encoding="utf-8")
+    assert "admin_frontend_url: ${{ steps.urls.outputs.admin_frontend_url }}" in text
+    assert "tests/smoke/test_staging_connectivity.py" in text
+    assert "tests/smoke/test_staging_ev002_admin.py" in text
+    assert "tests/smoke/test_staging_f84_metrics.py" in text
+    assert "SUPABASE_ADMIN_EMAIL: ${{ secrets.SUPABASE_ADMIN_EMAIL }}" in text
+    assert "SUPABASE_ADMIN_PASSWORD: ${{ secrets.SUPABASE_ADMIN_PASSWORD }}" in text
+    assert "VECINITA_MODAL_DATA_MGMT_URL: ${{ secrets.VECINITA_MODAL_DATA_MGMT_URL }}" in text
+    assert "VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}" in text
+
+
 def test_deploy_digitalocean_chained_after_modal() -> None:
     """DO deploy runs after Modal deploy succeeds on main (or manual dispatch)."""
     text = _read("deploy_digitalocean")

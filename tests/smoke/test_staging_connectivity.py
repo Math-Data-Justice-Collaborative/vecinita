@@ -21,6 +21,10 @@ def _env(name: str) -> str | None:
     return value or None
 
 
+def _staging_admin_api_url() -> str | None:
+    return _env("VECINITA_STAGING_ADMIN_API_URL") or _env("VECINITA_MODAL_DATA_MGMT_URL")
+
+
 @pytest.fixture
 def chat_api() -> str:
     """Return the staging chat API base URL, skipping when unset."""
@@ -139,9 +143,9 @@ def test_h4_write_api_cors_preflight_patch_chunk_tags(admin_frontend: str) -> No
 
 def test_h4_modal_data_mgmt_cors_preflight(admin_frontend: str) -> None:
     """H4: Modal data-management API allows CORS preflight for jobs."""
-    admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
+    admin_api = _staging_admin_api_url()
     if not admin_api:
-        pytest.skip("Set VECINITA_STAGING_ADMIN_API_URL for Modal CORS check")
+        pytest.skip("Set VECINITA_STAGING_ADMIN_API_URL or VECINITA_MODAL_DATA_MGMT_URL")
     assert_cors_preflight(
         api_base=admin_api,
         origin=admin_frontend,
@@ -323,7 +327,7 @@ def test_h5_admin_frontend_bundle_has_modal_and_write_hosts(
 ) -> None:
     """H5: admin frontend bundle references the write API and Modal hosts."""
     write_url = _env("VECINITA_STAGING_WRITE_URL")
-    admin_api = _env("VECINITA_STAGING_ADMIN_API_URL")
+    admin_api = _staging_admin_api_url()
     if not write_url:
         pytest.skip("Set VECINITA_STAGING_WRITE_URL")
     js_url = fetch_main_js_url(admin_frontend)
@@ -333,3 +337,32 @@ def test_h5_admin_frontend_bundle_has_modal_and_write_hosts(
         hosts.append(httpx.URL(admin_api).host)
     assert all(hosts)
     assert_bundle_contains_hosts(js, [h for h in hosts if h])
+
+
+def test_h5_admin_frontend_bundle_uses_staging_supabase_and_not_prod(
+    admin_frontend: str,
+) -> None:
+    """F83/TC-296: staging admin bundle must embed staging auth/backend hosts only."""
+    write_url = _env("VECINITA_STAGING_WRITE_URL")
+    admin_api = _staging_admin_api_url()
+    supabase_url = _env("SUPABASE_URL")
+    if not write_url or not admin_api or not supabase_url:
+        pytest.skip("Set VECINITA_STAGING_WRITE_URL, staging admin API URL, and SUPABASE_URL")
+
+    js_url = fetch_main_js_url(admin_frontend)
+    js = httpx.get(js_url, timeout=30.0).text
+    expected_hosts = [
+        httpx.URL(write_url).host,
+        httpx.URL(admin_api).host,
+        httpx.URL(supabase_url).host,
+    ]
+    assert all(expected_hosts)
+    assert_bundle_contains_hosts(js, [host for host in expected_hosts if host])
+
+    forbidden = (
+        "cfuvghdsuwactfeamtym.supabase.co",
+        "vecinita-internal-write-api-icze4.ondigitalocean.app",
+        "vecinita--vecinita-data-management-fastapi-app.modal.run",
+    )
+    for value in forbidden:
+        assert value not in js, f"staging admin bundle leaked prod config: {value}"

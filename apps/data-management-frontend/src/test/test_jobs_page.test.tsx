@@ -179,6 +179,46 @@ describe("JobsPage", () => {
     });
   });
 
+  it("surfaces unauthorized failures instead of leaving the page in loading state", async () => {
+    let jobsRequests = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url;
+        if (url.includes("/jobs/events")) {
+          return new Promise(() => undefined);
+        }
+        jobsRequests += 1;
+        return Promise.resolve(
+          new Response('{"detail":"Unauthorized"}', {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+      }),
+    );
+
+    renderJobsPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/unauthorized/i);
+    });
+    expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+    const retryButton = screen.getByTestId("jobs-inline-retry");
+    expect(retryButton).toBeInTheDocument();
+
+    fireEvent.click(retryButton);
+
+    await waitFor(() => {
+      expect(jobsRequests).toBeGreaterThan(1);
+    });
+  });
+
   it("shows a generic error for non-Error failures", async () => {
     vi.stubGlobal(
       "fetch",
