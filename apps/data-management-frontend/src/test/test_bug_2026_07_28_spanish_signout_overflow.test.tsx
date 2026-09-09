@@ -2,7 +2,7 @@ vi.mock("@/hooks/useMediaQuery", () => ({
   useMediaQuery: () => true,
 }));
 
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LOCALE_STORAGE_KEY } from "vecinita-frontend-i18n";
@@ -40,13 +40,14 @@ describe("BUG-2026-07-28 — Spanish sign-out-all overflows sidebar (#105)", () 
     renderSignedInApp("/dashboard");
     await waitForAdminNav();
 
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("admin-sign-out-all-devices"),
-      ).toBeInTheDocument();
-    });
+    const more = await waitFor(() => screen.getByTestId("admin-sign-out-more"));
+    const summary = more.querySelector("summary");
+    expect(summary).not.toBeNull();
+    fireEvent.click(summary!);
 
-    const button = screen.getByTestId("admin-sign-out-all-devices");
+    const button = await waitFor(() =>
+      screen.getByTestId("admin-sign-out-all-devices"),
+    );
     expect(button).toHaveTextContent(
       /cerrar sesión en todos los dispositivos/i,
     );

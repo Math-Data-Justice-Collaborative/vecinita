@@ -28,6 +28,7 @@ def test_no_context_message_english() -> None:
     """Test no context message english."""
     result = answer_without_context("What is quantum physics?")
     assert result.language == "en"
+    assert "matching sources" in result.answer.lower()
     assert "corpus" in result.answer.lower()
     assert result.sources == []
 
@@ -38,4 +39,5 @@ def test_no_context_message_spanish() -> None:
     result = answer_without_context("¿Qué es la física cuántica?")
     assert result.language == "es"
     assert result.answer == message
+    assert "fuentes coincidentes" in result.answer.lower()
     assert "corpus" in result.answer.lower()

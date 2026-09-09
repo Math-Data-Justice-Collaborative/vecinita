@@ -83,6 +83,10 @@ describe("auth UX privacy — no extra server traffic (TC-102)", () => {
 
     const callsBefore = adminApiCallCount();
 
+    const more = screen.getByTestId("admin-sign-out-more");
+    const summary = more.querySelector("summary");
+    expect(summary).not.toBeNull();
+    fireEvent.click(summary!);
     fireEvent.click(screen.getByTestId("admin-sign-out-all-devices"));
 
     await waitFor(() => {

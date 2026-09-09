@@ -12,13 +12,14 @@ from vecinita_rag.cache import (
     CascadeRequest,
     cascade_lookup,
 )
+from vecinita_rag.constants import NO_CONTEXT_MESSAGE_EN
 from vecinita_rag.types import RetrievedChunk
 
 pytestmark = pytest.mark.unit
 
 _QUERY = "Where can I get food assistance in Providence?"
 _LOCALE = "en"
-_EMPTY_MSG = "I don't have enough community corpus context to answer that question."
+_EMPTY_MSG = NO_CONTEXT_MESSAGE_EN
 
 
 def _empty_answer() -> CachedAnswer:

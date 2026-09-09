@@ -59,25 +59,32 @@ function UserMenu() {
         variant="outline"
         size="sm"
         className="h-auto w-full whitespace-normal text-left"
-        data-testid="admin-sign-out-all-devices"
-        onClick={() => {
-          void signOutAllDevices();
-        }}
-      >
-        {tr("admin.auth.signOutAllDevices")}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-auto w-full whitespace-normal text-left"
         data-testid="admin-sign-out"
+        data-priority="primary"
         onClick={() => {
           void signOut();
         }}
       >
         {tr("admin.auth.signOut")}
       </Button>
+      <details className="group" data-testid="admin-sign-out-more">
+        <summary className="cursor-pointer list-none text-xs text-muted-foreground underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden">
+          {tr("admin.auth.moreAccountActions")}
+        </summary>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-2 h-auto w-full justify-start whitespace-normal px-0 text-left text-muted-foreground"
+          data-testid="admin-sign-out-all-devices"
+          data-priority="secondary"
+          onClick={() => {
+            void signOutAllDevices();
+          }}
+        >
+          {tr("admin.auth.signOutAllDevices")}
+        </Button>
+      </details>
     </div>
   );
 }

@@ -18,20 +18,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminT } from "@/hooks/useAdminT";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
+import { JOB_STATUS_VARIANT } from "@/lib/jobStatusBadge";
 
 const POLL_MS = 4000;
 const SSE_RETRY_BASE_MS = 2000;
 const SSE_RETRY_MAX_MS = 30000;
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
-
-const STATUS_VARIANT: Record<JobStatus, BadgeVariant> = {
-  pending: "outline",
-  running: "secondary",
-  completed: "default",
-  failed: "destructive",
-  cancelled: "outline",
-};
+const STATUS_VARIANT = JOB_STATUS_VARIANT;
 
 const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
   pending: "admin.jobs.status.pending",
@@ -241,7 +234,11 @@ export function JobDetailPage() {
                 return typeKey ? tr(typeKey) : jobType;
               })()}
             </span>
-            <Badge variant={STATUS_VARIANT[job.status]}>
+            <Badge
+              variant={STATUS_VARIANT[job.status]}
+              data-variant={STATUS_VARIANT[job.status]}
+              data-testid={`job-detail-status-badge-${job.status}`}
+            >
               {tr(STATUS_KEY[job.status])}
             </Badge>
           </CardTitle>

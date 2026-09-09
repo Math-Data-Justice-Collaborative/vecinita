@@ -191,7 +191,8 @@ def test_ask_returns_no_context_message_when_empty() -> None:
     """Test ask returns no context message when empty."""
     service = _service(chunks=[])
     response = service.ask(AskRequest(question="Where is the clinic?"))
-    assert "context" in response.answer.lower()
+    assert "matching sources" in response.answer.lower()
+    assert "corpus" in response.answer.lower()
     assert response.sources == []
 
 
