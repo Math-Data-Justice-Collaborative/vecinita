@@ -1021,6 +1021,73 @@ values to prod without an explicit approve.
 [Corpus: staging-secrets-matrix]
 [Corpus: ADR-054] #305 #306 #307 #308 #309
 
+## Adversarial API / Schemathesis pass (EV-staging-api-adversarial)
+
+[Corpus: api] [Corpus: tests] [Spec: docs/test-plan.md §TC-333–TC-336]
+
+**Goal:** Contract + negative probes on staging without burning Modal budget or polluting corpus.
+
+### Auth reminders
+
+| Surface | Required headers |
+|---------|------------------|
+| ChatRAG public | none (identity fields must 400) |
+| Write API | `Authorization: Bearer <VECINITA_INTERNAL_API_KEY>` **or** admin JWT |
+| DM Modal ASGI | **Both** `Authorization: Bearer <JWT>` **and** `X-Vecinita-Proxy-Key` |
+
+Do **not** use `X-API-Key` for write — OpenAPI `internalApiKey` is HTTP bearer.
+
+### Budgets
+
+- Schemathesis: start `--max-examples 20` / `--max-time 120`; exclude `/ask/stream` and mutate-heavy write paths until allowlisted.
+- Skip finetune train, rebuild promote-to-live, and bulk delete unless intentional + cleanup plan.
+- After any doc create: run corpus test-artifact cleanup (`example.com` / `fixture://`).
+
+### Commands
+
+```bash
+# Unit contract (CI):
+uv run pytest tests/unit/chat_rag/test_schemathesis_chat_rag_smoke.py \
+  tests/unit/chat_rag/test_openapi_feedback_request_body.py \
+  tests/unit/internal_write_api/test_openapi_security_schemes.py -q
+
+# Staging OpenAPI gate (after ChatRAG redeploy):
+uv run pytest tests/smoke/test_staging_openapi_request_bodies.py -m live -q
+
+# Optional live Schemathesis (write read paths only):
+uv run schemathesis run "$VECINITA_STAGING_WRITE_URL/openapi.json" \
+  -H "Authorization: Bearer $VECINITA_INTERNAL_API_KEY" \
+  --max-examples 20 --max-time 120 \
+  --include-path-regex '/internal/v1/(health|stats|metrics)' \
+  -c not_a_server_error
+```
+
+### Process improvements
+
+1. **Redeploy gate:** after OpenAPI-affecting merges to `stage`, redeploy staging ChatRAG
+   (+ write/DM when their OpenAPI changed) before closing an adversarial cycle. TC-336
+   fails closed until ChatRAG picks up `openapi_extra` publishers.
+2. **Prefer live `/openapi.json` for Schemathesis** (not checked-in YAML alone). Repo YAML
+   remains SoT; normalize `servers.url` + relative paths when comparing (TC-337).
+3. **Weekly OpenAPI drift** (repo ↔ live requestBody + securitySchemes):
+
+   ```bash
+   uv run python scripts/ops/openapi_live_drift.py \
+     --surface chat-rag \
+     --live-url "$VECINITA_STAGING_CHAT_URL/openapi.json"
+   uv run python scripts/ops/openapi_live_drift.py \
+     --surface internal-write \
+     --live-url "$VECINITA_STAGING_WRITE_URL/openapi.json"
+   uv run python scripts/ops/openapi_live_drift.py \
+     --surface data-management \
+     --live-url "$VECINITA_STAGING_MODAL_DATA_MGMT_URL/openapi.json"
+   ```
+
+4. **Mutation testing = request/negative fuzz first** (`scripts/adversarial/staging_api_probe.sh`,
+   Schemathesis). Source mutation (mutmut) is optional later — do not block adversarial
+   cycles on it.
+5. **CI:** TC-334 stays in unit CI; TC-336 is part of `staging-smoke` after ChatRAG redeploy.
+
 ## Related
 
 - `scripts/deploy/staging_smoke.sh` — shell H1–H3  

@@ -208,9 +208,12 @@ jobs:
       - name: H1–H3 + admin staging smoke
         run: |
           set -euo pipefail
+          # TC-336: ChatRAG live OpenAPI requestBody gate (fails until OpenAPI-affecting
+          # ChatRAG image is redeployed — see staging-runbook § Adversarial).
           uv run pytest \
             tests/smoke/test_staging_health.py \
             tests/smoke/test_staging_connectivity.py \
             tests/smoke/test_staging_ev002_admin.py \
             tests/smoke/test_staging_f84_metrics.py \
+            tests/smoke/test_staging_openapi_request_bodies.py \
             -m live -q --tb=short

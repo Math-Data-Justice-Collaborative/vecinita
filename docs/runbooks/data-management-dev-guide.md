@@ -154,10 +154,18 @@ OpenAPI: check repo `openapi/` or app route modules. Contract: [api-contract.md]
 
 ### Modal data management (`apps/data-management-backend`)
 
+**Dual auth (required on every protected route):**
+
+1. `Authorization: Bearer <supabase_jwt>`
+2. `X-Vecinita-Proxy-Key: <VECINITA_MODAL_PROXY_KEY>`
+
+JWT-only or proxy-only → `401`. Admin FE must send both (see [api-contract.md](../api-contract.md) §Authentication).
+
 | Method | Path | Auth |
 |--------|------|------|
-| POST | `/jobs` | Supabase JWT + Modal proxy |
-| GET | `/jobs/{id}` | Supabase JWT + Modal proxy |
+| POST | `/jobs` | JWT + `X-Vecinita-Proxy-Key` |
+| GET | `/jobs/{id}` | JWT + `X-Vecinita-Proxy-Key` |
+| GET/POST | `/admin/users*` | JWT + `X-Vecinita-Proxy-Key` (admin role) |
 
 Workers call internal write API with service key — never direct Postgres.
 

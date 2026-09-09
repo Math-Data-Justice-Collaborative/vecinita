@@ -34,6 +34,7 @@
 | onnxruntime | `>=1.16,<2` (CPU; Modal embed if ONNX; `ONNXRUNTIME_PIN`) | Optional ONNX embed inference | MIT | ADR-048; only if `VECINITA_EMBED_RUNTIME=onnx`; micros locked T119/T122.2 |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |
+| **schemathesis** | `>=4.0,<5` (dev) | OpenAPI property-based / contract fuzz (TC-334) | MIT | EV-staging-api-adversarial; Hypothesis-backed |
 
 ### EV-022 — Website scrape & crawl (F59–F61, ADR-045)
 

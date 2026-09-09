@@ -1899,3 +1899,18 @@ plus `reports/prewarm-trigger-policy.md`, `reports/whole-stack-cost-baseline.md`
 
 **Cites:** [Corpus: feature-list.md §F40] [Corpus: staging] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Corpus: ADR-004]
 
+## EV-staging-api-adversarial (2026-09-09)
+
+Staging adversarial / Schemathesis contract pass after UX plunge + write-auth work.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-SAA-D1 | Schemathesis | Dev dep + in-process unit smoke (TC-334); prefer live `/openapi.json` for staging runs |
+| EV-SAA-D2 | Mutation | Request/negative fuzz first (`staging_api_probe.sh`); mutmut deferred |
+| EV-SAA-D3 | OpenAPI gaps | Publish Feedback requestBody + write/DM `securitySchemes`; live gate TC-336 in `staging-smoke` |
+| EV-SAA-D4 | Drift | Weekly repo↔live check via `scripts/ops/openapi_live_drift.py` (TC-337) |
+| EV-SAA-D5 | DM auth docs | Document dual auth JWT + `X-Vecinita-Proxy-Key` in api-contract + DM runbook |
+| EV-SAA-D6 | Redeploy | Staging ChatRAG (+ write/DM when OpenAPI changes) required after OpenAPI merges before closing adversarial cycle |
+
+**Cites:** [Corpus: staging] [Corpus: api] [Corpus: tests] [Spec: docs/test-plan.md §TC-333–TC-337]
+
