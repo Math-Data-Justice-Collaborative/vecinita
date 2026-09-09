@@ -39,7 +39,7 @@ export function EnvironmentBanner({
       aria-label={t(locale, "shared.envBanner.regionLabel")}
       data-testid="environment-banner"
       data-env={env}
-      className="border-b border-amber-500/40 bg-amber-500/15 px-4 py-2 text-center text-sm font-medium text-amber-950 dark:text-amber-100"
+      className="sticky top-0 z-40 border-b border-amber-500/40 bg-amber-500/15 px-3 py-1.5 text-center text-xs font-semibold text-amber-950 sm:px-4 sm:py-2 sm:text-sm dark:text-amber-100"
     >
       {message}
     </div>

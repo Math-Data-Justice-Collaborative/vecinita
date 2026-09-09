@@ -3,15 +3,24 @@ import { describe, expect, it } from "vitest";
 import { resolveDeployEnv } from "./deployEnv";
 
 describe("resolveDeployEnv (F83 / EV-staging-adversarial-ux)", () => {
-  it("honors explicit VITE_VECINITA_DEPLOY_ENV", () => {
+  it("honors explicit VITE_VECINITA_DEPLOY_ENV on non-staging hosts", () => {
     expect(resolveDeployEnv("anything.ondigitalocean.app", "staging")).toBe(
       "staging",
     );
     expect(resolveDeployEnv("anything.ondigitalocean.app", "production")).toBe(
       "production",
     );
-    expect(resolveDeployEnv("staging.example.com", "local")).toBe("local");
+    expect(resolveDeployEnv("app.example.com", "local")).toBe("local");
     expect(resolveDeployEnv("x", "STAGING")).toBe("staging");
+  });
+
+  it("staging hostname wins over mis-baked production flag", () => {
+    expect(
+      resolveDeployEnv(
+        "vecinita-staging-admin-fe-4tj2p.ondigitalocean.app",
+        "production",
+      ),
+    ).toBe("staging");
   });
 
   it("detects staging from hostname when env unset", () => {

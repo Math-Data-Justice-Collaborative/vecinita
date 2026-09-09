@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
@@ -170,7 +171,51 @@ def cmd_create_all(client, *, env: str = "prod") -> int:
     return rc
 
 
-def cmd_deploy(client, name: str) -> int:
+_TERMINAL_OK = frozenset({"ACTIVE"})
+_TERMINAL_FAIL = frozenset({"ERROR", "CANCELED", "SUPERSEDED"})
+
+
+def wait_for_deployment(
+    client: Any,
+    *,
+    app_id: str,
+    deployment_id: str,
+    timeout_s: float = 900,
+    poll_s: float = 10,
+) -> str:
+    """Block until a DO App Platform deployment reaches ACTIVE (or fail).
+
+    Deploy Staging previously returned after PENDING_BUILD, so staging FEs could
+    keep serving pre-banner bundles while smoke already passed (EV-staging-responsive-plunge).
+    """
+    deadline = time.monotonic() + timeout_s
+    last_phase = "UNKNOWN"
+    while time.monotonic() < deadline:
+        resp = client.apps.get_deployment(app_id=app_id, deployment_id=deployment_id)
+        dep: Any = resp.get("deployment") if isinstance(resp, dict) else None
+        if not isinstance(dep, dict):
+            dep = resp if isinstance(resp, dict) else {}
+        phase_raw = dep.get("phase")
+        last_phase = str(phase_raw) if phase_raw is not None else "UNKNOWN"
+        print(f"… deployment {deployment_id} phase={last_phase}")
+        if last_phase in _TERMINAL_OK:
+            return last_phase
+        if last_phase in _TERMINAL_FAIL:
+            raise SystemExit(f"Deployment {deployment_id} ended in phase={last_phase}")
+        time.sleep(poll_s)
+    raise SystemExit(
+        f"Timed out after {timeout_s:.0f}s waiting for deployment "
+        f"{deployment_id} (last phase={last_phase})"
+    )
+
+
+def cmd_deploy(
+    client: Any,
+    name: str,
+    *,
+    wait: bool = False,
+    timeout_s: float = 900,
+) -> int:
     apps = _iter_apps(client)
     app = _find_app(apps, name)
     if not app:
@@ -178,7 +223,18 @@ def cmd_deploy(client, name: str) -> int:
     app_id = app["id"]
     resp = client.apps.create_deployment(app_id=app_id, body={"force_build": True})
     dep = resp.get("deployment") or {}
-    print(f"Deployment started for {name}: deployment_id={dep.get('id')} phase={dep.get('phase')}")
+    dep_id = dep.get("id")
+    print(f"Deployment started for {name}: deployment_id={dep_id} phase={dep.get('phase')}")
+    if wait:
+        if not isinstance(dep_id, str) or not dep_id:
+            raise SystemExit(f"Deploy {name}: missing deployment id in API response")
+        phase = wait_for_deployment(
+            client,
+            app_id=str(app_id),
+            deployment_id=dep_id,
+            timeout_s=timeout_s,
+        )
+        print(f"Deployment ready for {name}: phase={phase}")
     return 0
 
 
@@ -447,6 +503,17 @@ def main() -> int:
     )
     p_dep = sub.add_parser("deploy", help="Trigger deployment for existing app by spec name")
     _ = p_dep.add_argument("--name", required=True, help="App spec name field")
+    _ = p_dep.add_argument(
+        "--wait",
+        action="store_true",
+        help="Block until deployment phase is ACTIVE (required for FE banner parity)",
+    )
+    _ = p_dep.add_argument(
+        "--timeout-s",
+        type=float,
+        default=900,
+        help="Max seconds to wait when --wait is set (default: 900)",
+    )
     p_urls = sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
     _ = p_urls.add_argument(
         "--env",
@@ -480,7 +547,12 @@ def main() -> int:
     if args.command == "create-all":
         return cmd_create_all(client, env=args.env)
     if args.command == "deploy":
-        return cmd_deploy(client, args.name)
+        return cmd_deploy(
+            client,
+            args.name,
+            wait=bool(getattr(args, "wait", False)),
+            timeout_s=float(getattr(args, "timeout_s", 900)),
+        )
     if args.command == "urls":
         return cmd_urls(
             client,

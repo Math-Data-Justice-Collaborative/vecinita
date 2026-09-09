@@ -32,7 +32,7 @@ jobs:
   deploy-staging:
     name: deploy-staging
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     environment: staging
     outputs:
       chat_url: ${{ steps.urls.outputs.chat_url }}
@@ -168,7 +168,7 @@ jobs:
             vecinita-staging-chat-fe \
             vecinita-staging-admin-fe; do
             echo "==> Deploying ${app}"
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}"
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}" --wait --timeout-s 900
           done
 
   staging-smoke:
