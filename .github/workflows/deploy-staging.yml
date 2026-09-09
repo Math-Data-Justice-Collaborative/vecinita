@@ -25,6 +25,8 @@ permissions:
 env:
   VECINITA_MODAL_WORKSPACE: vecinita
   MODAL_ENVIRONMENT: staging
+  # Pinned Supabase CLI — same constraint as deploy-modal.yml / supabase.yml (ADR-030 §8).
+  SUPABASE_CLI_VERSION: "2.84.2"
 
 jobs:
   deploy-staging:
@@ -107,7 +109,24 @@ jobs:
           echo "chat_url=${VECINITA_STAGING_CHAT_URL:-}" >> "$GITHUB_OUTPUT"
           echo "admin_frontend_url=${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" >> "$GITHUB_OUTPUT"
 
+      - name: Detect Supabase access token
+        id: supabase_token
+        run: |
+          if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ]; then
+            echo "SUPABASE_ACCESS_TOKEN not configured — skipping Supabase sync"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Supabase CLI
+        if: steps.supabase_token.outputs.skip != 'true'
+        uses: supabase/setup-cli@3c2f5e2ae34c34e428e8e206e2c4d21fa2d20fbf  # v2.1.1
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+
       - name: Sync staging Supabase auth/config
+        if: steps.supabase_token.outputs.skip != 'true'
         env:
           VECINITA_ADMIN_FRONTEND_URL: ${{ steps.urls.outputs.admin_frontend_url }}
         run: |
@@ -180,13 +199,18 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ] || [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging \
+            # --frontend exports admin FE URL used by H4/H5 smokes (Bugbot on #372).
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend \
               | tee /tmp/staging-urls.env
             # shellcheck disable=SC1091
             set -a && source /tmp/staging-urls.env && set +a
           fi
           if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ]; then
             echo "::error::VECINITA_STAGING_CHAT_URL unset — staging apps missing?" >&2
+            exit 1
+          fi
+          if [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
+            echo "::error::VECINITA_STAGING_ADMIN_FRONTEND_URL unset — staging admin FE missing?" >&2
             exit 1
           fi
           echo "VECINITA_STAGING_CHAT_URL=${VECINITA_STAGING_CHAT_URL}" >> "$GITHUB_ENV"
