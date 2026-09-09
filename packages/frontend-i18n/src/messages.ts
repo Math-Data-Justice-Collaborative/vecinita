@@ -17,6 +17,13 @@ const enStrings = {
   "shared.languageGroupLabel": "Language",
   "shared.tooltip.themeToggle": "Switch light/dark theme",
   "shared.tooltip.languageToggle": "Switch interface language",
+  "shared.envBanner.staging":
+    "Staging environment — not production. Corpus and jobs here are for testing.",
+  "shared.envBanner.local": "Local development — not staging or production.",
+  "shared.envBanner.regionLabel": "Deployment environment",
+  "shared.pageLoading.slow":
+    "This is taking longer than usual. You can keep waiting or retry.",
+  "shared.pageLoading.retry": "Retry",
   "admin.tooltip.forceSignout": "Sign this operator out of all sessions",
   "chat.tooltip.newChat": "Start a new conversation",
   "chat.ask": "Ask",
@@ -53,6 +60,8 @@ const enStrings = {
   "chat.energyCarPrefix": "≈",
   "chat.energyCarSuffix": "of average car travel",
   "chat.energyEstimateLabel": "Approx. energy",
+  "chat.energyDetailsShow": "Show energy details",
+  "chat.energyDetailsHide": "Hide energy details",
   "chat.energyUseGuideBody":
     "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
   "chat.energyUseGuideToggle": "How we estimate energy",
@@ -765,6 +774,13 @@ const esStrings = {
   "shared.languageGroupLabel": "Idioma",
   "shared.tooltip.themeToggle": "Cambiar tema claro/oscuro",
   "shared.tooltip.languageToggle": "Cambiar idioma de la interfaz",
+  "shared.envBanner.staging":
+    "Entorno de staging — no es producción. El corpus y los trabajos aquí son de prueba.",
+  "shared.envBanner.local": "Desarrollo local — no es staging ni producción.",
+  "shared.envBanner.regionLabel": "Entorno de despliegue",
+  "shared.pageLoading.slow":
+    "Esto está tardando más de lo habitual. Puedes seguir esperando o reintentar.",
+  "shared.pageLoading.retry": "Reintentar",
   "admin.tooltip.forceSignout": "Cerrar todas las sesiones de este operador",
   "chat.tooltip.newChat": "Iniciar una conversación nueva",
   "chat.ask": "Preguntar",
@@ -800,6 +816,8 @@ const esStrings = {
   "chat.energyCarPrefix": "≈",
   "chat.energyCarSuffix": "de viaje en auto promedio",
   "chat.energyEstimateLabel": "Energía aprox.",
+  "chat.energyDetailsShow": "Mostrar detalles de energía",
+  "chat.energyDetailsHide": "Ocultar detalles de energía",
   "chat.energyUseGuideBody":
     "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
   "chat.energyUseGuideToggle": "Cómo estimamos la energía",

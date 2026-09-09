@@ -10,6 +10,7 @@ import { requireAdminConfig } from "@/config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageLoadingState } from "@/components/PageLoadingState";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAdminT } from "@/hooks/useAdminT";
+import { useLoadTimeout } from "@/hooks/useLoadTimeout";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 import { TruncatedText } from "@/components/TruncatedText";
 
@@ -80,6 +82,7 @@ export function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sseFailed, setSseFailed] = useState(false);
+  const initialLoadTimedOut = useLoadTimeout(loading && jobs.length === 0);
   const statusFilterRef = useRef(statusFilter);
   useEffect(() => {
     statusFilterRef.current = statusFilter;
@@ -287,7 +290,12 @@ export function JobsPage() {
               </Button>
             </div>
           ) : loading && jobs.length === 0 ? (
-            <p className="text-muted-foreground">{tr("shared.loading")}</p>
+            <PageLoadingState
+              timedOut={initialLoadTimedOut}
+              onRetry={() => {
+                void load();
+              }}
+            />
           ) : jobs.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {tr("admin.jobs.empty")}

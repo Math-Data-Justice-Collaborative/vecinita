@@ -53,6 +53,13 @@ exact-hit on retry.
 refusals cannot poison exact/retrieve tiers. Stream path no longer calls
 `store_answer` for empty chunk lists (redundant with cache guard).
 
+**Code merged to `stage` via #368 (2026-09-09).** Live staging ChatRAG still
+served `cache_hit: exact` empty answers for the canonical food question during
+EV-staging-adversarial-ux (process had not recycled / DO app not yet redeployed).
+Paraphrases returned sources. **Action:** redeploy staging ChatRAG from current
+`stage` tip, then re-verify the canonical food ask.
+
 ## Interview record
 
 Found during EV-staging-adversarial-plunge pass 2 (operator-approved staging plunge).
+Reconfirmed EV-staging-adversarial-ux Build band 2026-09-09.

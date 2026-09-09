@@ -67,9 +67,19 @@ body,
 
 /* ---------- Shell layout ---------- */
 
+.app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
 .app-shell {
   display: flex;
-  height: 100vh;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
@@ -373,10 +383,26 @@ body,
   color: var(--text-muted);
 }
 
+.energy-estimate-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
 .energy-chip {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-weight: 600;
   color: var(--text);
+}
+
+.energy-details-toggle {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.energy-estimate-details {
+  margin-top: 0.5rem;
 }
 
 .energy-car-line {
@@ -392,6 +418,24 @@ body,
 .energy-use-guide-toggle {
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
+}
+
+.environment-banner {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5c4500;
+  background: #fff3bf;
+  border-bottom: 1px solid #e8c547;
+}
+
+:root[data-theme="dark"] .environment-banner {
+  color: #ffe8a3;
+  background: #3d3210;
+  border-bottom-color: #6b5a1e;
 }
 
 .energy-use-guide {

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ChatPanel } from "./components/ChatPanel";
 import { CorpusBrowse } from "./components/CorpusBrowse";
+import { EnvironmentBanner } from "./components/EnvironmentBanner";
 import { FeedbackPage } from "./components/FeedbackPage";
 import { Sidebar } from "./components/Sidebar";
 import { LocaleProvider } from "./context/LocaleContext";
@@ -32,74 +33,77 @@ function AppContent() {
   const onFeedback = pathname === "/feedback" || pathname.endsWith("/feedback");
 
   return (
-    <div className="app-shell" data-sidebar-open={sidebarOpen}>
-      <Sidebar
-        open={sidebarOpen}
-        locale={locale}
-        theme={theme}
-        onCorpus={onCorpus}
-        onFeedback={onFeedback}
-        newChatDisabled={chat.loading || chat.messages.length === 0}
-        tags={tagFilters.tags}
-        selectedTags={tagFilters.selected}
-        previousChats={chat.previousChats}
-        previousSelectDisabled={chat.loading}
-        onNavigate={navigate}
-        onNewChat={chat.newChat}
-        onToggleTag={tagFilters.toggle}
-        onSelectConversation={chat.selectConversation}
-        onDeleteConversation={chat.deleteConversation}
-        onClearAll={chat.clearAll}
-        onSetLocale={setLocale}
-        onToggleTheme={toggleTheme}
-      />
-      {sidebarOpen ? (
-        <button
-          type="button"
-          className="sidebar-scrim"
-          aria-hidden="true"
-          tabIndex={-1}
-          onClick={() => {
-            setSidebarOpen(false);
-          }}
+    <div className="app-root">
+      <EnvironmentBanner locale={locale} />
+      <div className="app-shell" data-sidebar-open={sidebarOpen}>
+        <Sidebar
+          open={sidebarOpen}
+          locale={locale}
+          theme={theme}
+          onCorpus={onCorpus}
+          onFeedback={onFeedback}
+          newChatDisabled={chat.loading || chat.messages.length === 0}
+          tags={tagFilters.tags}
+          selectedTags={tagFilters.selected}
+          previousChats={chat.previousChats}
+          previousSelectDisabled={chat.loading}
+          onNavigate={navigate}
+          onNewChat={chat.newChat}
+          onToggleTag={tagFilters.toggle}
+          onSelectConversation={chat.selectConversation}
+          onDeleteConversation={chat.deleteConversation}
+          onClearAll={chat.clearAll}
+          onSetLocale={setLocale}
+          onToggleTheme={toggleTheme}
         />
-      ) : null}
-      <div className="app-main">
-        <header className="app-topbar" role="banner" data-testid="app-header">
+        {sidebarOpen ? (
           <button
             type="button"
-            className="sidebar-toggle"
-            aria-label={t(locale, "chat.toggleSidebar")}
-            aria-expanded={sidebarOpen}
+            className="sidebar-scrim"
+            aria-hidden="true"
+            tabIndex={-1}
             onClick={() => {
-              setSidebarOpen((value) => !value);
+              setSidebarOpen(false);
             }}
-          >
-            <span aria-hidden="true">☰</span>
-          </button>
-          <div className="app-topbar-title">
-            <h1>{t(locale, "chat.appTitle")}</h1>
-            <p className="subtitle">{t(locale, "chat.appSubtitle")}</p>
-          </div>
-        </header>
-        <main className="app">
-          {onFeedback ? (
-            <FeedbackPage
-              locale={locale}
-              onNavigateHome={() => {
-                navigate("/");
+          />
+        ) : null}
+        <div className="app-main">
+          <header className="app-topbar" role="banner" data-testid="app-header">
+            <button
+              type="button"
+              className="sidebar-toggle"
+              aria-label={t(locale, "chat.toggleSidebar")}
+              aria-expanded={sidebarOpen}
+              onClick={() => {
+                setSidebarOpen((value) => !value);
               }}
-            />
-          ) : onCorpus ? (
-            <CorpusBrowse
-              onNavigateHome={() => {
-                navigate("/");
-              }}
-            />
-          ) : (
-            <ChatPanel chat={chat} selectedTags={tagFilters.selected} />
-          )}
-        </main>
+            >
+              <span aria-hidden="true">☰</span>
+            </button>
+            <div className="app-topbar-title">
+              <h1>{t(locale, "chat.appTitle")}</h1>
+              <p className="subtitle">{t(locale, "chat.appSubtitle")}</p>
+            </div>
+          </header>
+          <main className="app">
+            {onFeedback ? (
+              <FeedbackPage
+                locale={locale}
+                onNavigateHome={() => {
+                  navigate("/");
+                }}
+              />
+            ) : onCorpus ? (
+              <CorpusBrowse
+                onNavigateHome={() => {
+                  navigate("/");
+                }}
+              />
+            ) : (
+              <ChatPanel chat={chat} selectedTags={tagFilters.selected} />
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );
