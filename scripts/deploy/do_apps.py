@@ -205,7 +205,7 @@ def wait_for_deployment(
         time.sleep(poll_s)
     raise SystemExit(
         f"Timed out after {timeout_s:.0f}s waiting for deployment "
-        f"{deployment_id} (last phase={last_phase})"
+        + f"{deployment_id} (last phase={last_phase})"
     )
 
 

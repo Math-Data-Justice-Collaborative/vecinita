@@ -29,7 +29,7 @@ def test_staging_fe_js_includes_environment_banner() -> None:
     failures: list[str] = []
     for label, base in _fe_bases():
         html_resp = httpx.get(f"{base}/", timeout=30.0)
-        html_resp.raise_for_status()
+        _ = html_resp.raise_for_status()
         match = re.search(r"""src=["']([^"']*assets/[^"']+\.js)["']""", html_resp.text)
         if match is None:
             failures.append(f"{label}: no assets/*.js in index HTML")
@@ -44,6 +44,6 @@ def test_staging_fe_js_includes_environment_banner() -> None:
         if "environment-banner" not in js and "envBanner" not in js:
             failures.append(
                 f"{label}: bundle missing environment banner "
-                "(Deploy Staging likely returned before FE ACTIVE)"
+                + "(Deploy Staging likely returned before FE ACTIVE)"
             )
     assert not failures, "; ".join(failures)

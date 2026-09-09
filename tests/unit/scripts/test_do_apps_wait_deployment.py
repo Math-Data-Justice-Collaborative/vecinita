@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 import pytest
 from deploy import do_apps
@@ -27,12 +27,20 @@ class _FakeClient:
         self.apps = api
 
 
+def _noop_sleep(_seconds: float) -> None:
+    return None
+
+
 def test_wait_for_deployment_returns_when_active(monkeypatch: pytest.MonkeyPatch) -> None:
     """Poll until ACTIVE; do not treat PENDING_BUILD as success."""
     sleeps: list[float] = []
-    monkeypatch.setattr(do_apps.time, "sleep", lambda s: sleeps.append(float(s)))
+
+    def _record_sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+
+    monkeypatch.setattr(do_apps.time, "sleep", _record_sleep)
     api = _FakeAppsApi(["PENDING_BUILD", "BUILDING", "ACTIVE"])
-    client: Any = _FakeClient(api)
+    client = _FakeClient(api)
     phase = do_apps.wait_for_deployment(
         client,
         app_id="app-1",
@@ -47,9 +55,9 @@ def test_wait_for_deployment_returns_when_active(monkeypatch: pytest.MonkeyPatch
 
 def test_wait_for_deployment_raises_on_error_phase(monkeypatch: pytest.MonkeyPatch) -> None:
     """ERROR / CANCELED phases fail closed."""
-    monkeypatch.setattr(do_apps.time, "sleep", lambda _s: None)
+    monkeypatch.setattr(do_apps.time, "sleep", _noop_sleep)
     api = _FakeAppsApi(["ERROR"])
-    client: Any = _FakeClient(api)
+    client = _FakeClient(api)
     with pytest.raises(SystemExit, match="ERROR"):
         _ = do_apps.wait_for_deployment(
             client,
@@ -66,26 +74,28 @@ def test_cmd_deploy_wait_flag_calls_wait(monkeypatch: pytest.MonkeyPatch) -> Non
 
     class _Apps:
         @staticmethod
-        def create_deployment(*, app_id: str, body: dict[str, object]) -> dict[str, object]:
+        def create_deployment(
+            *,
+            app_id: str,
+            body: dict[str, object],
+        ) -> dict[str, object]:
             del app_id, body
             return {"deployment": {"id": "dep-9", "phase": "PENDING_BUILD"}}
 
     class _Client:
         apps = _Apps()
 
-    monkeypatch.setattr(
-        do_apps,
-        "_iter_apps",
-        lambda _c: [{"id": "app-9", "spec": {"name": "vecinita-staging-chat-fe"}}],
-    )
-    monkeypatch.setattr(
-        do_apps,
-        "_find_app",
-        lambda _apps, name: {"id": "app-9", "spec": {"name": name}},
-    )
+    def _iter_apps(_client: object) -> list[dict[str, object]]:
+        return [{"id": "app-9", "spec": {"name": "vecinita-staging-chat-fe"}}]
+
+    def _find_app(
+        _apps: list[dict[str, object]],
+        name: str,
+    ) -> dict[str, object]:
+        return {"id": "app-9", "spec": {"name": name}}
 
     def _wait(
-        _c: object,
+        _client: object,
         *,
         app_id: str,
         deployment_id: str,
@@ -94,7 +104,9 @@ def test_cmd_deploy_wait_flag_calls_wait(monkeypatch: pytest.MonkeyPatch) -> Non
         waited.append(f"{app_id}:{deployment_id}:{timeout_s}")
         return "ACTIVE"
 
+    monkeypatch.setattr(do_apps, "_iter_apps", _iter_apps)
+    monkeypatch.setattr(do_apps, "_find_app", _find_app)
     monkeypatch.setattr(do_apps, "wait_for_deployment", _wait)
-    rc = do_apps.cmd_deploy(cast("Any", _Client()), "vecinita-staging-chat-fe", wait=True)
+    rc = do_apps.cmd_deploy(cast("object", _Client()), "vecinita-staging-chat-fe", wait=True)
     assert rc == 0
     assert waited == ["app-9:dep-9:900"]
