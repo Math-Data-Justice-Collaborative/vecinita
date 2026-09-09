@@ -160,7 +160,7 @@ GitHub access for the DO apps. **Staging static frontends** (`infra/do/staging/*
 build from branch **`stage`** (not `main`) so promote-PR Deploy Staging / `staging-smoke` exercise
 tip-of-stage FE bundles (EnvironmentBanner, Beta chrome, etc.).
 `do_apps.py create-all --env staging` **updates** existing FE apps' `github.branch` from YAML
-(force_build alone does not retarget the source branch).
+(force_build alone does not retarget the source branch). Requires repo
 secret `DIGITALOCEAN_TOKEN`.
 
 **Release on `main`:** `.github/workflows/release.yml` runs after **Deploy DigitalOcean**
