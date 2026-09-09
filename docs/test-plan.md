@@ -56,6 +56,10 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
+| UJ-097 Ask vs Clear hierarchy | Vitest `ChatPanel` | TC-329 |
+| UJ-098 Job status badge colors | Vitest JobsPage / JobDetailPage | TC-330 |
+| UJ-035 Sign-out hierarchy | Vitest logout + AdminLayout | TC-097, TC-331 |
+| OpenAPI AskRequest body | unit / OpenAPI export | TC-332 |
 | UJ-006 Job failure | `tests/e2e/test_uj006_job_failure.py` | TC-013 |
 | UJ-007 Reject identity | `tests/e2e/test_uj007_reject_identity.py` | TC-030, TC-031 |
 | UJ-008 Unauthorized admin | `tests/e2e/test_uj008_unauthorized_admin.py` | TC-014 |
@@ -183,7 +187,9 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: No hallucinated answer when no chunks match.
 - **Input**: Off-corpus question.
-- **Expected**: Clear no-context message; no fake citations.
+- **Expected**: Clear empty-retrieval message (no matching sources + short next-step hint);
+  `sources: []`; distinct from hedge path when sources exist (EV-ux-backlog UX-8).
+- **Refs**: UJ-005 · `NO_CONTEXT_MESSAGE_EN` / `_ES`
 
 ### TC-010: Job submit and complete (UJ-002)
 
@@ -2215,4 +2221,28 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
   identities, or chat bodies in the evidence; existing mount-prewarm contract remains in
   force until a later build-approved implementation change.
 - **Refs**: AC-359-01 · AC-359-02 · AC-359-03 · UJ-096 · [Corpus: ADR-004] · [Corpus: config]
+
+### TC-329: Ask primary vs Clear secondary (UJ-097, EV-ux-backlog UX-6)
+
+- **Objective**: Composer presents Ask as primary and Clear history as demoted/spaced.
+- **Expected**: Clear has secondary styling and/or separator spacing from Ask; ask submit unchanged.
+- **Refs**: UJ-097 · [Corpus: journeys]
+
+### TC-330: Job status badge semantic variants (UJ-098, EV-ux-backlog UX-7)
+
+- **Objective**: Jobs list and detail use distinct badge variants per status.
+- **Expected**: completed success-leaning; failed destructive; running distinct; pending/cancelled muted; same map both pages.
+- **Refs**: UJ-098 · [Corpus: journeys]
+
+### TC-331: Sign-out hierarchy (UJ-035, EV-ux-backlog UX-5)
+
+- **Objective**: Log out of all devices is demoted relative to Sign out.
+- **Expected**: Sign out remains primary (`admin-sign-out`); all-devices control secondary; scopes unchanged.
+- **Refs**: UJ-035 · TC-097 · [Corpus: journeys]
+
+### TC-332: Live OpenAPI AskRequest body (EV-ux-backlog UX-9)
+
+- **Objective**: FastAPI `/openapi.json` documents ask `requestBody` with required `question`.
+- **Expected**: `POST /api/v1/ask` and stream ask schemas include `AskRequest.question`; checked-in `openapi/chat-rag.yaml` stays in sync.
+- **Refs**: [Corpus: api] · [Spec: openapi/chat-rag.yaml]
 

@@ -1,4 +1,10 @@
-import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -173,6 +179,13 @@ describe("JobsPage", () => {
     expect(screen.getAllByText(/Failed/).length).toBeGreaterThan(0);
     expect(screen.getByText(/LlmTagClientError/)).toBeInTheDocument();
     expect(screen.getByText(/ScrapeError/)).toBeInTheDocument();
+    expect(
+      screen.getAllByTestId("job-status-badge-completed")[0],
+    ).toHaveAttribute("data-variant", "success");
+    expect(screen.getAllByTestId("job-status-badge-failed")[0]).toHaveAttribute(
+      "data-variant",
+      "destructive",
+    );
   });
 
   it("shows empty state when there are no jobs", async () => {

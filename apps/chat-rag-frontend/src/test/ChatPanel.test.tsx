@@ -626,4 +626,16 @@ describe("ChatPanel", () => {
     expect(screen.queryByTestId("cold-start-wait")).not.toBeInTheDocument();
     expect(screen.getByText(/^Ready$/)).toBeInTheDocument();
   });
+
+  it("marks Ask as primary and Clear history as secondary (UJ-097 / UX-6)", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
+    renderWithLocale(<ChatPanel />);
+    expect(screen.getByTestId("chat-ask-submit")).toHaveAttribute(
+      "data-priority",
+      "primary",
+    );
+    const clear = screen.getByTestId("chat-clear-history");
+    expect(clear).toHaveAttribute("data-priority", "secondary");
+    expect(clear.className.split(/\s+/)).toContain("chat-clear-history");
+  });
 });

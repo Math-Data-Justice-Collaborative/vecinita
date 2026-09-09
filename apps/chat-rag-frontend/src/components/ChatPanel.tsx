@@ -259,6 +259,7 @@ function ChatPanelView({
               type="submit"
               disabled={loading || !question.trim()}
               data-testid="chat-ask-submit"
+              data-priority="primary"
             >
               <ActionIcon
                 motion="pulse"
@@ -272,10 +273,11 @@ function ChatPanelView({
             </button>
             <button
               type="button"
-              className="secondary"
+              className="secondary chat-clear-history"
               disabled={loading || isEmpty}
               onClick={clearHistory}
               data-testid="chat-clear-history"
+              data-priority="secondary"
             >
               <ActionIcon motion="press" pending={false}>
                 <span aria-hidden="true">⌫</span>

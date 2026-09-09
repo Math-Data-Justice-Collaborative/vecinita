@@ -116,6 +116,9 @@ Base path: `/api/v1`
 
 - **Purpose**: Non-streaming bilingual Q&A.
 - **Auth**: None (public).
+- **OpenAPI**: Runtime `/openapi.json` **must** publish `requestBody` → `AskRequest` with
+  required `question` (1–4000). Static mirror: `openapi/chat-rag.yaml`. Field name is
+  **`question`** (not `message`). (EV-ux-backlog-polish UX-9)
 - **Request**:
 
 ```json
@@ -129,6 +132,11 @@ Base path: `/api/v1`
 When `language` is set, retrieval filters `documents.language` to that value and the response uses the same language. When omitted, the backend auto-detects language from the question text (ADR-013).
 
 When `tags` is non-empty, retrieval filters by those tags only (LLM tag inference skipped). When omitted or empty, backend infers tags from the question before retrieval.
+
+When retrieval returns no chunks above threshold, `answer` is the localized empty-retrieval
+message (`NO_CONTEXT_MESSAGE_EN` / `_ES`) stating that **no matching sources were found**,
+with a short next-step hint; `sources` is `[]`. This is distinct from weak-context answers
+that still include `sources` and may append a hedge disclaimer. (EV-ux-backlog-polish UX-8)
 
 - **Response** `200`:
 

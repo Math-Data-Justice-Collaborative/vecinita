@@ -22,22 +22,16 @@ import {
 import { useAdminT } from "@/hooks/useAdminT";
 import { useLoadTimeout } from "@/hooks/useLoadTimeout";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
+import { JOB_STATUS_VARIANT } from "@/lib/jobStatusBadge";
 import { TruncatedText } from "@/components/TruncatedText";
 
 const POLL_MS = 4000;
 const SSE_RETRY_BASE_MS = 2000;
 const SSE_RETRY_MAX_MS = 30000;
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 type StatusFilter = JobStatus | "all";
 
-const STATUS_VARIANT: Record<JobStatus, BadgeVariant> = {
-  pending: "outline",
-  running: "secondary",
-  completed: "default",
-  failed: "destructive",
-  cancelled: "outline",
-};
+const STATUS_VARIANT = JOB_STATUS_VARIANT;
 
 const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
   pending: "admin.jobs.status.pending",
@@ -334,7 +328,11 @@ export function JobsPage() {
                       </TableCell>
                       <TableCell>{typeKey ? tr(typeKey) : jobType}</TableCell>
                       <TableCell>
-                        <Badge variant={STATUS_VARIANT[job.status]}>
+                        <Badge
+                          variant={STATUS_VARIANT[job.status]}
+                          data-variant={STATUS_VARIANT[job.status]}
+                          data-testid={`job-status-badge-${job.status}`}
+                        >
                           {tr(STATUS_KEY[job.status])}
                         </Badge>
                       </TableCell>

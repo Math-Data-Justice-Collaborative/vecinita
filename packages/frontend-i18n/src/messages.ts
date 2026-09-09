@@ -287,6 +287,7 @@ const enStrings = {
   "admin.auth.loginFailed": "Sign in failed",
   "admin.auth.signOut": "Sign out",
   "admin.auth.signOutAllDevices": "Log out of all devices",
+  "admin.auth.moreAccountActions": "More account actions",
   "admin.auth.idleWarningTitle": "Still there?",
   "admin.auth.idleWarningBody":
     "You will be signed out on this device in {seconds} seconds due to inactivity.",
@@ -1053,6 +1054,7 @@ const esStrings = {
   "admin.auth.loginFailed": "Error al iniciar sesión",
   "admin.auth.signOut": "Cerrar sesión",
   "admin.auth.signOutAllDevices": "Cerrar sesión en todos los dispositivos",
+  "admin.auth.moreAccountActions": "Más acciones de cuenta",
   "admin.auth.idleWarningTitle": "¿Sigues ahí?",
   "admin.auth.idleWarningBody":
     "Se cerrará la sesión en este dispositivo en {seconds} segundos por inactividad.",
