@@ -33,12 +33,13 @@ function formatMiles(km: number): string {
 }
 
 /**
- * Post-ask energy chip + car-travel line + advisory + use guide (F65 / UJ-070).
+ * Post-ask energy chip; car/advisory/guide collapsed by default (F65 / UJ-070 / UX-2).
  */
 export function EnergyEstimatePanel({
   estimate,
   locale,
 }: EnergyEstimatePanelProps) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const meters = formatMeters(estimate.car_m_equiv);
   const miles = formatMiles(estimate.car_km_equiv);
@@ -55,30 +56,53 @@ export function EnergyEstimatePanel({
       data-testid="energy-estimate"
       aria-label={t(locale, "chat.energyEstimateLabel")}
     >
-      <p className="energy-chip" data-testid="energy-chip">
-        {t(locale, "chat.energyEstimateLabel")}: {wh} Wh · {gCo2e} gCO2e
-      </p>
-      <p className="energy-car-line" data-testid="energy-car-line">
-        {t(locale, "chat.energyCarPrefix")} {meters} m (≈ {miles} mi){" "}
-        {t(locale, "chat.energyCarSuffix")}
-      </p>
-      <p className="energy-advisory" data-testid="energy-advisory" role="note">
-        {t(locale, "chat.energyAdvisory")}
-      </p>
-      <button
-        type="button"
-        className="energy-use-guide-toggle secondary"
-        data-testid="energy-use-guide-toggle"
-        aria-expanded={guideOpen}
-        onClick={() => {
-          setGuideOpen((open) => !open);
-        }}
-      >
-        {t(locale, "chat.energyUseGuideToggle")}
-      </button>
-      {guideOpen ? (
-        <div className="energy-use-guide" data-testid="energy-use-guide">
-          <p>{t(locale, "chat.energyUseGuideBody")}</p>
+      <div className="energy-estimate-summary">
+        <p className="energy-chip" data-testid="energy-chip">
+          {t(locale, "chat.energyEstimateLabel")}: {wh} Wh · {gCo2e} gCO2e
+        </p>
+        <button
+          type="button"
+          className="energy-details-toggle secondary"
+          data-testid="energy-details-toggle"
+          aria-expanded={detailsOpen}
+          onClick={() => {
+            setDetailsOpen((open) => !open);
+          }}
+        >
+          {detailsOpen
+            ? t(locale, "chat.energyDetailsHide")
+            : t(locale, "chat.energyDetailsShow")}
+        </button>
+      </div>
+      {detailsOpen ? (
+        <div className="energy-estimate-details" data-testid="energy-details">
+          <p className="energy-car-line" data-testid="energy-car-line">
+            {t(locale, "chat.energyCarPrefix")} {meters} m (≈ {miles} mi){" "}
+            {t(locale, "chat.energyCarSuffix")}
+          </p>
+          <p
+            className="energy-advisory"
+            data-testid="energy-advisory"
+            role="note"
+          >
+            {t(locale, "chat.energyAdvisory")}
+          </p>
+          <button
+            type="button"
+            className="energy-use-guide-toggle secondary"
+            data-testid="energy-use-guide-toggle"
+            aria-expanded={guideOpen}
+            onClick={() => {
+              setGuideOpen((open) => !open);
+            }}
+          >
+            {t(locale, "chat.energyUseGuideToggle")}
+          </button>
+          {guideOpen ? (
+            <div className="energy-use-guide" data-testid="energy-use-guide">
+              <p>{t(locale, "chat.energyUseGuideBody")}</p>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </aside>

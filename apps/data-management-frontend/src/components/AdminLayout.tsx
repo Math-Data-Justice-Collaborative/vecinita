@@ -36,6 +36,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { EnvironmentBanner } from "@/components/EnvironmentBanner";
 import { IdleTimeoutGuard } from "@/components/IdleTimeoutGuard";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -159,6 +160,7 @@ function NavItems({ onClick }: { onClick?: () => void }) {
         <NavLink
           key={to}
           to={to}
+          end
           onClick={onClick}
           className={({ isActive }) =>
             cn(
@@ -262,6 +264,7 @@ export function AdminLayout() {
           <IdleTimeoutGuard />
           <DesktopSidebar showChrome={isDesktop} />
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <EnvironmentBanner />
             <MobileHeader showChrome={!isDesktop} />
             <main
               className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"

@@ -14,12 +14,16 @@ const SAMPLE: EnergyEstimate = {
   car_m_equiv: 0.0299,
 };
 
-describe("EnergyEstimatePanel (TC-220, TC-231 / F65)", () => {
+function expandDetails(): void {
+  fireEvent.click(screen.getByTestId("energy-details-toggle"));
+}
+
+describe("EnergyEstimatePanel (TC-220, TC-231 / F65 / UX-2)", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("shows Wh/gCO2e chip, car meters/miles, and advisory (EN)", () => {
+  it("shows compact chip with details collapsed by default", () => {
     renderWithLocale(<EnergyEstimatePanel estimate={SAMPLE} locale="en" />);
 
     const root = screen.getByTestId("energy-estimate");
@@ -28,6 +32,13 @@ describe("EnergyEstimatePanel (TC-220, TC-231 / F65)", () => {
     expect(screen.getByTestId("energy-chip")).toHaveTextContent(
       /gCO2e|g CO₂e|gCO₂e/i,
     );
+    expect(screen.queryByTestId("energy-car-line")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("energy-advisory")).not.toBeInTheDocument();
+  });
+
+  it("expands car line and advisory when details open (EN)", () => {
+    renderWithLocale(<EnergyEstimatePanel estimate={SAMPLE} locale="en" />);
+    expandDetails();
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent(/≈/);
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent(/m/);
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent(/mi/);
@@ -36,8 +47,9 @@ describe("EnergyEstimatePanel (TC-220, TC-231 / F65)", () => {
     );
   });
 
-  it("renders Spanish advisory and use-guide copy", () => {
+  it("renders Spanish advisory and use-guide copy when expanded", () => {
     renderWithLocale(<EnergyEstimatePanel estimate={SAMPLE} locale="es" />);
+    expandDetails();
     expect(screen.getByTestId("energy-advisory")).toHaveTextContent(
       /aproximad/i,
     );
@@ -48,8 +60,9 @@ describe("EnergyEstimatePanel (TC-220, TC-231 / F65)", () => {
     );
   });
 
-  it("toggles use guide open/closed", () => {
+  it("toggles use guide open/closed when details expanded", () => {
     renderWithLocale(<EnergyEstimatePanel estimate={SAMPLE} locale="en" />);
+    expandDetails();
     expect(screen.queryByTestId("energy-use-guide")).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId("energy-use-guide-toggle"));
     expect(screen.getByTestId("energy-use-guide")).toBeInTheDocument();
@@ -72,6 +85,7 @@ describe("EnergyEstimatePanel (TC-220, TC-231 / F65)", () => {
     );
     expect(screen.getByTestId("energy-chip")).toHaveTextContent("1.25 Wh");
     expect(screen.getByTestId("energy-chip")).toHaveTextContent("0.48 gCO2e");
+    expandDetails();
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent("1500 m");
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent(/mi/);
   });
@@ -89,7 +103,8 @@ describe("EnergyEstimatePanel (TC-220, TC-231 / F65)", () => {
         locale="en"
       />,
     );
-    expect(screen.getByTestId("energy-car-line")).toHaveTextContent("50.0 m");
     expect(screen.getByTestId("energy-chip")).toHaveTextContent("0.05 Wh");
+    expandDetails();
+    expect(screen.getByTestId("energy-car-line")).toHaveTextContent("50.0 m");
   });
 });

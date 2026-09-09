@@ -52,7 +52,7 @@ describe("UJ-070 / F65 energy estimate in ChatPanel (TC-220, TC-231)", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows energy chip and car line after stream done", async () => {
+  it("shows energy chip; expands details for car line and advisory", async () => {
     vi.stubGlobal(
       "fetch",
       mockFetchRouter({
@@ -70,6 +70,8 @@ describe("UJ-070 / F65 energy estimate in ChatPanel (TC-220, TC-231)", () => {
       expect(screen.getByTestId("energy-estimate")).toBeInTheDocument();
     });
     expect(screen.getByTestId("energy-chip")).toHaveTextContent(/Wh/i);
+    expect(screen.queryByTestId("energy-car-line")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("energy-details-toggle"));
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent(/mi/);
     expect(screen.getByTestId("energy-advisory")).toHaveTextContent(
       /approximate/i,
