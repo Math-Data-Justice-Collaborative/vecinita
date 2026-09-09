@@ -36,7 +36,10 @@ Live FE JS (2026-09-09): no `environment-banner` / `envBanner` strings.
 ## Fix
 
 - `do_apps.py deploy --wait` polls until ACTIVE / ERROR
-- `.github/workflows/deploy-staging.yml` uses `--wait --timeout-s 900`; job timeout 45m
+- `.github/workflows/deploy-staging.yml` waits for **FE** apps only (`chat-fe`,
+  `admin-fe`) with `--wait --timeout-s 900`; backends fire-and-forget; job
+  timeout 60m
+- `staging-smoke` runs `tests/smoke/test_staging_fe_environment_banner.py`
 
 ## Status
 

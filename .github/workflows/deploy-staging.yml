@@ -32,7 +32,7 @@ jobs:
   deploy-staging:
     name: deploy-staging
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     environment: staging
     outputs:
       chat_url: ${{ steps.urls.outputs.chat_url }}
@@ -162,13 +162,21 @@ jobs:
       - name: Deploy staging DO apps
         run: |
           set -euo pipefail
+          # Backends: fire-and-forget (API health comes from prior Modal sync + smoke).
           for app in \
             vecinita-staging-write-api \
-            vecinita-staging-chat-api \
+            vecinita-staging-chat-api; do
+            echo "==> Deploying ${app}"
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}"
+          done
+          # Frontends: wait for ACTIVE so banner/UX bundles are live before smoke
+          # (BUG-2026-09-09-staging-fe-deploy-no-wait). Cap wait at 2×900s + slack.
+          for app in \
             vecinita-staging-chat-fe \
             vecinita-staging-admin-fe; do
-            echo "==> Deploying ${app}"
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}" --wait --timeout-s 900
+            echo "==> Deploying ${app} (wait ACTIVE)"
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy \
+              --name "${app}" --wait --timeout-s 900
           done
 
   staging-smoke:
@@ -240,4 +248,5 @@ jobs:
             tests/smoke/test_staging_ev002_admin.py \
             tests/smoke/test_staging_f84_metrics.py \
             tests/smoke/test_staging_openapi_request_bodies.py \
+            tests/smoke/test_staging_fe_environment_banner.py \
             -m live -q --tb=short
