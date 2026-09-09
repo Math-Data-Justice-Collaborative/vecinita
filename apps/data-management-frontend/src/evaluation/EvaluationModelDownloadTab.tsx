@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { BetaFeatureNotice } from "@/components/BetaFeatureNotice";
 import { useAdminT } from "@/hooks/useAdminT";
 import { usePlaygroundModelDownload } from "./usePlaygroundModelDownload";
 
@@ -152,6 +153,8 @@ export function EvaluationModelDownloadTab() {
           {tr("admin.evaluation.models.subtitle")}
         </p>
       </div>
+
+      <BetaFeatureNotice feature="playground" />
 
       {catalogError ? (
         <p role="alert" className="text-sm text-destructive">

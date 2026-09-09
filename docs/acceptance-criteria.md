@@ -563,3 +563,11 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [ ] **AC-MON6**: Staging Loki holds ADR-004 allow-listed structured logs only; short retention (TC-305).
 - [ ] **AC-MON7**: Staging Grafana shows Modal + DO panels (UJ-089).
 - [ ] **AC-MON8**: ≥1 Alertmanager rule notifies staging webhook secret; no chat content in alert payload (TC-306). Prod always-on Grafana deferred (EV-036-D11).
+
+### EV-beta-feature-labeling — Beta UI + feedback (F86)
+
+- [x] **AC-BETA1**: Fine-tune page and Evaluation Playground (incl. model download when shown) display a visible **Beta** badge and a short banner explaining Beta status (TC-338, UJ-099).
+- [x] **AC-BETA2**: Banner/badge include a link to the umbrella GitHub feedback issue (opens in new tab; `rel="noopener noreferrer"`) (TC-338).
+- [x] **AC-BETA3**: Admin nav for Fine-tune and Evaluation shows a compact Beta chip (or equivalent) so Beta is visible before opening the page (TC-339).
+- [x] **AC-BETA4**: README documents Beta surfaces and the feedback issue URL; GitHub repo About/description mentions Beta + feedback (TC-340).
+- [x] **AC-BETA5**: Cursor rule + skill checklist recommend tagging new/flaky features as Beta and linking the feedback issue during evolve/build (verified by doc presence + agent checklist cite).

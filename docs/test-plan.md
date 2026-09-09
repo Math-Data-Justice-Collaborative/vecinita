@@ -58,6 +58,8 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
 | UJ-097 Ask vs Clear hierarchy | Vitest `ChatPanel` | TC-329 |
 | UJ-098 Job status badge colors | Vitest JobsPage / JobDetailPage | TC-330 |
+| UJ-099 Beta label + feedback link | Vitest BetaBadge / Finetune / Playground | TC-338, TC-339 |
+| README + GH About Beta copy | docs / ops checklist | TC-340 |
 | UJ-035 Sign-out hierarchy | Vitest logout + AdminLayout | TC-097, TC-331 |
 | OpenAPI AskRequest body | unit / OpenAPI export | TC-332 |
 | UJ-006 Job failure | `tests/e2e/test_uj006_job_failure.py` | TC-013 |
@@ -2275,4 +2277,25 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Objective**: Normalize `servers.url` + compare requestBody / securitySchemes between repo YAML and live `/openapi.json`.
 - **Expected**: Drift messages when live lacks documented requestBody or write/DM securitySchemes; CLI exits non-zero on drift.
 - **Refs**: [Corpus: api] · `scripts/ops/openapi_live_drift.py` · `tests/unit/scripts/test_openapi_live_drift.py`
+
+### TC-338: Fine-tune + Playground Beta chrome (UJ-099, F86)
+
+- **Objective**: Fine-tune page and Evaluation Playground render Beta badge + banner with feedback URL.
+- **Input**: Vitest mounts of `FinetunePage` and Evaluation playground tab with mocked data.
+- **Expected**: `data-testid` for beta badge/banner; link `href` matches configured umbrella issue URL; `target="_blank"` + `rel` includes `noopener`.
+- **Refs**: [Corpus: feature-list.md §F86] [Corpus: acceptance] AC-BETA1–2 · `apps/data-management-frontend/src/test/`
+
+### TC-339: Admin nav Beta chips (UJ-099, F86)
+
+- **Objective**: Nav entries for `/finetune` and `/evaluation` show compact Beta chip.
+- **Input**: Vitest `AdminLayout` (or NavItems) render with admin auth.
+- **Expected**: Beta chip test ids present on those nav items only (not Dashboard/Corpus).
+- **Refs**: [Corpus: feature-list.md §F86] AC-BETA3
+
+### TC-340: README + GitHub About Beta documentation (F86)
+
+- **Objective**: README lists Beta surfaces + feedback issue; repo description mentions Beta feedback.
+- **Input**: README assertion (string/grep in test or manual checklist in verify-impl); `gh api repos/...` description check in verify-impl.
+- **Expected**: Both surfaces name Fine-tune and Playground as Beta and include the issue URL (or `issues/new` label link).
+- **Refs**: [Corpus: feature-list.md §F86] AC-BETA4
 

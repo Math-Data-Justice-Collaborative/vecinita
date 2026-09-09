@@ -1914,3 +1914,20 @@ Staging adversarial / Schemathesis contract pass after UX plunge + write-auth wo
 
 **Cites:** [Corpus: staging] [Corpus: api] [Corpus: tests] [Spec: docs/test-plan.md §TC-333–TC-337]
 
+
+## EV-beta-feature-labeling (2026-09-09)
+
+Admin Beta labeling for Fine-tune + Evaluation playground; README/About; umbrella feedback issue; agent process.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-BETA-D1 | Scope | Fine-tune + Eval playground (+ model download); not Automations/Rebuild/ChatRAG this cycle |
+| EV-BETA-D2 | Feedback | One umbrella GH issue + label `beta-feedback` (not Discussions; not one issue per surface) |
+| EV-BETA-D3 | Docs surface | README + GitHub repo About/description |
+| EV-BETA-D4 | Feature id | New **F86** (not silent UX-only without Fn) |
+| EV-BETA-D5 | Related issues | #352 / #345 stay ops/tester; new issue is product Beta-surface feedback |
+| EV-BETA-D6 | Scale | Standard evolve |
+| EV-BETA-D7 | UI preview | Skip non-deployed preview; specify from docs + existing admin UI |
+| EV-BETA-D8 | Config | Issue URL via `VITE_BETA_FEEDBACK_ISSUE_URL` with documented default after create |
+
+**Cites:** [Corpus: feature-list.md §F86] [Corpus: frontend-i18n] · context brief `beta-feature-labeling.md`
