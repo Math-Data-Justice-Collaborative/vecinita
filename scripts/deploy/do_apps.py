@@ -17,7 +17,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from urllib.parse import parse_qs, urlparse
 
 import yaml
@@ -141,13 +141,72 @@ def cmd_list(client) -> int:
     return 0
 
 
+def sync_static_site_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+) -> bool:
+    """Copy ``static_sites[].github`` branch/repo from YAML into the live app spec.
+
+    ``create-all`` previously skipped existing apps, so staging FEs kept building
+    from an old branch (``main``) even after YAML pointed at ``stage``.
+    """
+    desired_sites = yaml_spec.get("static_sites")
+    live_sites = live_spec.get("static_sites")
+    if not isinstance(desired_sites, list) or not isinstance(live_sites, list):
+        return False
+    changed = False
+    desired_by_name: dict[str, dict[str, object]] = {}
+    for site in desired_sites:
+        if isinstance(site, dict) and isinstance(site.get("name"), str):
+            desired_by_name[str(site["name"])] = site
+    for live_site in live_sites:
+        if not isinstance(live_site, dict):
+            continue
+        name = live_site.get("name")
+        if not isinstance(name, str):
+            continue
+        desired = desired_by_name.get(name)
+        if desired is None:
+            continue
+        desired_gh = desired.get("github")
+        if not isinstance(desired_gh, dict):
+            continue
+        live_gh_raw = live_site.get("github")
+        live_gh: dict[str, object]
+        if isinstance(live_gh_raw, dict):
+            live_gh = live_gh_raw
+        else:
+            live_gh = {}
+            live_site["github"] = live_gh
+        for key in ("repo", "branch", "deploy_on_push"):
+            if key not in desired_gh:
+                continue
+            if live_gh.get(key) != desired_gh[key]:
+                live_gh[key] = desired_gh[key]
+                changed = True
+    return changed
+
+
 def cmd_create(client, spec_path: Path) -> int:
     spec = _load_spec(spec_path)
     name = spec["name"]
     apps = _iter_apps(client)
     existing = _find_app(apps, name)
     if existing:
-        print(f"App already exists: {name} ({existing['id']}) — use deploy/update instead.")
+        app_id = existing["id"]
+        detail = client.apps.get(id=app_id)
+        app_body = detail.get("app") if isinstance(detail, dict) else None
+        if not isinstance(app_body, dict):
+            app_body = existing
+        live_spec_raw = app_body.get("spec") or {}
+        if not isinstance(live_spec_raw, dict):
+            raise SystemExit(f"Live app {name!r} has invalid spec")
+        live_spec = cast("dict[str, object]", live_spec_raw)
+        if sync_static_site_github_from_yaml(live_spec, cast("dict[str, object]", spec)):
+            _ = client.apps.update(id=app_id, body={"spec": live_spec})
+            print(f"Updated github source for existing app: {name} ({app_id})")
+        else:
+            print(f"App already exists: {name} ({app_id}) — github source unchanged.")
         return 0
     resp = client.apps.create(body={"spec": spec})
     app = resp.get("app") or {}
