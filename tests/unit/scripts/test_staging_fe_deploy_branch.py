@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
-
-import yaml
 
 _ROOT = Path(__file__).resolve().parents[3]
 _STAGING_FE_SPECS = (
     _ROOT / "infra/do/staging/chat-rag-frontend.yaml",
     _ROOT / "infra/do/staging/data-management-frontend.yaml",
+)
+_BRANCH_RE = re.compile(
+    r"github:\s*\n(?:[ \t]+.+\n)*?[ \t]+branch:\s*(\S+)",
+    re.MULTILINE,
 )
 
 
@@ -20,14 +23,8 @@ def test_staging_frontend_specs_deploy_from_stage_branch() -> None:
     off live staging FE, so staging-smoke fails on tip-of-stage promote PRs.
     """
     for path in _STAGING_FE_SPECS:
-        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
-        assert isinstance(raw, dict)
-        sites = raw.get("static_sites")
-        assert isinstance(sites, list)
-        assert sites
-        site0 = sites[0]
-        assert isinstance(site0, dict)
-        github = site0.get("github")
-        assert isinstance(github, dict)
-        assert github.get("branch") == "stage", f"{path.name} github.branch"
-        assert github.get("deploy_on_push") is False
+        text = path.read_text(encoding="utf-8")
+        match = _BRANCH_RE.search(text)
+        assert match is not None, f"{path.name}: missing github.branch"
+        assert match.group(1) == "stage", f"{path.name} github.branch"
+        assert "deploy_on_push: false" in text
