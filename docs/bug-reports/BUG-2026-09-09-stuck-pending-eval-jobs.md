@@ -2,7 +2,7 @@
 
 [Corpus: staging] [Corpus: tests]  
 **Found by:** EV-staging-adversarial-plunge (2026-09-09)  
-**Status:** fixed (code) — staging orphans still need operator cleanup after deploy  
+**Status:** fixed — staging orphan pending evals soft-deleted 2026-09-09 via write API  
 **Session:** HF-2026-09-09-staging-plunge-findings
 
 ## Error description
@@ -61,8 +61,8 @@ Also: `tests/unit/modal/test_dm_job_spawn.py`.
 - `fail_eval_run_dispatch` on enqueue failure
 - `process_dm_job` Modal function + `job_spawner` sets `modal_call_id` (fail closed)
 
-**Ops follow-up after deploy:** mark or soft-delete the existing 16 staging pending
-`eval_runs` (AskQuestion before live prod).
+**Ops follow-up:** Staging orphan pending `eval_runs` soft-deleted 2026-09-09 (write API).
+Redeploy Modal DM so `process_dm_job.spawn` is live on staging.
 
 ## Interview record
 

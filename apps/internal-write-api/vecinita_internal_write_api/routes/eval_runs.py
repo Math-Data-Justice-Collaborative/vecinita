@@ -83,6 +83,11 @@ def register_eval_run_routes(  # noqa: PLR0913, PLR0915 — route factory wires 
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
         if retag_jobs is None:
+            fail_eval_run_dispatch(
+                engine,
+                run_id=created.response.run_id,
+                error_message="Eval job client not configured",
+            )
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Eval job client not configured",
