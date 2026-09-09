@@ -6,7 +6,7 @@
  * [Spec: docs/test-plan.md §TC-260 §TC-261 §TC-262 §TC-265]
  * [Spec: docs/acceptance-criteria.md §AC-FT2 §AC-FT3 §AC-FT4 §AC-FT9]
  */
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -182,8 +182,26 @@ describe("UJ-082 Fine-tune UI (T129.9)", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
+  });
+
+  it("shows slow-load retry after timeout and reloads (UX-3)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const fetchMock = vi.fn().mockReturnValue(new Promise(() => {}));
+    vi.stubGlobal("fetch", fetchMock);
+    renderFinetune();
+    expect(screen.getByTestId("page-loading")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByTestId("page-loading-retry")).toBeInTheDocument();
+
+    const callsBefore = fetchMock.mock.calls.length;
+    fireEvent.click(screen.getByTestId("page-loading-retry"));
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBefore);
   });
 
   it("shows prod pin as base and lists pending train jobs (TC-262)", async () => {

@@ -20,6 +20,7 @@ const enStrings = {
   "shared.envBanner.staging":
     "Staging environment — not production. Corpus and jobs here are for testing.",
   "shared.envBanner.local": "Local development — not staging or production.",
+  "shared.envBanner.regionLabel": "Deployment environment",
   "shared.pageLoading.slow":
     "This is taking longer than usual. You can keep waiting or retry.",
   "shared.pageLoading.retry": "Retry",
@@ -775,8 +776,8 @@ const esStrings = {
   "shared.tooltip.languageToggle": "Cambiar idioma de la interfaz",
   "shared.envBanner.staging":
     "Entorno de staging — no es producción. El corpus y los trabajos aquí son de prueba.",
-  "shared.envBanner.local":
-    "Desarrollo local — no es staging ni producción.",
+  "shared.envBanner.local": "Desarrollo local — no es staging ni producción.",
+  "shared.envBanner.regionLabel": "Entorno de despliegue",
   "shared.pageLoading.slow":
     "Esto está tardando más de lo habitual. Puedes seguir esperando o reintentar.",
   "shared.pageLoading.retry": "Reintentar",

@@ -29,6 +29,8 @@ test.describe("UJ-070 energy estimate", () => {
 
     await expect(page.getByTestId("energy-estimate")).toBeVisible();
     await expect(page.getByTestId("energy-chip")).toContainText(/Wh/i);
+    await expect(page.getByTestId("energy-car-line")).toHaveCount(0);
+    await page.getByTestId("energy-details-toggle").click();
     await expect(page.getByTestId("energy-car-line")).toContainText(/mi/);
     await expect(page.getByTestId("energy-advisory")).toContainText(
       /approximate/i,

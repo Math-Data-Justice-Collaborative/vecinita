@@ -20,9 +20,24 @@ describe("EnvironmentBanner (UX-1 / F83)", () => {
     expect(banner).toHaveTextContent(/staging/i);
   });
 
+  it("renders local banner for localhost", () => {
+    renderWithProviders(<EnvironmentBanner hostname="localhost" />);
+    expect(screen.getByTestId("environment-banner")).toHaveAttribute(
+      "data-env",
+      "local",
+    );
+  });
+
   it("hides banner on production hostnames", () => {
     renderWithProviders(
       <EnvironmentBanner hostname="vecinita-admin-fe.ondigitalocean.app" />,
+    );
+    expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
+  });
+
+  it("honors explicit deployEnvVar over hostname", () => {
+    renderWithProviders(
+      <EnvironmentBanner hostname="localhost" deployEnvVar="production" />,
     );
     expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
   });

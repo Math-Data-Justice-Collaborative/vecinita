@@ -90,21 +90,29 @@ describe("EnergyEstimatePanel (TC-220, TC-231 / F65 / UX-2)", () => {
     expect(screen.getByTestId("energy-car-line")).toHaveTextContent(/mi/);
   });
 
-  it("formats mid-range meters and sub-mile car distance", () => {
+  it("collapses details again after expand", () => {
+    renderWithLocale(<EnergyEstimatePanel estimate={SAMPLE} locale="en" />);
+    expandDetails();
+    expect(screen.getByTestId("energy-details")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("energy-details-toggle"));
+    expect(screen.queryByTestId("energy-details")).not.toBeInTheDocument();
+  });
+
+  it("formats sub-centi Wh and kilometer-scale miles edge", () => {
     renderWithLocale(
       <EnergyEstimatePanel
         estimate={{
           ...SAMPLE,
-          wh: 0.05,
-          g_co2e: 0.02,
-          car_km_equiv: 0.05,
-          car_m_equiv: 50,
+          wh: 0.004,
+          g_co2e: 0.004,
+          car_km_equiv: 2.5,
+          car_m_equiv: 2500,
         }}
         locale="en"
       />,
     );
-    expect(screen.getByTestId("energy-chip")).toHaveTextContent("0.05 Wh");
+    expect(screen.getByTestId("energy-chip")).toHaveTextContent("0.0040 Wh");
     expandDetails();
-    expect(screen.getByTestId("energy-car-line")).toHaveTextContent("50.0 m");
+    expect(screen.getByTestId("energy-car-line")).toHaveTextContent("2500 m");
   });
 });

@@ -11,6 +11,7 @@ describe("resolveDeployEnv (F83 / EV-staging-adversarial-ux)", () => {
       "production",
     );
     expect(resolveDeployEnv("staging.example.com", "local")).toBe("local");
+    expect(resolveDeployEnv("x", "STAGING")).toBe("staging");
   });
 
   it("detects staging from hostname when env unset", () => {
@@ -31,11 +32,13 @@ describe("resolveDeployEnv (F83 / EV-staging-adversarial-ux)", () => {
   it("detects local hostnames", () => {
     expect(resolveDeployEnv("localhost", undefined)).toBe("local");
     expect(resolveDeployEnv("127.0.0.1", "")).toBe("local");
+    expect(resolveDeployEnv("admin.local", "")).toBe("local");
   });
 
-  it("treats non-staging DigitalOcean hosts as production", () => {
+  it("treats non-staging hosts as production; empty host unknown", () => {
     expect(resolveDeployEnv("vecinita-chat-fe.ondigitalocean.app", "")).toBe(
       "production",
     );
+    expect(resolveDeployEnv("", undefined)).toBe("unknown");
   });
 });

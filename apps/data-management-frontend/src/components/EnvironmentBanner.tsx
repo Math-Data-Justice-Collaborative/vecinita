@@ -18,7 +18,7 @@ export function EnvironmentBanner({
 }: EnvironmentBannerProps = {}) {
   const { locale } = useLocale();
   const env = resolveDeployEnv(
-    hostname ?? (typeof window !== "undefined" ? window.location.hostname : ""),
+    hostname ?? window.location.hostname,
     deployEnvVar !== undefined
       ? deployEnvVar
       : (import.meta.env["VITE_VECINITA_DEPLOY_ENV"] as string | undefined),
@@ -35,7 +35,8 @@ export function EnvironmentBanner({
 
   return (
     <div
-      role="status"
+      role="region"
+      aria-label={t(locale, "shared.envBanner.regionLabel")}
       data-testid="environment-banner"
       data-env={env}
       className="border-b border-amber-500/40 bg-amber-500/15 px-4 py-2 text-center text-sm font-medium text-amber-950 dark:text-amber-100"

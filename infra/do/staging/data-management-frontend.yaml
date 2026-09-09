@@ -33,3 +33,6 @@ static_sites:
       - key: VITE_SUPABASE_PUBLISHABLE_KEY
         scope: BUILD_TIME
         type: SECRET
+      - key: VITE_VECINITA_DEPLOY_ENV
+        scope: BUILD_TIME
+        value: staging

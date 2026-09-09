@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -84,7 +84,37 @@ const MOCK_JOBS = {
 describe("JobsPage", () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it("shows slow-load retry after timeout and reloads (UX-3)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+      if (url.includes("/jobs/events")) {
+        return new Promise(() => undefined);
+      }
+      return new Promise(() => undefined);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderJobsPage();
+    expect(screen.getByTestId("page-loading")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByTestId("page-loading-retry")).toBeInTheDocument();
+
+    const callsBefore = fetchMock.mock.calls.length;
+    fireEvent.click(screen.getByTestId("page-loading-retry"));
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBefore);
   });
 
   it("renders eval job type and navigates to job detail on row click (TC-124 / UJ-050)", async () => {

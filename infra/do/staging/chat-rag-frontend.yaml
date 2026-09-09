@@ -17,3 +17,6 @@ static_sites:
       - key: VITE_VECINITA_CHAT_API_URL
         scope: BUILD_TIME
         type: SECRET
+      - key: VITE_VECINITA_DEPLOY_ENV
+        scope: BUILD_TIME
+        value: staging

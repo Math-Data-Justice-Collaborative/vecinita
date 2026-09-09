@@ -1,5 +1,5 @@
-import { cleanup, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders } from "@/test/renderWithProviders";
 
@@ -19,9 +19,16 @@ describe("PageLoadingState (UX-3)", () => {
   });
 
   it("shows slow-load message and retry when timedOut", () => {
-    const onRetry = () => undefined;
+    const onRetry = vi.fn();
     renderWithProviders(<PageLoadingState timedOut onRetry={onRetry} />);
     expect(screen.getByTestId("page-loading-slow")).toBeInTheDocument();
-    expect(screen.getByTestId("page-loading-retry")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("page-loading-retry"));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows slow-load copy without retry button when onRetry omitted", () => {
+    renderWithProviders(<PageLoadingState timedOut />);
+    expect(screen.getByTestId("page-loading-slow")).toBeInTheDocument();
+    expect(screen.queryByTestId("page-loading-retry")).not.toBeInTheDocument();
   });
 });

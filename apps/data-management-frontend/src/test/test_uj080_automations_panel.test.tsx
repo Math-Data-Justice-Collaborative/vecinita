@@ -5,7 +5,7 @@
  * [Spec: docs/test-plan.md §TC-252, TC-255]
  * [Spec: docs/acceptance-criteria.md §AC-AU1, AC-AU5]
  */
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -85,6 +85,7 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
   });
@@ -93,7 +94,24 @@ describe("UJ-080 Automations panel (F75 / TC-252 / TC-255)", () => {
     vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
     renderAutomations();
     expect(screen.getByTestId("automations-admin-page")).toBeInTheDocument();
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByTestId("page-loading")).toBeInTheDocument();
+  });
+
+  it("shows slow-load retry after timeout and reloads (UX-3)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const fetchMock = vi.fn().mockReturnValue(new Promise(() => {}));
+    vi.stubGlobal("fetch", fetchMock);
+    renderAutomations();
+    expect(screen.getByTestId("page-loading")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByTestId("page-loading-retry")).toBeInTheDocument();
+
+    const callsBefore = fetchMock.mock.calls.length;
+    fireEvent.click(screen.getByTestId("page-loading-retry"));
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBefore);
   });
 
   it("renders enable toggle, kill-switch state, and run history (AC-AU1 / AC-AU5)", async () => {

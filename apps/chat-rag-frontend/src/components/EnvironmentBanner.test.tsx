@@ -21,4 +21,33 @@ describe("EnvironmentBanner chat (UX-1)", () => {
       "staging",
     );
   });
+
+  it("shows local banner for localhost", () => {
+    renderWithLocale(<EnvironmentBanner locale="en" hostname="localhost" />);
+    expect(screen.getByTestId("environment-banner")).toHaveAttribute(
+      "data-env",
+      "local",
+    );
+  });
+
+  it("hides banner on production hostnames", () => {
+    renderWithLocale(
+      <EnvironmentBanner
+        locale="en"
+        hostname="vecinita-chat-fe.ondigitalocean.app"
+      />,
+    );
+    expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
+  });
+
+  it("honors explicit deployEnvVar over hostname", () => {
+    renderWithLocale(
+      <EnvironmentBanner
+        locale="en"
+        hostname="localhost"
+        deployEnvVar="production"
+      />,
+    );
+    expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
+  });
 });

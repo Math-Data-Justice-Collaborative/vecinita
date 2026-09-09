@@ -16,7 +16,7 @@ export function EnvironmentBanner({
   deployEnvVar,
 }: EnvironmentBannerProps) {
   const env = resolveDeployEnv(
-    hostname ?? (typeof window !== "undefined" ? window.location.hostname : ""),
+    hostname ?? window.location.hostname,
     deployEnvVar !== undefined
       ? deployEnvVar
       : (import.meta.env["VITE_VECINITA_DEPLOY_ENV"] as string | undefined),
@@ -33,7 +33,8 @@ export function EnvironmentBanner({
 
   return (
     <div
-      role="status"
+      role="region"
+      aria-label={t(locale, "shared.envBanner.regionLabel")}
       data-testid="environment-banner"
       data-env={env}
       className="environment-banner"

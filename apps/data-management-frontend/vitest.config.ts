@@ -4,7 +4,10 @@ import { filterExpectedVitestConsoleLog } from "../../packages/frontend-ui/src/t
 import { defineConfig } from "vitest/config";
 
 /** Node ≥25 ships a stub Web Storage that blocks jsdom's localStorage (vitest#8757). */
-const nodeMajor = Number.parseInt(process.versions.node.split(".")[0] ?? "0", 10);
+const nodeMajor = Number.parseInt(
+  process.versions.node.split(".")[0] ?? "0",
+  10,
+);
 const disableNodeWebstorage = nodeMajor >= 25;
 
 export default defineConfig({
