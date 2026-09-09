@@ -119,7 +119,13 @@ class AnswerCache:
         self.corpus_version = corpus_version
 
     def store_answer(self, query: str, locale: str, answer: CachedAnswer) -> None:
-        """Store or refresh an answer (and embedding) under the content-hash key."""
+        """Store or refresh an answer (and embedding) under the content-hash key.
+
+        Empty-source answers (no-context refusals) are **not** stored so a transient
+        retrieval miss cannot poison exact/semantic cache (BUG-2026-09-09).
+        """
+        if not answer.sources:
+            return
         key = content_hash(query, locale)
         now = self.now_fn()
         existing = self._entries.get(key)
@@ -138,14 +144,21 @@ class AnswerCache:
         locale: str,
         chunks: Sequence[RetrievedChunk],
     ) -> None:
-        """Store retrieve-result chunks under the content-hash key."""
+        """Store retrieve-result chunks under the content-hash key.
+
+        Empty chunk lists are **not** stored so an empty RETRIEVE hit cannot skip
+        a later successful corpus lookup (BUG-2026-09-09).
+        """
+        chunk_tuple = tuple(chunks)
+        if not chunk_tuple:
+            return
         key = content_hash(query, locale)
         now = self.now_fn()
         existing = self._entries.get(key)
         answer = existing.answer if existing is not None else None
         self._entries[key] = _CacheEntry(
             answer=answer,
-            chunks=tuple(chunks),
+            chunks=chunk_tuple,
             expires_at=now + float(self.ttl_s),
         )
         self._entries.move_to_end(key)

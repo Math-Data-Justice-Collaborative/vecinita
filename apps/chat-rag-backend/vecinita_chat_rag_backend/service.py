@@ -617,14 +617,8 @@ class ChatRagService:
             cache.store_retrieve(request.question, language, chunks)
 
         if not chunks:
+            # Do not exact-cache empty refusals (BUG-2026-09-09 / store_answer no-op).
             message = no_context_message(language)
-            empty = CachedAnswer(
-                answer=message,
-                language=language,
-                sources=(),
-                query_embedding=tuple(query_embedding) if query_embedding is not None else None,
-            )
-            cache.store_answer(request.question, language, empty)
             return AskStreamSession(
                 sources=[],
                 cache_hit=cache_hit,
