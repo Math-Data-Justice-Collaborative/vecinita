@@ -123,6 +123,16 @@ def test_sync_staging_uses_staging_runtime_inputs() -> None:
     assert "config push --project-ref" in staging_section
 
 
+def test_sync_staging_pushes_migrations_via_resolved_branch_db_url() -> None:
+    """Staging sync should use the branch DB URL instead of linked-project autodiscovery."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert 'db_url="$(jq -r \'.POSTGRES_URL // empty\' <<<"$branch_json")"' in staging_section
+    assert 'supabase db push --db-url "$db_url" --yes' in staging_section
+
+
 def test_sync_staging_uses_temp_project_root_for_cli_and_migrations() -> None:
     """Staging sync should return the temp project root, not the nested supabase dir."""
     script = CI_SYNC.read_text(encoding="utf-8")

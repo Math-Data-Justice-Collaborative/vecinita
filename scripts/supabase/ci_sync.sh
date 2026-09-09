@@ -253,6 +253,7 @@ sync_staging() {
   local branch_name="${SUPABASE_STAGING_BRANCH_NAME:-staging}"
   local admin_origin="${VECINITA_ADMIN_FRONTEND_URL%/}"
   local branch_json
+  local db_url
   local project_ref
   local branch_url
   local staging_root
@@ -260,9 +261,10 @@ sync_staging() {
 
   ensure_staging_branch "$branch_name"
   branch_json="$(wait_for_preview_branch "$branch_name")"
+  db_url="$(jq -r '.POSTGRES_URL // empty' <<<"$branch_json")"
   branch_url="$(jq -r '.SUPABASE_URL // empty' <<<"$branch_json")"
   project_ref="$(branch_project_ref_from_url "$branch_url")"
-  if [[ -z "$project_ref" || -z "$branch_url" ]]; then
+  if [[ -z "$project_ref" || -z "$branch_url" || -z "$db_url" ]]; then
     echo "ERROR: could not resolve staging branch connection details for ${branch_name}" >&2
     exit 1
   fi
@@ -278,7 +280,7 @@ sync_staging() {
   supabase config push --project-ref "$PROJECT_REF" --yes
   if compgen -G "supabase/migrations/*.sql" > /dev/null; then
     echo "==> Applying SQL migrations to staging branch ${branch_name}"
-    supabase db push --yes
+    supabase db push --db-url "$db_url" --yes
   else
     echo "No supabase/migrations/*.sql — skipping db push"
   fi
