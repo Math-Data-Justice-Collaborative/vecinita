@@ -56,6 +56,16 @@ describe("BetaFeatureNotice (TC-338)", () => {
     );
     expect(screen.queryByTestId("beta-feature-banner")).not.toBeInTheDocument();
   });
+
+  it("renders playground banner for model-download reuse (AC-BETA1)", () => {
+    renderWithProviders(<BetaFeatureNotice feature="playground" />);
+    expect(
+      screen.getByTestId("beta-feature-banner-playground"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("beta-feature-feedback-link-playground"),
+    ).toHaveAttribute("href", BETA_FEEDBACK_ISSUE_URL);
+  });
 });
 
 describe("Fine-tune Beta chrome (TC-338)", () => {

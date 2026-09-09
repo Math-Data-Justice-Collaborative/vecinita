@@ -1393,6 +1393,9 @@ describe("EvaluationPlayground model download (UJ-048)", () => {
       ).toBeInTheDocument();
     });
 
+    expect(
+      screen.getByTestId("beta-feature-banner-playground"),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("evaluation-models-download")).toHaveTextContent(
       /Playground model download/i,
     );
