@@ -127,7 +127,8 @@ def _adhoc_golden_row(question: str) -> GoldenRow:
     )
 
 
-def _abstain_answer_ok(answer: str) -> bool:
+def abstain_answer_ok(answer: str) -> bool:
+    """True when answer is an abstain / empty-retrieval style reply (no fabricated facts)."""
     lowered = answer.lower()
     no_info_markers = (
         "not available",
@@ -138,6 +139,10 @@ def _abstain_answer_ok(answer: str) -> bool:
         "can't find",
         "no relevant",
         "not in the corpus",
+        "no matching sources",
+        "no matching source",
+        "fuentes coincidentes",
+        "no se encontraron fuentes",
         "no tengo",
         "no disponible",
         "no encuentro",
@@ -146,6 +151,10 @@ def _abstain_answer_ok(answer: str) -> bool:
     if any(marker in lowered for marker in phone_markers):
         return False
     return any(marker in lowered for marker in no_info_markers)
+
+
+# Backward-compatible alias for in-module historical name.
+_abstain_answer_ok = abstain_answer_ok
 
 
 def _evaluate_rows(  # noqa: PLR0913, C901, PLR0912
