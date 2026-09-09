@@ -772,6 +772,7 @@ class EvalRunListItem(BaseModel):
 
     run_id: UUID
     status: EvalRunStatus
+    created_at: datetime
     started_at: datetime | None = None
     completed_at: datetime | None = None
     metrics_summary: EvalMetricsSummary

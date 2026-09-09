@@ -409,6 +409,7 @@ def test_list_jobs_includes_eval_runs_from_internal_write_api() -> None:
                     EvalRunListItem(
                         run_id=eval_run_id,
                         status="running",
+                        created_at=datetime(2026, 7, 2, 11, 59, tzinfo=UTC),
                         started_at=datetime(2026, 7, 2, 12, 0, tzinfo=UTC),
                         metrics_summary=EvalMetricsSummary(),
                     )
