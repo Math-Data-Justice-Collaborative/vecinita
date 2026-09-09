@@ -199,13 +199,18 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ] || [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging \
+            # --frontend exports admin FE URL used by H4/H5 smokes (Bugbot on #372).
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend \
               | tee /tmp/staging-urls.env
             # shellcheck disable=SC1091
             set -a && source /tmp/staging-urls.env && set +a
           fi
           if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ]; then
             echo "::error::VECINITA_STAGING_CHAT_URL unset — staging apps missing?" >&2
+            exit 1
+          fi
+          if [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
+            echo "::error::VECINITA_STAGING_ADMIN_FRONTEND_URL unset — staging admin FE missing?" >&2
             exit 1
           fi
           echo "VECINITA_STAGING_CHAT_URL=${VECINITA_STAGING_CHAT_URL}" >> "$GITHUB_ENV"
