@@ -156,6 +156,9 @@ Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` and `SUPABASE_ACCE
 **DigitalOcean CD on `main`:** `.github/workflows/deploy-digitalocean.yml` deploys the four
 DO apps after **Deploy Modal** succeeds on `main` (EV-007 order: Supabase → Modal → DO).
 `deploy_on_push` is **disabled** in `infra/do/*.yaml` so deploys are CI-gated. Requires repo
+GitHub access for the DO apps. **Staging static frontends** (`infra/do/staging/*-frontend.yaml`)
+build from branch **`stage`** (not `main`) so promote-PR Deploy Staging / `staging-smoke` exercise
+tip-of-stage FE bundles (EnvironmentBanner, Beta chrome, etc.).
 secret `DIGITALOCEAN_TOKEN`.
 
 **Release on `main`:** `.github/workflows/release.yml` runs after **Deploy DigitalOcean**
