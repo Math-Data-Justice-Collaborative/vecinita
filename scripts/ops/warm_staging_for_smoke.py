@@ -19,8 +19,8 @@ Examples::
     uv run python scripts/ops/warm_staging_for_smoke.py
     bash scripts/deploy/staging_smoke.sh
 
-Env defaults: ``VECINITA_MODAL_EMBED_URL`` / ``VECINITA_STAGING_MODAL_EMBED_URL``,
-``VECINITA_MODAL_LLM_URL`` / ``VECINITA_STAGING_MODAL_LLM_URL``,
+Env defaults: ``VECINITA_STAGING_MODAL_EMBED_URL`` / ``VECINITA_MODAL_EMBED_URL``
+(staging-named first), ``VECINITA_STAGING_MODAL_LLM_URL`` / ``VECINITA_MODAL_LLM_URL``,
 ``VECINITA_MODAL_PROXY_KEY``.
 """
 
@@ -129,18 +129,32 @@ def run_warm(
     return 0
 
 
+def default_modal_url(*, staging_env: str, generic_env: str) -> str:
+    """Prefer staging-named Modal URLs for this staging warm helper.
+
+    ``VECINITA_STAGING_MODAL_*`` wins over ``VECINITA_MODAL_*`` so a dual-populated
+    developer ``.env`` cannot silently warm prod (BUG-2026-09-09-warm-staging-url-precedence).
+    Explicit ``--embed-url`` / ``--llm-url`` still override.
+    """
+    return (os.environ.get(staging_env, "") or os.environ.get(generic_env, "")).strip()
+
+
 def main(argv: list[str] | None = None) -> int:
     """CLI entry for CI and operators."""
     parser = argparse.ArgumentParser(description=__doc__)
     _ = parser.add_argument(
         "--embed-url",
-        default=os.environ.get("VECINITA_MODAL_EMBED_URL", "")
-        or os.environ.get("VECINITA_STAGING_MODAL_EMBED_URL", ""),
+        default=default_modal_url(
+            staging_env="VECINITA_STAGING_MODAL_EMBED_URL",
+            generic_env="VECINITA_MODAL_EMBED_URL",
+        ),
     )
     _ = parser.add_argument(
         "--llm-url",
-        default=os.environ.get("VECINITA_MODAL_LLM_URL", "")
-        or os.environ.get("VECINITA_STAGING_MODAL_LLM_URL", ""),
+        default=default_modal_url(
+            staging_env="VECINITA_STAGING_MODAL_LLM_URL",
+            generic_env="VECINITA_MODAL_LLM_URL",
+        ),
     )
     _ = parser.add_argument(
         "--proxy-key",

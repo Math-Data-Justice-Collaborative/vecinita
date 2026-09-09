@@ -150,6 +150,26 @@ def soft_delete_eval_run(engine: Engine, *, run_id: UUID) -> bool:
     return int(result.rowcount or 0) > 0
 
 
+def fail_eval_run_dispatch(engine: Engine, *, run_id: UUID, error_message: str) -> None:
+    """Mark a pending eval run failed when Modal enqueue/spawn fails (no orphan pending).
+
+    [Spec: docs/bug-reports/BUG-2026-09-09-stuck-pending-eval-jobs.md]
+    """
+    with engine.begin() as conn:
+        _ = conn.execute(
+            text(
+                """
+                UPDATE eval_runs
+                SET status = 'failed',
+                    completed_at = now(),
+                    error_message = :error
+                WHERE id = :id AND status = 'pending' AND deleted_at IS NULL
+                """
+            ),
+            {"id": run_id, "error": error_message[:500]},
+        )
+
+
 def list_eval_runs(
     engine: Engine,
     *,
@@ -168,7 +188,8 @@ def list_eval_runs(
             conn.execute(
                 text(
                     """
-                    SELECT id, status, started_at, completed_at, metrics_summary, error_message
+                    SELECT id, status, created_at, started_at, completed_at,
+                           metrics_summary, error_message
                     FROM eval_runs
                     WHERE deleted_at IS NULL
                     ORDER BY created_at DESC
@@ -185,6 +206,8 @@ def list_eval_runs(
             EvalRunListItem(
                 run_id=row_uuid(mapping_row(row), "id"),
                 status=eval_run_status(row_str(mapping_row(row), "status")),
+                created_at=optional_datetime(mapping_row(row).get("created_at"))
+                or datetime.now(UTC),
                 started_at=optional_datetime(mapping_row(row).get("started_at")),
                 completed_at=optional_datetime(mapping_row(row).get("completed_at")),
                 metrics_summary=summary_from_json(mapping_row(row).get("metrics_summary")),

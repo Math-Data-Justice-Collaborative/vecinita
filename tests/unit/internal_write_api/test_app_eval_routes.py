@@ -134,12 +134,17 @@ def test_create_eval_run_enqueues_modal_eval_job(internal_api_env: None) -> None
 
 def test_create_eval_run_returns_503_when_jobs_client_missing(
     internal_api_env: None,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """POST /eval/runs fails closed when Modal jobs client is not configured (TP-S013-06)."""
+    """POST /eval/runs fails closed when Modal jobs client is not configured (TP-S013-06).
+
+    Also marks the inserted pending run failed (BUG-2026-09-09 orphan path).
+    """
     _ = internal_api_env
     from vecinita_internal_write_api.app import create_app  # noqa: PLC0415
 
     run_id = uuid4()
+    marked: list[tuple[UUID, str]] = []
 
     def _fake_create(
         _engine: object,
@@ -160,11 +165,27 @@ def test_create_eval_run_returns_503_when_jobs_client_missing(
             config_snapshot=EvalConfig(),
         )
 
+    def _fake_fail(_engine: object, *, run_id: UUID, error_message: str) -> None:
+        marked.append((run_id, error_message))
+
+    # create_app(jobs_client=None) falls back to env default — force unset for 503 path.
+    monkeypatch.setattr(
+        "vecinita_internal_write_api.app._default_jobs_client",
+        lambda: None,
+    )
+
     client = TestClient(
         create_app(eval_embed_fn=eval_embed_fn, eval_judge=MockEvalJudge(), jobs_client=None),
     )
-    with patch(
-        "vecinita_internal_write_api.routes.eval_runs.create_eval_run", side_effect=_fake_create
+    with (
+        patch(
+            "vecinita_internal_write_api.routes.eval_runs.create_eval_run",
+            side_effect=_fake_create,
+        ),
+        patch(
+            "vecinita_internal_write_api.routes.eval_runs.fail_eval_run_dispatch",
+            side_effect=_fake_fail,
+        ),
     ):
         response = client.post(
             "/internal/v1/eval/runs",
@@ -172,6 +193,7 @@ def test_create_eval_run_returns_503_when_jobs_client_missing(
             headers=auth_headers(),
         )
     assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+    assert marked == [(run_id, "Eval job client not configured")]
 
 
 def test_list_eval_runs_clamps_pagination(eval_write_client: TestClient) -> None:

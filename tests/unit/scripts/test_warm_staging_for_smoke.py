@@ -139,3 +139,69 @@ def test_run_warm_propagates_http_errors() -> None:
         pytest.raises(httpx.HTTPStatusError),
     ):
         _ = warm.run_warm(targets, timeout_s=1.0, dry_run=False, client=client)
+
+
+def test_default_modal_url_prefers_staging_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """BUG-2026-09-09: staging-named URLs win when both env families are set."""
+    monkeypatch.setenv(
+        "VECINITA_MODAL_EMBED_URL",
+        "https://vecinita--vecinita-embedding-embedding-api.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_STAGING_MODAL_EMBED_URL",
+        "https://vecinita-staging--vecinita-embedding-embedding-api.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_MODAL_LLM_URL",
+        "https://vecinita--vecinita-llm-fastapi-app.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_STAGING_MODAL_LLM_URL",
+        "https://vecinita-staging--vecinita-llm-fastapi-app.modal.run",
+    )
+    assert (
+        warm.default_modal_url(
+            staging_env="VECINITA_STAGING_MODAL_EMBED_URL",
+            generic_env="VECINITA_MODAL_EMBED_URL",
+        )
+        == "https://vecinita-staging--vecinita-embedding-embedding-api.modal.run"
+    )
+    assert (
+        warm.default_modal_url(
+            staging_env="VECINITA_STAGING_MODAL_LLM_URL",
+            generic_env="VECINITA_MODAL_LLM_URL",
+        )
+        == "https://vecinita-staging--vecinita-llm-fastapi-app.modal.run"
+    )
+
+
+def test_main_dry_run_uses_staging_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """CLI defaults warm staging hosts when dual env is populated."""
+    monkeypatch.setenv(
+        "VECINITA_MODAL_EMBED_URL",
+        "https://vecinita--vecinita-embedding-embedding-api.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_STAGING_MODAL_EMBED_URL",
+        "https://vecinita-staging--embed.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_MODAL_LLM_URL",
+        "https://vecinita--vecinita-llm-fastapi-app.modal.run",
+    )
+    monkeypatch.setenv(
+        "VECINITA_STAGING_MODAL_LLM_URL",
+        "https://vecinita-staging--llm.modal.run",
+    )
+    monkeypatch.setenv("VECINITA_MODAL_PROXY_KEY", "proxy-key")
+    code = warm.main(["--dry-run"])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "vecinita-staging--embed.modal.run" in out
+    assert "vecinita-staging--llm.modal.run" in out
+    assert "vecinita--vecinita-embedding" not in out
