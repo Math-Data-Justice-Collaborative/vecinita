@@ -1930,4 +1930,4 @@ Admin Beta labeling for Fine-tune + Evaluation playground; README/About; umbrell
 | EV-BETA-D7 | UI preview | Skip non-deployed preview; specify from docs + existing admin UI |
 | EV-BETA-D8 | Config | Issue URL via `VITE_BETA_FEEDBACK_ISSUE_URL` with documented default after create |
 
-**Cites:** [Corpus: feature-list.md §F86] [Corpus: docs/context/beta-feature-labeling.md] [Corpus: frontend-i18n]
+**Cites:** [Corpus: feature-list.md §F86] [Corpus: frontend-i18n] · context brief `beta-feature-labeling.md`

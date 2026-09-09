@@ -1671,7 +1671,7 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Acceptance**: AC-BETA1–AC-BETA5; UJ-099; TC-338–TC-340.
 - **Out of scope**: ChatRAG public Beta banner; Automations/Freshness/Rebuild Beta this
   cycle; changing FT/playground runtime behavior; duplicating #352 WRWC ops beta loop.
-- **Source**: EV-beta-feature-labeling; [Corpus: docs/context/beta-feature-labeling.md].
+- **Source**: EV-beta-feature-labeling; context brief `beta-feature-labeling.md`.
 
 ## Planned / Deferred (post-v1)
 
