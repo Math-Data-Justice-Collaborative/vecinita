@@ -190,6 +190,14 @@ const enStrings = {
   "admin.finetune.promoteConfirmLabel":
     "I reviewed the eval evidence and judge this adapter better than base (human promote only).",
   "admin.finetune.promote": "Promote to prod",
+  "admin.beta.badge": "Beta",
+  "admin.beta.badgeTitle": "This feature is in beta",
+  "admin.beta.heading": "Beta feature",
+  "admin.beta.description.finetune":
+    "Fine-tune train and promote are available for early use but may be incomplete or flaky (GPU cold starts). Please share feedback.",
+  "admin.beta.description.playground":
+    "Evaluation Playground and model download are available for early use but may be incomplete or flaky. Please share feedback.",
+  "admin.beta.feedbackLink": "Send feedback on GitHub",
   "admin.feedback.title": "Feedback",
   "admin.feedback.subtitle":
     "Anonymous community product feedback (no visitor email).",
@@ -951,6 +959,14 @@ const esStrings = {
   "admin.finetune.promoteConfirmLabel":
     "Revisé la evidencia de evaluación y juzgo que este adaptador es mejor que la base (promoción humana solamente).",
   "admin.finetune.promote": "Promover a producción",
+  "admin.beta.badge": "Beta",
+  "admin.beta.badgeTitle": "Esta función está en beta",
+  "admin.beta.heading": "Función en beta",
+  "admin.beta.description.finetune":
+    "El entrenamiento y la promoción de ajuste fino están disponibles para uso temprano, pero pueden ser incompletos o inestables (arranques en frío de GPU). Comparte tus comentarios.",
+  "admin.beta.description.playground":
+    "El Playground de evaluación y la descarga de modelos están disponibles para uso temprano, pero pueden ser incompletos o inestables. Comparte tus comentarios.",
+  "admin.beta.feedbackLink": "Enviar comentarios en GitHub",
   "admin.feedback.title": "Comentarios",
   "admin.feedback.subtitle":
     "Comentarios anónimos del producto (sin correo del visitante).",

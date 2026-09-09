@@ -97,6 +97,7 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-096 | Choose browser-entry prewarm trigger from bounce-cost evidence | Operator | Compare mount / dwell / focus / keystroke trigger policies | F40 delta EV-359 #359 | staging |
 | UJ-097 | Ask primary vs Clear history secondary | Community member | ChatRAG composer `.form-actions` | F1 / F11 polish EV-ux-backlog | local |
 | UJ-098 | Job status badges by semantic color | Operator | Admin Jobs list + detail | F32 polish EV-ux-backlog | local |
+| UJ-099 | See Beta label + open feedback issue | Admin operator | DM Fine-tune + Evaluation playground | F86 EV-beta-feature-labeling | local |
 
 ## Visual journey maps
 
@@ -2595,4 +2596,28 @@ Jobs list and job detail.
 **E2E tier**: local (Vitest).
 
 **Refs**: [Corpus: feature-list.md §F32] [Corpus: journeys] EV-ux-backlog-polish
+
+### UJ-099: See Beta label + open feedback issue (F86)
+
+**Actor**: Admin operator
+
+**Goal**: Recognize Fine-tune and Evaluation Playground as Beta and open the umbrella
+GitHub feedback issue without leaving the admin chrome unclear.
+
+**Steps**:
+
+1. Open Admin → Fine-tune. Confirm **Beta** badge + banner with feedback link.
+2. Open Admin → Evaluation → Playground. Confirm the same Beta chrome (and on model
+   download panel when visible).
+3. Confirm Fine-tune / Evaluation nav items show a compact Beta chip.
+4. Click the feedback link → umbrella GitHub issue opens (new tab).
+
+**Acceptance**: AC-BETA1–AC-BETA3; en/es strings present; no PII sent to GitHub from the app
+(link-only).
+
+**Automated tests**: Vitest admin Beta chrome + Finetune/Playground mounts (TC-338, TC-339).
+
+**E2E tier**: local (Vitest; optional Playwright later).
+
+**Refs**: [Corpus: feature-list.md §F86] [Corpus: journeys] EV-beta-feature-labeling
 

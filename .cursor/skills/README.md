@@ -13,6 +13,7 @@ Pack pipeline skills (orchestrators, `spec-*`, `build-*`, `support-*`) load from
 | [eval-golden-sweep](eval-golden-sweep/SKILL.md) | Eval golden set sweeps |
 | [ui-tests](ui-tests/SKILL.md) | Vecinita UI test patterns |
 | [modal-proxy-header](modal-proxy-header/SKILL.md) | Proxy auth header reference |
+| [beta-features](beta-features/SKILL.md) | Beta labeling + feedback issue (F86) |
 
 ## Shared references
 

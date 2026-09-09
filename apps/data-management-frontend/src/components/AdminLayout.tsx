@@ -36,6 +36,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BetaFeatureNotice } from "@/components/BetaFeatureNotice";
 import { EnvironmentBanner } from "@/components/EnvironmentBanner";
 import { IdleTimeoutGuard } from "@/components/IdleTimeoutGuard";
 import { useAdminT } from "@/hooks/useAdminT";
@@ -180,11 +181,25 @@ function NavItems({ onClick }: { onClick?: () => void }) {
         >
           <Icon className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1">{label}</span>
-          {to === "/evaluation" ? (
-            <ModelDownloadProgressIndicator
-              className="ml-auto shrink-0 text-xs"
-              testId="admin-nav-playground-download-in-progress"
+          {to === "/finetune" ? (
+            <BetaFeatureNotice
+              feature="finetune"
+              compact
+              data-testid="beta-nav-chip-finetune"
             />
+          ) : null}
+          {to === "/evaluation" ? (
+            <>
+              <BetaFeatureNotice
+                feature="playground"
+                compact
+                data-testid="beta-nav-chip-evaluation"
+              />
+              <ModelDownloadProgressIndicator
+                className="ml-auto shrink-0 text-xs"
+                testId="admin-nav-playground-download-in-progress"
+              />
+            </>
           ) : null}
         </NavLink>
       ))}

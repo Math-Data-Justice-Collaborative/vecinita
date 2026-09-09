@@ -37,7 +37,7 @@ Full bootstrap: **[docs/LOCAL_DEV.md](docs/LOCAL_DEV.md)** · non-secret default
 
 Commits and PRs use short plain English subjects (optional feature/ADR cites) — see LOCAL_DEV §Commits and PRs.
 
-## Features (through corpus automations + LoRA FT)
+## Features (through corpus automations + LoRA FT + Beta labeling)
 
 | Area | Capabilities |
 |------|----------------|
@@ -48,7 +48,21 @@ Commits and PRs use short plain English subjects (optional feature/ADR cites) �
 | Fine-tune | LoRA/PEFT on pinned Qwen; human approve train; human promote to prod LLM |
 | Privacy | Zero personal data (ADR-004), no IP tracking (ADR-016) |
 
-See [docs/feature-list.md](docs/feature-list.md) for the full feature catalog (F1–F77).
+### Beta features
+
+These admin surfaces are available for early use but may be incomplete or flaky
+(e.g. GPU cold starts). They are labeled **Beta** in the admin UI.
+
+| Surface | Path | Notes |
+|---------|------|--------|
+| Fine-tune | Admin `/finetune` | LoRA train / human promote (F80) |
+| Evaluation Playground | Admin `/evaluation?tab=playground` | Sandbox eval + model download (F37/F38) |
+
+**Feedback:** open or comment on
+[issue #374 — Beta feature feedback](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/374)
+(label `beta-feedback`). Do not paste secrets or personal data.
+
+See [docs/feature-list.md](docs/feature-list.md) for the full feature catalog (F1–F86).
 
 ## Docs
 

@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_PUBLISHABLE_KEY: string;
   readonly VITE_VECINITA_IDLE_TIMEOUT_MIN?: string;
   readonly VITE_VECINITA_IDLE_WARNING_SEC?: string;
+  /** Umbrella GitHub issue for Beta feature feedback (F86). */
+  readonly VITE_BETA_FEEDBACK_ISSUE_URL?: string;
 }
 
 interface ImportMeta {

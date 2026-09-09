@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Copy, FlaskConical, Rocket, Save } from "lucide-react";
 
+import { BetaFeatureNotice } from "@/components/BetaFeatureNotice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -495,6 +496,8 @@ export function EvaluationPlaygroundTab({
           {tr("admin.evaluation.playground.subtitle")}
         </p>
       </div>
+
+      <BetaFeatureNotice feature="playground" />
 
       {error ? (
         <p role="alert" className="text-sm text-destructive">

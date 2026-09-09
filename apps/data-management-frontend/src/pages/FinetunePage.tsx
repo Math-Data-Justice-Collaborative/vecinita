@@ -21,6 +21,7 @@ import {
   type FinetuneEvalReport,
 } from "@/api/finetune";
 import type { Job } from "@/api/types";
+import { BetaFeatureNotice } from "@/components/BetaFeatureNotice";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -224,6 +225,8 @@ export function FinetunePage() {
           </Button>
         </div>
       </div>
+
+      <BetaFeatureNotice feature="finetune" />
 
       {loading && !pin ? (
         <PageLoadingState

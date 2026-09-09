@@ -86,6 +86,7 @@
 | F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule; idle cost posture + warm-before-smoke (EV-354 / #354) | EV-staging-do-supabase; EV-033; ADR-054; EV-354 |
 | F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
 | F85 | FAQ fast-path (canned answers; skip LLM) | Implemented | ChatRAG | chat-rag-backend, shared-schemas | EV-320 #320 / #79; ADR-022 Layer D |
+| F86 | Beta feature labeling + feedback link (admin) | Implemented | Data Management / Cross-cutting | data-management-frontend, frontend-i18n, README, GH About, `.cursor/rules` | EV-beta-feature-labeling #374 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -1652,6 +1653,25 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   per-user FAQ cache; always-on GPU; unprompted prod seed/scaledown (ops remain AskQuestion).
 - **Naming**: GitHub **#79** ≠ product **F79** (corpus freshness).
 - **Source**: EV-320; #320 · #79 · #311; ADR-004; ADR-022.
+
+### F86: Beta feature labeling + feedback link (admin)
+
+- **What it does**: Marks selected admin surfaces as **Beta** with clear UI chrome (badge,
+  page banner, optional nav chip) and a link to an umbrella GitHub issue for feedback.
+  Documents Beta surfaces in README + GitHub repo About. Adds Cursor rules/skills so
+  future evolve/build cycles **recommend** tagging new or flaky features as Beta and
+  pointing operators to the feedback issue.
+- **Initial Beta surfaces (this cycle)**: Fine-tune (F80 / admin `/finetune`); Evaluation
+  **Playground** tab + model download (F37/F38 / `/evaluation?tab=playground`).
+- **Inputs**: Shared Beta chrome component + i18n strings (en/es); config URL for the
+  umbrella issue (`VITE_BETA_FEEDBACK_ISSUE_URL` or build-time constant after issue create);
+  label `beta-feedback` on the umbrella issue.
+- **Outputs**: Visible Beta labeling on listed surfaces; README “Beta features” section;
+  updated GitHub description; rule + skill checklist for agents.
+- **Acceptance**: AC-BETA1–AC-BETA5; UJ-099; TC-338–TC-340.
+- **Out of scope**: ChatRAG public Beta banner; Automations/Freshness/Rebuild Beta this
+  cycle; changing FT/playground runtime behavior; duplicating #352 WRWC ops beta loop.
+- **Source**: EV-beta-feature-labeling; [Corpus: docs/context/beta-feature-labeling.md].
 
 ## Planned / Deferred (post-v1)
 
