@@ -23,8 +23,11 @@ def test_staging_frontend_specs_deploy_from_stage_branch() -> None:
         raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert isinstance(raw, dict)
         sites = raw.get("static_sites")
-        assert isinstance(sites, list) and sites
-        github = sites[0].get("github")
+        assert isinstance(sites, list)
+        assert sites
+        site0 = sites[0]
+        assert isinstance(site0, dict)
+        github = site0.get("github")
         assert isinstance(github, dict)
         assert github.get("branch") == "stage", f"{path.name} github.branch"
         assert github.get("deploy_on_push") is False
