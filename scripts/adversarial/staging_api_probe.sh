@@ -30,7 +30,17 @@ for line in Path(".env").read_text(encoding="utf-8").splitlines():
 
 chat = env["VECINITA_STAGING_CHAT_URL"].rstrip("/")
 write = env["VECINITA_STAGING_WRITE_URL"].rstrip("/")
-dm = env["VECINITA_STAGING_MODAL_DATA_MGMT_URL"].rstrip("/")
+dm = (
+    env.get("VECINITA_STAGING_ADMIN_API_URL")
+    or env.get("VECINITA_STAGING_MODAL_DATA_MGMT_URL")
+    or env.get("VECINITA_MODAL_DATA_MGMT_URL")
+    or ""
+).rstrip("/")
+if not dm:
+    raise SystemExit(
+        "Set VECINITA_STAGING_ADMIN_API_URL (or VECINITA_STAGING_MODAL_DATA_MGMT_URL / "
+        "VECINITA_MODAL_DATA_MGMT_URL) for DM dual-auth probes."
+    )
 key = env["VECINITA_INTERNAL_API_KEY"]
 proxy = env.get("VECINITA_MODAL_PROXY_KEY", "")
 supa = (
@@ -69,13 +79,13 @@ def check(name: str, code: int, expect: set[int]) -> None:
     print(f"{code:4} {name} ok={ok}")
 
 
-# OpenAPI body gate
+# OpenAPI body gate (fail closed — ok field drives exit status)
 _, oa_raw = http("GET", f"{chat}/openapi.json")
 oa = json.loads(oa_raw)
 for path in ("/api/v1/ask", "/api/v1/feedback"):
     has = "requestBody" in oa["paths"][path]["post"]
-    rows.append({"name": f"openapi{path}", "has_requestBody": has})
-    print(f"openapi {path} requestBody={has}")
+    rows.append({"name": f"openapi{path}", "has_requestBody": has, "ok": has})
+    print(f"openapi {path} requestBody={has} ok={has}")
 
 check("write_noauth", http("GET", f"{write}/internal/v1/stats/summary")[0], {401})
 check(
@@ -113,7 +123,10 @@ check(
     http("GET", f"{dm}/jobs", {"Authorization": f"Bearer {token}"})[0],
     {401},
 )
-if proxy:
+if not proxy:
+    rows.append({"name": "dm_jwt_proxy", "ok": False, "error": "VECINITA_MODAL_PROXY_KEY unset"})
+    print("dm_jwt_proxy ok=False (proxy key unset)")
+else:
     check(
         "dm_jwt_proxy",
         http(

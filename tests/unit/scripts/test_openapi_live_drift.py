@@ -25,13 +25,20 @@ def test_normalize_path_strips_servers_prefix() -> None:
     assert normalize_path("ask", "api/v1") == "/api/v1/ask"
 
 
+def test_normalize_path_extracts_path_from_template_server_url() -> None:
+    """Repo YAML uses https://{host}/api/v1 — only the path prefix must apply."""
+    assert normalize_path("/ask", "https://{host}/api/v1") == "/api/v1/ask"
+    assert normalize_path("/feedback", "https://{host}/api/v1") == "/api/v1/feedback"
+    assert normalize_path("/jobs", "https://{host}/") == "/jobs"
+
+
 def test_drift_messages_flags_missing_live_request_body() -> None:
     """When repo documents requestBody, live OpenAPI must too (TC-336 class)."""
     repo = as_json_object(
         cast(
             "object",
             {
-                "servers": [{"url": "/api/v1"}],
+                "servers": [{"url": "https://{host}/api/v1"}],
                 "paths": {
                     "/ask": {
                         "post": {

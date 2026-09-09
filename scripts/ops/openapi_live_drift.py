@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 from typing import cast
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 import yaml
@@ -35,14 +36,23 @@ _REQUIRED_SCHEMES: dict[str, frozenset[str]] = {
 
 
 def normalize_path(path: str, servers_url: str) -> str:
-    """Join relative OpenAPI path with servers.url; leave absolute paths alone."""
+    """Join relative OpenAPI path with servers.url; leave absolute paths alone.
+
+    Repo YAML often uses template bases like ``https://{host}/api/v1``; only the
+    URL path prefix is applied so keys match live FastAPI ``/api/v1/...`` paths.
+    """
     path_part = path if path.startswith("/") else f"/{path}"
-    base = servers_url.strip()
+    base_raw = servers_url.strip()
+    if not base_raw:
+        return path_part
+    if "://" in base_raw or base_raw.startswith("//"):
+        parsed = urlsplit(base_raw if "://" in base_raw else f"https:{base_raw}")
+        base = parsed.path or "/"
+    else:
+        base = base_raw if base_raw.startswith("/") else f"/{base_raw}"
+    base = base.rstrip("/") or ""
     if not base:
         return path_part
-    if not base.startswith("/"):
-        base = f"/{base}"
-    base = base.rstrip("/")
     if path_part == base or path_part.startswith(f"{base}/"):
         return path_part
     return f"{base}{path_part}"
