@@ -1,6 +1,6 @@
 # BUG-2026-09-09-empty-answer-exact-cache
 
-> Status: fix in progress (`fix/empty-answer-exact-cache`)  
+> Status: fixed (merged to `stage` via #368)  
 > Severity: high (staging ChatRAG quality)  
 > Surface: `POST /api/v1/ask` exact-answer cache  
 > Spec: [Corpus: staging] [Corpus: api] [Spec: docs/api-contract.md §POST /api/v1/ask]
