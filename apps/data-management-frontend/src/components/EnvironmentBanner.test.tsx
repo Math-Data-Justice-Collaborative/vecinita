@@ -35,10 +35,13 @@ describe("EnvironmentBanner (UX-1 / F83)", () => {
     expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
   });
 
-  it("honors explicit deployEnvVar over hostname", () => {
+  it("keeps local/staging host banners even if deployEnvVar is production", () => {
     renderWithProviders(
       <EnvironmentBanner hostname="localhost" deployEnvVar="production" />,
     );
-    expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
+    expect(screen.getByTestId("environment-banner")).toHaveAttribute(
+      "data-env",
+      "local",
+    );
   });
 });

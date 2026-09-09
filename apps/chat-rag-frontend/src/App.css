@@ -422,14 +422,25 @@ body,
 
 .environment-banner {
   flex: 0 0 auto;
+  position: sticky;
+  top: 0;
+  z-index: 40;
   width: 100%;
-  padding: 0.45rem 0.75rem;
+  padding: 0.4rem 0.75rem;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   color: #5c4500;
   background: #fff3bf;
   border-bottom: 1px solid #e8c547;
+}
+
+@media (max-width: 768px) {
+  .environment-banner {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
+  }
 }
 
 :root[data-theme="dark"] .environment-banner {

@@ -239,12 +239,17 @@ function MobileHeader({ showChrome }: { showChrome: boolean }) {
               {tr("admin.nav.mobileMenuDescription")}
             </SheetDescription>
           </SheetHeader>
-          <div className="px-3 py-4">
-            <NavItems
-              onClick={() => {
-                setOpen(false);
-              }}
-            />
+          <div className="flex h-full flex-col">
+            <div className="flex-1 overflow-auto px-3 py-4">
+              <NavItems
+                onClick={() => {
+                  setOpen(false);
+                }}
+              />
+            </div>
+            <div className="space-y-3 border-t px-3 py-3">
+              <UserMenu />
+            </div>
           </div>
         </SheetContent>
       </Sheet>

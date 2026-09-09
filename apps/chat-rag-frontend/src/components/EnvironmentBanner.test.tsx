@@ -40,7 +40,7 @@ describe("EnvironmentBanner chat (UX-1)", () => {
     expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
   });
 
-  it("honors explicit deployEnvVar over hostname", () => {
+  it("keeps local/staging host banners even if deployEnvVar is production", () => {
     renderWithLocale(
       <EnvironmentBanner
         locale="en"
@@ -48,6 +48,9 @@ describe("EnvironmentBanner chat (UX-1)", () => {
         deployEnvVar="production"
       />,
     );
-    expect(screen.queryByTestId("environment-banner")).not.toBeInTheDocument();
+    expect(screen.getByTestId("environment-banner")).toHaveAttribute(
+      "data-env",
+      "local",
+    );
   });
 });

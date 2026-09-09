@@ -17,8 +17,7 @@ const enStrings = {
   "shared.languageGroupLabel": "Language",
   "shared.tooltip.themeToggle": "Switch light/dark theme",
   "shared.tooltip.languageToggle": "Switch interface language",
-  "shared.envBanner.staging":
-    "Staging environment — not production. Corpus and jobs here are for testing.",
+  "shared.envBanner.staging": "Staging — not production. Test corpus only.",
   "shared.envBanner.local": "Local development — not staging or production.",
   "shared.envBanner.regionLabel": "Deployment environment",
   "shared.pageLoading.slow":
@@ -776,7 +775,7 @@ const esStrings = {
   "shared.tooltip.themeToggle": "Cambiar tema claro/oscuro",
   "shared.tooltip.languageToggle": "Cambiar idioma de la interfaz",
   "shared.envBanner.staging":
-    "Entorno de staging — no es producción. El corpus y los trabajos aquí son de prueba.",
+    "Staging — no es producción. Solo corpus de prueba.",
   "shared.envBanner.local": "Desarrollo local — no es staging ni producción.",
   "shared.envBanner.regionLabel": "Entorno de despliegue",
   "shared.pageLoading.slow":

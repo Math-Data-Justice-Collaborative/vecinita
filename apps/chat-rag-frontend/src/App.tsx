@@ -12,6 +12,7 @@ import { useLocale } from "./hooks/useLocale";
 import { usePathname } from "./hooks/usePathname";
 import { useTagFilters } from "./hooks/useTagFilters";
 import { useTheme } from "./hooks/useTheme";
+import { initialSidebarOpen } from "./lib/sidebarInitial";
 import { t } from "vecinita-frontend-i18n";
 import { TooltipProvider } from "vecinita-frontend-ui";
 import "./App.css";
@@ -20,7 +21,11 @@ function AppContent() {
   const { pathname, navigate } = usePathname();
   const { locale, setLocale } = useLocale();
   const { theme, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    initialSidebarOpen(
+      typeof window !== "undefined" ? window.innerWidth : 1280,
+    ),
+  );
   // Owned by the always-mounted shell so the conversation survives navigation
   // to the Corpus tab and back (BUG-2026-06-25, issue #53) and is write-through
   // to device-local `localStorage` (F33, ADR-023/024/025).
