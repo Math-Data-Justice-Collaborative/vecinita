@@ -26,6 +26,10 @@ from vecinita_shared_schemas.data_management import (
     JobTreeResponse,
 )
 from vecinita_shared_schemas.internal_write import AuditEventRequest, FeedbackListResponse
+from vecinita_shared_schemas.openapi_security import (
+    attach_openapi_security_schemes,
+    data_management_security_schemes,
+)
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
 from vecinita_data_management_backend.email_test import ResendClient
@@ -508,4 +512,5 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
         ),
     )
 
+    attach_openapi_security_schemes(app, data_management_security_schemes())
     return app

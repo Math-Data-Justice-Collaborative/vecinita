@@ -25,6 +25,7 @@ from vecinita_shared_schemas.chat_rag import (
     DocumentBrowsePage,
     EnergyEstimate,
     FeedbackCreateResponse,
+    FeedbackRequest,
     HealthResponse,
     Source,
     TagListResponse,
@@ -74,6 +75,33 @@ def _ask_request_openapi_extra() -> dict[str, object]:
                         ref_template="#/components/schemas/{model}"
                     ),
                 },
+            },
+        },
+    }
+
+
+def _feedback_request_openapi_extra() -> dict[str, object]:
+    """Publish FeedbackRequest body + 400/503 in OpenAPI (Request-only handlers).
+
+    [Corpus: api] EV-staging-api-adversarial / TC-333 / F68
+    """
+    return {
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": FeedbackRequest.model_json_schema(
+                        ref_template="#/components/schemas/{model}"
+                    ),
+                },
+            },
+        },
+        "responses": {
+            "400": {
+                "description": "Invalid JSON, identity fields, or validation error",
+            },
+            "503": {
+                "description": "Feedback write path unavailable",
             },
         },
     }
@@ -393,6 +421,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         "/api/v1/feedback",
         response_model=FeedbackCreateResponse,
         status_code=status.HTTP_201_CREATED,
+        openapi_extra=_feedback_request_openapi_extra(),
     )
     async def submit_feedback(request: Request) -> FeedbackCreateResponse:  # pyright: ignore[reportUnusedFunction]
         try:

@@ -2246,3 +2246,33 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Expected**: `POST /api/v1/ask` and stream ask schemas include `AskRequest.question`; checked-in `openapi/chat-rag.yaml` stays in sync.
 - **Refs**: [Corpus: api] · [Spec: openapi/chat-rag.yaml]
 
+### TC-333: OpenAPI FeedbackRequest body + error responses (EV-staging-api-adversarial)
+
+- **Objective**: `POST /api/v1/feedback` OpenAPI publishes `FeedbackRequest` and documents `400`/`503`.
+- **Expected**: Required `category` + `message`; `additionalProperties: false`; responses include 201/400/503.
+- **Refs**: F68 · [Corpus: api] · `tests/unit/chat_rag/test_openapi_feedback_request_body.py`
+
+### TC-334: Schemathesis ChatRAG smoke (in-process)
+
+- **Objective**: Schemathesis generation against safe ChatRAG ops does not produce 5xx.
+- **Expected**: `/health`, `/api/v1/tags`, `/api/v1/warm` pass limited Hypothesis examples without server errors.
+- **Refs**: [Corpus: tests] · `tests/unit/chat_rag/test_schemathesis_chat_rag_smoke.py`
+
+### TC-335: OpenAPI securitySchemes on write + DM
+
+- **Objective**: Runtime `/openapi.json` publishes auth schemes matching ADR-011 / repo YAML.
+- **Expected**: Write: `bearerAuth` + `internalApiKey` (HTTP bearer). DM: `bearerAuth` + `modalProxyAuth` (`X-Vecinita-Proxy-Key`).
+- **Refs**: [Corpus: api] · `packages/shared-schemas/.../openapi_security.py`
+
+### TC-336: Staging OpenAPI requestBody gate (live)
+
+- **Objective**: Staging ChatRAG OpenAPI includes requestBody for ask/stream/feedback after deploy.
+- **Expected**: `VECINITA_STAGING_CHAT_URL/openapi.json` has `requestBody` on those POSTs; fails closed until ChatRAG redeployed.
+- **Refs**: [Corpus: staging] · `tests/smoke/test_staging_openapi_request_bodies.py` · `staging-smoke` job
+
+### TC-337: OpenAPI repo↔live drift helpers
+
+- **Objective**: Normalize `servers.url` + compare requestBody / securitySchemes between repo YAML and live `/openapi.json`.
+- **Expected**: Drift messages when live lacks documented requestBody or write/DM securitySchemes; CLI exits non-zero on drift.
+- **Refs**: [Corpus: api] · `scripts/ops/openapi_live_drift.py` · `tests/unit/scripts/test_openapi_live_drift.py`
+

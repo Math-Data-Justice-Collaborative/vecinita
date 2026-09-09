@@ -153,6 +153,18 @@ test: test-py test-fe ## Full test suite: Python + frontends (fail fast)
 test-live: ## Live staging smokes (requires VECINITA_STAGING_* env vars)
 	$(UV) run pytest tests/smoke -m live -v
 
+test-contract: ## OpenAPI unit contracts (TC-333–335 + Schemathesis TC-334 + TC-337)
+	$(UV) run pytest \
+		tests/unit/chat_rag/test_openapi_feedback_request_body.py \
+		tests/unit/chat_rag/test_schemathesis_chat_rag_smoke.py \
+		tests/unit/internal_write_api/test_openapi_security_schemes.py \
+		tests/unit/data_management/test_openapi_security_schemes.py \
+		tests/unit/scripts/test_openapi_live_drift.py \
+		-q
+
+adversarial-staging: ## Env-gated staging adversarial probe (VECINITA_ALLOW_STAGING_ADVERSARIAL=1)
+	VECINITA_ALLOW_STAGING_ADVERSARIAL=1 bash scripts/adversarial/staging_api_probe.sh
+
 verify-connectivity: ## H0c + optional H4/H5 live (see infra/staging/.env.example)
 	bash scripts/deploy/verify_connectivity.sh
 
