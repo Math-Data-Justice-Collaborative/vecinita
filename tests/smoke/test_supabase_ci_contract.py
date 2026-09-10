@@ -174,6 +174,22 @@ def test_sync_production_soft_fails_unauthorized_token() -> None:
     assert "exit 0" in sync_section
 
 
+def test_supabase_workflow_db_reset_avoids_storage_health_flake() -> None:
+    """Validate job must not hard-fail on storage/v1/bucket after db reset.
+
+    Promote to main failed when ``supabase db reset`` restarted containers and
+    timed out on storage health (auth-only stack; Storage unused). Prefer
+    ``SUPABASE_DB_ONLY=true`` so migration apply stays blocking without the
+    flaky storage probe. [Corpus: staging] [Spec: docs/adr/ADR-027]
+    """
+    text = _workflow_text()
+    assert "supabase db reset" in text
+    assert "SUPABASE_DB_ONLY=true" in text
+    lint_start = text.index("Lint and apply migrations locally")
+    lint_slice = text[lint_start : lint_start + 800]
+    assert "SUPABASE_DB_ONLY=true supabase db reset --no-seed" in lint_slice
+
+
 def test_supabase_workflow_deletes_preview_branch_on_pr_close() -> None:
     """Preview branches persist during review and tear down when the PR closes."""
     text = _workflow_text()

@@ -71,7 +71,12 @@ jobs:
           set -euo pipefail
           if compgen -G "supabase/migrations/*.sql" > /dev/null; then
             supabase db lint
-            supabase db reset --no-seed
+            # Auth-only stack: full db reset restarts containers then probes
+            # /storage/v1/bucket; that health check flakes in GHA (deadline exceeded)
+            # even when migrations already applied. SUPABASE_DB_ONLY skips non-DB
+            # services so migration apply stays blocking without Storage.
+            # Evidence: Actions run 34494789300 on promote ae4533e7.
+            SUPABASE_DB_ONLY=true supabase db reset --no-seed
           else
             echo "No supabase/migrations/*.sql yet — skipping db lint/reset"
           fi
