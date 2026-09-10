@@ -1931,3 +1931,18 @@ Admin Beta labeling for Fine-tune + Evaluation playground; README/About; umbrell
 | EV-BETA-D8 | Config | Issue URL via `VITE_BETA_FEEDBACK_ISSUE_URL` with documented default after create |
 
 **Cites:** [Corpus: feature-list.md §F86] [Corpus: frontend-i18n] · context brief `beta-feature-labeling.md`
+
+
+## EV-do-apps-github-sync-services (2026-09-10)
+
+Extend `do_apps.py` GitHub source sync to App Platform `services[]` (parity with
+`static_sites[]` from PR #378). Helper-only; staging backend YAML stays on `main`.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-do-apps-D1 | Scale | micro |
+| EV-do-apps-D2 | Scope | Sync `services[].github` `{repo,branch,deploy_on_push}` on create/create-all |
+| EV-do-apps-D3 | Staging YAML | Leave staging backend `github.branch` on `main` this cycle |
+| EV-do-apps-D4 | Safety | Github keys only — preserve encrypted live envs |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Spec: docs/staging-runbook.md §DigitalOcean CD]
