@@ -162,13 +162,15 @@ jobs:
       - name: Deploy staging DO apps
         run: |
           set -euo pipefail
-          # Backends: fire-and-forget (API health comes from prior Modal sync + smoke).
-          for app in \
-            vecinita-staging-write-api \
-            vecinita-staging-chat-api; do
-            echo "==> Deploying ${app}"
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}"
-          done
+          # Write API: fire-and-forget (smoke uses ChatRAG + admin FE primarily).
+          echo "==> Deploying vecinita-staging-write-api"
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy \
+            --name vecinita-staging-write-api
+          # ChatRAG API: wait ACTIVE so OpenAPI/H3 smoke hits the tip-of-stage image
+          # (branch retarget + force_build can take minutes; fire-and-forget raced smoke).
+          echo "==> Deploying vecinita-staging-chat-api (wait ACTIVE)"
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy \
+            --name vecinita-staging-chat-api --wait --timeout-s 900
           # Frontends: wait for ACTIVE so banner/UX bundles are live before smoke
           # (BUG-2026-09-09-staging-fe-deploy-no-wait). Cap wait at 2×900s + slack.
           for app in \

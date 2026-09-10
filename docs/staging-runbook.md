@@ -92,11 +92,11 @@ feature→`stage` hop. When `stage` does not exist yet: AskQuestion to create it
 before the first integration PR (do not silently PR to `main`). Smoke on the tip SHA remains
 required for any `main` merge (ADR-054 / #212).
 
-**After promote (DO staging deploy branches):** Staging apps normally track **`main`**. If an
-app was temporarily pointed at `stage` (e.g. `vecinita-staging-write-api` for pre-promote
-smoke), flip its GitHub deploy `branch` back to **`main`** after the promote PR merges so
-staging stays aligned with production CD. Do not leave staging permanently on `stage`
-unless an AskQuestion records that exception.
+**After promote (DO staging deploy branches):** Staging apps in YAML track **`stage`** so
+promote-PR smoke exercises tip-of-stage images. After the promote PR merges, operators may
+flip staging backend (and optionally FE) GitHub deploy `branch` back to **`main`** so
+staging stays aligned with production CD. Do not leave a one-off temporary branch pin
+undocumented — record AskQuestion if staging permanently diverges from the YAML default.
 
 ## CI/CD before promote (RET-002 / ADR-050)
 
@@ -156,13 +156,15 @@ Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` and `SUPABASE_ACCE
 **DigitalOcean CD on `main`:** `.github/workflows/deploy-digitalocean.yml` deploys the four
 DO apps after **Deploy Modal** succeeds on `main` (EV-007 order: Supabase → Modal → DO).
 `deploy_on_push` is **disabled** in `infra/do/*.yaml` so deploys are CI-gated. Requires repo
-GitHub access for the DO apps. **Staging static frontends** (`infra/do/staging/*-frontend.yaml`)
+GitHub access for the DO apps. **Staging static frontends** (`infra/do/staging/*-frontend.yaml`) **and staging backends**
+(`infra/do/staging/chat-rag-backend.yaml`, `internal-write-api.yaml`)
 build from branch **`stage`** (not `main`) so promote-PR Deploy Staging / `staging-smoke` exercise
-tip-of-stage FE bundles (EnvironmentBanner, Beta chrome, etc.).
+tip-of-stage FE bundles **and** ChatRAG/write OpenAPI contracts (TC-336).
 `do_apps.py create-all --env staging` **updates** existing apps' `github.branch` /
 `repo` / `deploy_on_push` from YAML for both **`static_sites[]`** (FE) and **`services[]`**
-(backends) — force_build alone does not retarget the source branch. Staging backend YAML may
-still pin `main` until an explicit retarget; the sync path is ready when YAML changes.
+(backends) — force_build alone does not retarget the source branch.
+After the promote PR merges, operators may flip staging backend `github.branch` back to
+**`main`** so staging tracks prod CD (see “After promote” above).
 Requires repo secret `DIGITALOCEAN_TOKEN`.
 
 **Release on `main`:** `.github/workflows/release.yml` runs after **Deploy DigitalOcean**
