@@ -141,6 +141,54 @@ def cmd_list(client) -> int:
     return 0
 
 
+def sync_component_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+    *,
+    list_key: str,
+) -> bool:
+    """Copy ``{list_key}[].github`` repo/branch/deploy_on_push from YAML into live spec.
+
+    Only those three keys are written so encrypted live ``envs`` stay intact.
+    Components are matched by ``name``.
+    """
+    desired_list = yaml_spec.get(list_key)
+    live_list = live_spec.get(list_key)
+    if not isinstance(desired_list, list) or not isinstance(live_list, list):
+        return False
+    changed = False
+    desired_by_name: dict[str, dict[str, object]] = {}
+    for component in desired_list:
+        if isinstance(component, dict) and isinstance(component.get("name"), str):
+            desired_by_name[str(component["name"])] = component
+    for live_component in live_list:
+        if not isinstance(live_component, dict):
+            continue
+        name = live_component.get("name")
+        if not isinstance(name, str):
+            continue
+        desired = desired_by_name.get(name)
+        if desired is None:
+            continue
+        desired_gh = desired.get("github")
+        if not isinstance(desired_gh, dict):
+            continue
+        live_gh_raw = live_component.get("github")
+        live_gh: dict[str, object]
+        if isinstance(live_gh_raw, dict):
+            live_gh = live_gh_raw
+        else:
+            live_gh = {}
+            live_component["github"] = live_gh
+        for key in ("repo", "branch", "deploy_on_push"):
+            if key not in desired_gh:
+                continue
+            if live_gh.get(key) != desired_gh[key]:
+                live_gh[key] = desired_gh[key]
+                changed = True
+    return changed
+
+
 def sync_static_site_github_from_yaml(
     live_spec: dict[str, object],
     yaml_spec: dict[str, object],
@@ -150,41 +198,29 @@ def sync_static_site_github_from_yaml(
     ``create-all`` previously skipped existing apps, so staging FEs kept building
     from an old branch (``main``) even after YAML pointed at ``stage``.
     """
-    desired_sites = yaml_spec.get("static_sites")
-    live_sites = live_spec.get("static_sites")
-    if not isinstance(desired_sites, list) or not isinstance(live_sites, list):
-        return False
-    changed = False
-    desired_by_name: dict[str, dict[str, object]] = {}
-    for site in desired_sites:
-        if isinstance(site, dict) and isinstance(site.get("name"), str):
-            desired_by_name[str(site["name"])] = site
-    for live_site in live_sites:
-        if not isinstance(live_site, dict):
-            continue
-        name = live_site.get("name")
-        if not isinstance(name, str):
-            continue
-        desired = desired_by_name.get(name)
-        if desired is None:
-            continue
-        desired_gh = desired.get("github")
-        if not isinstance(desired_gh, dict):
-            continue
-        live_gh_raw = live_site.get("github")
-        live_gh: dict[str, object]
-        if isinstance(live_gh_raw, dict):
-            live_gh = live_gh_raw
-        else:
-            live_gh = {}
-            live_site["github"] = live_gh
-        for key in ("repo", "branch", "deploy_on_push"):
-            if key not in desired_gh:
-                continue
-            if live_gh.get(key) != desired_gh[key]:
-                live_gh[key] = desired_gh[key]
-                changed = True
-    return changed
+    return sync_component_github_from_yaml(live_spec, yaml_spec, list_key="static_sites")
+
+
+def sync_service_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+) -> bool:
+    """Copy ``services[].github`` branch/repo from YAML into the live app spec.
+
+    Same gap as static sites: existing backend apps kept an old ``github.branch``
+    after YAML changed. Sync github keys only — do not replace encrypted envs.
+    """
+    return sync_component_github_from_yaml(live_spec, yaml_spec, list_key="services")
+
+
+def sync_app_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+) -> bool:
+    """Sync github source for both ``static_sites[]`` and ``services[]`` components."""
+    sites_changed = sync_static_site_github_from_yaml(live_spec, yaml_spec)
+    services_changed = sync_service_github_from_yaml(live_spec, yaml_spec)
+    return sites_changed or services_changed
 
 
 def cmd_create(client, spec_path: Path) -> int:
@@ -202,7 +238,7 @@ def cmd_create(client, spec_path: Path) -> int:
         if not isinstance(live_spec_raw, dict):
             raise SystemExit(f"Live app {name!r} has invalid spec")
         live_spec = cast("dict[str, object]", live_spec_raw)
-        if sync_static_site_github_from_yaml(live_spec, cast("dict[str, object]", spec)):
+        if sync_app_github_from_yaml(live_spec, cast("dict[str, object]", spec)):
             _ = client.apps.update(id=app_id, body={"spec": live_spec})
             print(f"Updated github source for existing app: {name} ({app_id})")
         else:
