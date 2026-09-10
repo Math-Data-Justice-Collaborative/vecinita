@@ -10,16 +10,64 @@
 
 | Role | Resources |
 |------|-----------|
-| **staging** | DO `vecinita-staging-*` + Postgres `vecinita-staging-db` (nyc); Supabase `vecinita-staging` (`camkatfbjguwvymfgdme`); Modal workspace **`vecinita`** Environment **`staging`** |
-| **prod** | Pre-existing sole stack (legacy hostnames may still contain `staging`; corpus DB historically `vecinita-staging-restored-20260701`); Modal **`vecinita`** / **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
+| **staging** | DO project **first-project** — apps `vecinita-staging-*` + Postgres **`vecinita-staging-db`** (nyc); Droplet `vecinita-staging-obs`; Supabase canonical project `cfuvghdsuwactfeamtym` via long-lived branch `staging`; Modal Environment **`staging`** |
+| **prod** | DO project **vecinita** — apps without `vecinita-staging-` prefix; Postgres display name **`vecinita-staging-restored-20260701`** (operator alias **`vecinita-prod-db`** — DO cannot rename managed clusters; EV-323); Modal Environment **`main`**; Supabase ref `cfuvghdsuwactfeamtym` |
 
 Cite [ADR-054](adr/ADR-054-distinct-staging-and-production.md). Staging corpus = migrations + seed;
 live corpus mutate / promote still needs AskQuestion (`no-live-prod-corpus-push`).
+
+### Idle cost posture (EV-354 / #354 / AC-ST9–14)
+
+Default staging to **cheap when idle**, still effective for Stage→Main:
+
+| Lever | Default |
+|-------|---------|
+| Modal Environment `staging` embed | `VECINITA_EMBED_MIN_CONTAINERS=0` (scale-to-zero) |
+| Staging LLM / playground / FT / rerank | Deployed; scale-to-zero (not always-warm) |
+| Obs droplet `vecinita-staging-obs` | **Powered off** until Grafana/Loki drill (EV-323-D13) |
+| Promote smoke | **Warm** Modal services, then H1–H5 / `staging-smoke` (UJ-095) |
+
+Soft target: maximize safe idle savings and document delta — no hard staging-only $ cap.
+Do **not** destroy `vecinita-staging-restored-20260701` (prod DB display name — EV-323-D10).
+
+**Warm-before-smoke (operator or CI):**
+
+```bash
+# Staging Modal URLs + proxy key from secrets matrix (never commit keys)
+export MODAL_ENVIRONMENT=staging
+uv run python scripts/ops/warm_staging_for_smoke.py
+bash scripts/deploy/staging_smoke.sh
+# or: uv run pytest tests/smoke/test_staging_health.py -m live -q
+```
+
+CI: `deploy-staging.yml` `staging-smoke` runs `scripts/ops/warm_staging_for_smoke.py`
+before H1–H3 (TC-326 / UJ-095).
+
+**Staging Supabase sync (CI):** `deploy-staging.yml` now ensures the long-lived Supabase
+branch `staging` exists on the canonical project before Modal/DO redeploy via
+`bash scripts/supabase/ci_sync.sh sync-staging`. That step derives the current staging
+admin frontend origin from the DO app URLs so invite/recovery redirects stay aligned
+with the live staging host, and it requires GitHub Environment `staging` secrets
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_SMTP_PASS`, `SUPABASE_SECRET_KEY`, `SUPABASE_URL`,
+and `RESEND_SENDER_EMAIL`. `SUPABASE_URL` must match the resolved branch URL, not prod
+and not retired `camkatfbjguwvymfgdme`.
 
 **Operational status (2026-08-28):** Distinct staging H1–H5 passed. Resolve `env_role` as
 `staging` or `prod` — do **not** use `staging_as_live` for the new `vecinita-staging-*`
 stack. Legacy DO app hostnames without the `vecinita-staging-` prefix remain **prod**.
 [ADR-049](adr/ADR-049-single-env-staging-as-live.md) is historical for the single-env era.
+
+### Retire standalone Supabase staging project
+
+Once the canonical project's `staging` branch is live and staging smoke is green:
+
+1. Confirm GitHub Environment `staging`, staging DO apps, and Modal Environment `staging`
+   all use the resolved branch `SUPABASE_URL` and branch-scoped keys.
+2. Confirm no secret or operator shell input still references retired project
+   `camkatfbjguwvymfgdme`.
+3. Pause the standalone Supabase project and leave it idle through one additional
+   staging deploy/smoke cycle as a rollback buffer.
+4. If the next cycle stays green, close out the standalone project permanently.
 
 ## Branch protection / merge gate (F83 / ADR-050 / ADR-054 / EV-033)
 
@@ -44,11 +92,11 @@ feature→`stage` hop. When `stage` does not exist yet: AskQuestion to create it
 before the first integration PR (do not silently PR to `main`). Smoke on the tip SHA remains
 required for any `main` merge (ADR-054 / #212).
 
-**After promote (DO staging deploy branches):** Staging apps normally track **`main`**. If an
-app was temporarily pointed at `stage` (e.g. `vecinita-staging-write-api` for pre-promote
-smoke), flip its GitHub deploy `branch` back to **`main`** after the promote PR merges so
-staging stays aligned with production CD. Do not leave staging permanently on `stage`
-unless an AskQuestion records that exception.
+**After promote (DO staging deploy branches):** Staging apps in YAML track **`stage`** so
+promote-PR smoke exercises tip-of-stage images. After the promote PR merges, operators may
+flip staging backend (and optionally FE) GitHub deploy `branch` back to **`main`** so
+staging stays aligned with production CD. Do not leave a one-off temporary branch pin
+undocumented — record AskQuestion if staging permanently diverges from the YAML default.
 
 ## CI/CD before promote (RET-002 / ADR-050)
 
@@ -108,7 +156,16 @@ Requires repo secrets `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` and `SUPABASE_ACCE
 **DigitalOcean CD on `main`:** `.github/workflows/deploy-digitalocean.yml` deploys the four
 DO apps after **Deploy Modal** succeeds on `main` (EV-007 order: Supabase → Modal → DO).
 `deploy_on_push` is **disabled** in `infra/do/*.yaml` so deploys are CI-gated. Requires repo
-secret `DIGITALOCEAN_TOKEN`.
+GitHub access for the DO apps. **Staging static frontends** (`infra/do/staging/*-frontend.yaml`) **and staging backends**
+(`infra/do/staging/chat-rag-backend.yaml`, `internal-write-api.yaml`)
+build from branch **`stage`** (not `main`) so promote-PR Deploy Staging / `staging-smoke` exercise
+tip-of-stage FE bundles **and** ChatRAG/write OpenAPI contracts (TC-336).
+`do_apps.py create-all --env staging` **updates** existing apps' `github.branch` /
+`repo` / `deploy_on_push` from YAML for both **`static_sites[]`** (FE) and **`services[]`**
+(backends) — force_build alone does not retarget the source branch.
+After the promote PR merges, operators may flip staging backend `github.branch` back to
+**`main`** so staging tracks prod CD (see “After promote” above).
+Requires repo secret `DIGITALOCEAN_TOKEN`.
 
 **Release on `main`:** `.github/workflows/release.yml` runs after **Deploy DigitalOcean**
 succeeds. Creates the next strict `vX.Y.Z` patch tag + GitHub Release (skips on
@@ -214,12 +271,109 @@ Database migrations are **not** automated — run `alembic upgrade head` per the
 | `VECINITA_STAGING_CHAT_FRONTEND_URL` | H4, H5 | No — skip H4/H5 chat wiring if unset |
 | `VECINITA_STAGING_ADMIN_FRONTEND_URL` | H4, H5 | No — skip admin wiring if unset |
 | `VECINITA_STAGING_ADMIN_API_URL` | H4 (Modal jobs CORS) | No |
+| `SUPABASE_STAGING_URL` | H5 (admin bundle auth host) | Recommended for distinct staging; overrides generic `SUPABASE_URL` |
+| `VITE_SUPABASE_STAGING_URL` | H5 (admin bundle auth host) | Optional alias when the shell mirrors frontend build-time vars |
 | `VECINITA_STAGING_DATABASE_URL` | H2 | No — falls back to `DATABASE_URL` |
 | `VECINITA_STAGING_INTERNAL_API_KEY` | T3 (EV-002 admin) | No — skip `test_staging_ev002_admin.py` if unset |
 | `DATABASE_URL` | H2 | No — used when staging-specific URL unset |
 | `VECINITA_CORS_ORIGINS` | H4 (on API containers) | **Yes** on each FastAPI deploy — comma-separated frontend origins |
 
 Never commit connection strings or API keys.
+
+## Staging write API DB target audit
+
+Use this when the staging admin/write path disagrees with `VECINITA_STAGING_DATABASE_URL`,
+for example when ChatRAG browse shows a clean corpus but `/internal/v1/documents` still lists
+synthetic `example.com` rows.
+
+[Corpus: staging] [Corpus: feature-list.md §F83]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+[Spec: docs/adr/ADR-007-modal-do-database-write-boundary.md]
+[Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push]
+
+**Symptoms**
+
+- H5 admin bundle passes only after exporting the active staging Supabase branch host instead
+  of assuming generic `SUPABASE_URL`.
+- `VECINITA_STAGING_DATABASE_URL` row counts do **not** match the staging write API corpus.
+- `GET /internal/v1/health/all` may return `status: degraded` when `modal_data_management`
+  times out even though the write API itself is reachable.
+- Repeated `freshness_refresh` failures with upstream `403 Forbidden` indicate source-policy
+  issues, not necessarily staging-wide outage.
+
+**Do not clean up artifacts yet**
+
+If the write API corpus and `VECINITA_STAGING_DATABASE_URL` disagree, stop before running
+`cleanup_corpus_test_artifacts.py`. Deleting through the API could hit the wrong database,
+and deleting through the local URL could miss the polluted rows entirely.
+
+**Audit procedure**
+
+1. Export the current staging hints and confirm the public hosts you are testing:
+
+   ```bash
+   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend
+   ```
+
+2. Inspect the live `vecinita-staging-write-api` `DATABASE_URL` in the DigitalOcean dashboard
+   or via a local operator-only spec export. Do **not** commit exported root `*-spec.yaml`
+   files; they can contain encrypted secrets.
+
+3. Compare hostnames only:
+
+   ```bash
+   python3 - <<'PY'
+   import os
+   from urllib.parse import urlparse
+   for key in ("VECINITA_STAGING_DATABASE_URL", "DATABASE_URL"):
+       raw = (os.environ.get(key) or "").strip()
+       host = urlparse(raw).hostname if raw else None
+       print(f"{key}: {host or '(unset)'}")
+   PY
+   ```
+
+   Then compare those hosts to the write-api app's live `DATABASE_URL` target from step 2.
+
+4. If the write API is cross-wired, fix the secret/env wiring first and redeploy the
+   staging write API before any cleanup:
+
+   ```bash
+   set -a && source prod.env && set +a
+   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py \
+     sync-secrets --name vecinita-staging-write-api
+   uv run --with pydo --with pyyaml scripts/deploy/do_apps.py \
+     deploy --name vecinita-staging-write-api
+   ```
+
+5. Re-run live verification against the same staging URLs:
+
+   ```bash
+   bash scripts/deploy/verify_connectivity.sh
+   uv run pytest tests/smoke/test_staging_connectivity.py -q
+   uv run pytest tests/smoke/test_staging_ev002_admin.py tests/smoke/test_staging_f84_metrics.py \
+     -k 'not test_require_staging_operator_creds' -m live -q
+   ```
+
+6. Only after the write API and `VECINITA_STAGING_DATABASE_URL` point at the **same** host,
+   dry-run the artifact audit on that exact database:
+
+   ```bash
+   uv run python scripts/ops/cleanup_corpus_test_artifacts.py \
+     --database-url "$VECINITA_STAGING_DATABASE_URL"
+   ```
+
+7. If the dry-run matches the polluted rows and the target is confirmed to be staging,
+   apply cleanup with the staging corpus-reset acknowledgement:
+
+   ```bash
+   export VECINITA_ALLOW_CORPUS_RESET=1
+   export VECINITA_CORPUS_RESET_ACK=staging-wipe-confirmed
+   uv run python scripts/ops/cleanup_corpus_test_artifacts.py \
+     --database-url "$VECINITA_STAGING_DATABASE_URL" --apply
+   ```
+
+8. Re-run H2/H4/H5 plus admin corpus browse. Freshness `403` failures should be triaged
+   separately per source host after the DB target is corrected.
 
 ## Phase 4 gate checklist
 
@@ -265,16 +419,110 @@ bash scripts/deploy/create_staging_obs_droplet.sh
 # Complete CHECKLIST-tc305-tc306.md
 ```
 
-**Live (2026-08-30):** Droplet `vecinita-staging-obs` / `159.203.137.236` (nyc3).
-Services bind loopback — tunnel Grafana:
+**Live (2026-08-30 create; EV-323 power-off 2026-09-04):** Droplet `vecinita-staging-obs`
+(id `596408528`) / `159.203.137.236` (nyc3), `s-1vcpu-1gb` (~**$6/mo** when on).
+**Default cost posture (EV-323-D13):** keep droplet **powered off** until staging Grafana/Loki
+is needed; power on via DO UI or
+`doctl compute droplet-action power-on 596408528`. Services bind **loopback** — public curl
+to :3000/:80 times out by design; tunnel Grafana after power-on:
 
 ```bash
 ssh -L 3000:127.0.0.1:3000 root@159.203.137.236
 # then open http://127.0.0.1:3000  (password in /opt/vecinita-obs/.env on host)
 ```
 
+**EV-323 cost note:** Droplet still bills while powered on even if unused. Destroy only after
+separate AskQuestion (recreate via `create_staging_obs_droplet.sh`).
+
 TC-306 drill: Alertmanager → compose `webhook-sink` received synthetic alert with no
 chat content fields (PASS). Replace sink URL with a real staging webhook when ready.
+
+## EV-311 — Close cold-start umbrella on evidence (#311)
+
+**Status:** Spec locked 2026-09-04 (close on evidence).  
+**ADR:** [ADR-022 §Amendment EV-311](adr/ADR-022-gpu-memory-snapshot-cold-start.md).
+
+### Procedure (staging only)
+
+```bash
+# Requires Modal CLI auth + staging LLM URL + proxy key (never commit secrets)
+export MODAL_ENVIRONMENT=staging
+# Optional: ensure snapshots stay on at next deploy (deploy-shell env, not Secret alone)
+# export VECINITA_LLM_GPU_SNAPSHOT=true
+
+# After LLM deploy: seed snapshots first (EV-315 / TC-315-02) — see §EV-315 below
+
+# Restore smoke (TC-311-01 / TC-314-02) — synthetic prompts only
+# --force-cold lists staging containers then stops vecinita-llm ids (Modal CLI 1.5+)
+uv run python scripts/ops/cold_start_bench.py \
+  --n 20 --force-cold --modal-env staging \
+  --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" \
+  --proxy-key "$VECINITA_MODAL_PROXY_KEY" \
+  --output ~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-311-infra-sub-second-chatrag-latency-on-cheap-server/evidence/cold-smoke.json
+
+# Optional publishable p95
+# uv run python scripts/ops/cold_start_bench.py --n 100 --force-cold --output …/cold-p95.json
+
+# E2E ChatRAG ask path (TC-311-02) — staging ChatRAG URL
+uv run python scripts/ops/cold_start_bench.py --mode chat-ask \
+  --chat-url "$VECINITA_STAGING_CHAT_URL" --n 5 \
+  --output …/chat-ask-smoke.json
+# and/or: bash scripts/deploy/staging_smoke.sh (H3)
+```
+
+### Close rules
+
+| Band | Action |
+|------|--------|
+| **Green** (restore p50 &lt;1s, p95 &lt;3s) | Fill ADR frontier table; close #311 |
+| **Useful** (planning band ~1–2s / ~3–10s; no 504) | Fill frontier; close #311 with honest Useful cite |
+| **Red** | Do **not** close; investigate / consider snapshot disable |
+
+Do **not** `modal container stop` on prod Environment `main` without AskQuestion.  
+Related ops: [§EV-315](#ev-315--seed-gpu-snapshots-after-deploy-315) seed · #317 thin ingress · #319 scaledown.
+
+## EV-315 — Seed GPU snapshots after deploy (#315)
+
+**Goal:** After staging LLM deploy (GPU snapshots on), prime authenticated `/warm` so the
+first real user hits **restore**, not ~70s **create**.  
+**ADR:** [ADR-022 §Amendment EV-315](adr/ADR-022-gpu-memory-snapshot-cold-start.md).  
+**Prod:** AskQuestion before any prod prime (default Environment is staging).  
+**CI:** Optional advisory only — not a hard CD gate.
+
+### Procedure (staging)
+
+```bash
+source .env   # or export VECINITA_STAGING_MODAL_LLM_URL + VECINITA_MODAL_PROXY_KEY
+export MODAL_ENVIRONMENT=staging
+
+# 1) Trigger captures (side effect). Exit 1 without kinds is expected (fail-closed).
+uv run python scripts/ops/seed_gpu_snapshots.py \
+  --modal-env staging \
+  --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" \
+  --proxy-key "$VECINITA_MODAL_PROXY_KEY" \
+  --max-primes 3
+
+# 2) Capture cold_kind stamps from Modal logs (create latency is separate from restore p50/p95)
+modal app logs vecinita-llm -e staging --tail 500 --timestamps > /tmp/vecinita-llm-seed-logs.txt
+# Evidence lines (either is enough for --kinds-file):
+#   cold_start_stamp … 'cold_kind': 'snapshot_restore'
+#   Restoring Function from memory snapshot.
+#   Creating memory snapshot…  (create path — document latency separately)
+
+# 3) Fail-closed evaluate (exit 0 only when snapshot_restore observed)
+uv run python scripts/ops/seed_gpu_snapshots.py --kinds-file /tmp/vecinita-llm-seed-logs.txt
+```
+
+Document **create** wall time separately from restore percentiles (Layer E / #314 harness).
+Do not conflate seed primes with FE mount `prewarm_to_ready` (#318).
+
+### Pass / fail
+
+| Result | Meaning |
+|--------|---------|
+| Exit 0 on `--kinds-file` / `--observed-kinds` | Restore-kind observed (TC-315-02) |
+| Exit 1 after live `/warm` only | Expected until kinds supplied — not a silent PASS |
+| Create-only kinds | Fail closed; re-prime / investigate snapshots |
 
 ## Troubleshooting
 
@@ -404,7 +652,17 @@ Never commit secret values. Use `--merge` on Modal pushes so rotation does not d
 
 ## Corpus protection (DO Managed Postgres)
 
-The **corpus lives only on DO Managed Postgres** (`vecinita-staging` via `DATABASE_URL`).
+The **corpus lives only on DO Managed Postgres**.
+
+| Env | Cluster display name (DO) | Operator alias | Typical env |
+|-----|---------------------------|----------------|-------------|
+| Staging | `vecinita-staging-db` | staging corpus | `VECINITA_STAGING_DATABASE_URL` |
+| Production | `vecinita-staging-restored-20260701` | **`vecinita-prod-db`** (cannot rename on DO) | `DATABASE_URL` on prod DO apps |
+
+**EV-323:** Do **not** destroy the restored-named cluster — it is live prod (ChatRAG + write API).
+Confirm hosts differ before any wipe/mirror ([corpus-db-safety](../.cursor/skills/corpus-db-safety/SKILL.md)).
+
+`DATABASE_URL` / staging URLs whose host ends in `.ondigitalocean.com` are **Managed**.
 Supabase holds auth identity only — corpus documents were never stored there.
 
 ### Prevent accidental wipes
@@ -513,11 +771,15 @@ this mirror unless a separate AskQuestion says so.
 8. Record evidence in the active session `evidence/` folder (counts + smoke exit codes).
 
 **Embed model alignment:** Mirrored vectors must match the embed model ChatRAG uses for
-queries. Staging DO apps must set `VECINITA_MODAL_EMBED_URL` to the **`vecinita--`**
-embedding base (same model that produced prod vectors) — not `vecinita-staging--` — or
-retrieval scores collapse (~0.02) and H3 returns the no-context fallback. See
-[staging-secrets-matrix.md](staging-secrets-matrix.md). After correcting the URL, redeploy
-`vecinita-staging-chat-api` (and write-api if ingest uses embed).
+queries. Staging DO apps **and** GitHub Environment `staging` secret
+`VECINITA_MODAL_EMBED_URL` must use the **`vecinita--`** embedding base (same model that
+produced prod vectors) — not `vecinita-staging--` — or retrieval scores collapse (~0.02)
+and H3 returns the no-context fallback. See [staging-secrets-matrix.md](staging-secrets-matrix.md).
+Deploy Staging runs `scripts/deploy/check_staging_embed_mirror_align.sh` before secret sync
+(BUG-2026-09-03-staging-embed-url-mirror-regress). After correcting the URL, redeploy
+`vecinita-staging-chat-api` (and write-api if ingest uses embed). Waiver only when staging
+intentionally re-embeds under the staging Modal Environment pin:
+`VECINITA_ALLOW_STAGING_EMBED=1`.
 
 **Alternatives:** DO backup restore (section above) when a pre-wipe staging snapshot exists;
 fixture `load_corpus()` for empty/dev-shaped staging only.
@@ -696,6 +958,19 @@ See [no-live-prod-corpus-push.mdc](../.cursor/rules/no-live-prod-corpus-push.mdc
 
 **Rollback:** kill-switch ON → `*_ENABLED=false` → DO redeploy → H1–H5.
 
+### Remaining live gate: F80 prod promote
+
+After EV-031, the remaining live EV-027/F80 step is **prod adapter promote** on
+`vecinita-llm`; F78/F79 live enable and the F80 eval path are already complete.
+
+| Step | Action |
+|------|--------|
+| 1 | Review base-vs-adapter eval evidence and operator judgment |
+| 2 | AskQuestion `[Decision]` for live prod promote; recommended default remains defer / runbook-only until explicitly approved |
+| 3 | Set the chosen `VECINITA_FINETUNE_ADAPTER_ID` and matching `VECINITA_FINETUNE_ADAPTER_HASH`, sync secrets, and redeploy prod `vecinita-llm` |
+| 4 | Verify the prod pin via the finetune adapter read path / health metadata, then run post-promote smoke H1–H5 |
+| 5 | If rollback is needed, clear the adapter pin back to base, redeploy, and re-run the same smoke H1–H5 path |
+
 ## Feedback operator notify — Resend (F68 / #214)
 
 Code ships with EV-214. Email notify stays **off** until secrets are set on internal-write.
@@ -723,9 +998,10 @@ Replace any prior staging `RESEND_*` that still matched prod (EV-feedback-notify
 
 > **Warning:** Root `supabase/config.toml` is **prod-oriented** (`site_url` / redirects /
 > `admin_email`). Do **not** run `supabase config push --project-ref camkatfbjguwvymfgdme`
-> from the repo root without a staging override workdir (staging admin FE URLs +
-> `noreply+staging@…` From). A bare push overwrites staging Auth redirects with prod
-> (caught and restored in EV-305).
+> against the retired standalone staging project, and do not push the canonical prod ref
+> directly from the repo root for staging. Use `bash scripts/supabase/ci_sync.sh sync-staging`
+> or an equivalent temp-config flow so the repo config is rewritten for the canonical
+> project's `staging` branch (staging admin FE URLs + `noreply+staging@…` From).
 
 ### Staging enable
 
@@ -753,6 +1029,73 @@ values to prod without an explicit approve.
 [Spec: docs/adr/ADR-046-anonymous-community-feedback.md]
 [Corpus: staging-secrets-matrix]
 [Corpus: ADR-054] #305 #306 #307 #308 #309
+
+## Adversarial API / Schemathesis pass (EV-staging-api-adversarial)
+
+[Corpus: api] [Corpus: tests] [Spec: docs/test-plan.md §TC-333–TC-336]
+
+**Goal:** Contract + negative probes on staging without burning Modal budget or polluting corpus.
+
+### Auth reminders
+
+| Surface | Required headers |
+|---------|------------------|
+| ChatRAG public | none (identity fields must 400) |
+| Write API | `Authorization: Bearer <VECINITA_INTERNAL_API_KEY>` **or** admin JWT |
+| DM Modal ASGI | **Both** `Authorization: Bearer <JWT>` **and** `X-Vecinita-Proxy-Key` |
+
+Do **not** use `X-API-Key` for write — OpenAPI `internalApiKey` is HTTP bearer.
+
+### Budgets
+
+- Schemathesis: start `--max-examples 20` / `--max-time 120`; exclude `/ask/stream` and mutate-heavy write paths until allowlisted.
+- Skip finetune train, rebuild promote-to-live, and bulk delete unless intentional + cleanup plan.
+- After any doc create: run corpus test-artifact cleanup (`example.com` / `fixture://`).
+
+### Commands
+
+```bash
+# Unit contract (CI):
+uv run pytest tests/unit/chat_rag/test_schemathesis_chat_rag_smoke.py \
+  tests/unit/chat_rag/test_openapi_feedback_request_body.py \
+  tests/unit/internal_write_api/test_openapi_security_schemes.py -q
+
+# Staging OpenAPI gate (after ChatRAG redeploy):
+uv run pytest tests/smoke/test_staging_openapi_request_bodies.py -m live -q
+
+# Optional live Schemathesis (write read paths only):
+uv run schemathesis run "$VECINITA_STAGING_WRITE_URL/openapi.json" \
+  -H "Authorization: Bearer $VECINITA_INTERNAL_API_KEY" \
+  --max-examples 20 --max-time 120 \
+  --include-path-regex '/internal/v1/(health|stats|metrics)' \
+  -c not_a_server_error
+```
+
+### Process improvements
+
+1. **Redeploy gate:** after OpenAPI-affecting merges to `stage`, redeploy staging ChatRAG
+   (+ write/DM when their OpenAPI changed) before closing an adversarial cycle. TC-336
+   fails closed until ChatRAG picks up `openapi_extra` publishers.
+2. **Prefer live `/openapi.json` for Schemathesis** (not checked-in YAML alone). Repo YAML
+   remains SoT; normalize `servers.url` + relative paths when comparing (TC-337).
+3. **Weekly OpenAPI drift** (repo ↔ live requestBody + securitySchemes):
+
+   ```bash
+   uv run python scripts/ops/openapi_live_drift.py \
+     --surface chat-rag \
+     --live-url "$VECINITA_STAGING_CHAT_URL/openapi.json"
+   uv run python scripts/ops/openapi_live_drift.py \
+     --surface internal-write \
+     --live-url "$VECINITA_STAGING_WRITE_URL/openapi.json"
+   uv run python scripts/ops/openapi_live_drift.py \
+     --surface data-management \
+     --live-url "$VECINITA_STAGING_MODAL_DATA_MGMT_URL/openapi.json"
+   ```
+
+4. **Mutation testing = request/negative fuzz first** (`scripts/adversarial/staging_api_probe.sh`,
+   Schemathesis). Source mutation (mutmut) is optional later — do not block adversarial
+   cycles on it.
+5. **CI:** TC-334 stays in unit CI; TC-336 is part of `staging-smoke` after ChatRAG redeploy.
 
 ## Related
 

@@ -10,7 +10,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "../App";
 import { deriveConversationLabel } from "../components/previousChatsLabel";
-import type { Conversation } from "../hooks/useConversationStore";
+import {
+  CHAT_HISTORY_STORAGE_KEY,
+  PREVIOUS_CHATS_CAP,
+  type Conversation,
+} from "../hooks/useConversationStore";
 
 function sseResponse(body: string): Response {
   const stream = new ReadableStream({
@@ -147,22 +151,41 @@ describe("F33 — previous-chats list (UJ-025)", () => {
   });
 
   it("caps the previous-chats list at 10 and evicts the oldest through the UI (TC-075, R45)", async () => {
-    render(<App />);
+    const previous = Array.from(
+      { length: PREVIOUS_CHATS_CAP + 1 },
+      (_value, i) => ({
+        id: `conv-${String(i)}`,
+        createdAt: i + 1,
+        messages: [
+          {
+            id: `user-${String(i)}`,
+            role: "user" as const,
+            content: `conversation ${String(i)}?`,
+          },
+        ],
+      }),
+    );
+    localStorage.setItem(
+      CHAT_HISTORY_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        active: { id: "active", createdAt: 100, messages: [] },
+        previous,
+      }),
+    );
 
-    // Archive 11 conversations via repeated ask → "New chat".
-    for (let i = 0; i <= 10; i++) {
-      await ask(`conversation ${String(i)}?`);
-      fireEvent.click(screen.getByRole("button", { name: /new chat/i }));
-    }
+    render(<App />);
 
     expandPreviousChats();
     const list = screen.getByTestId("previous-chats-list");
 
     // Exactly the last 10 remain, newest first; the toggle reflects the count.
-    expect(within(list).getAllByRole("listitem")).toHaveLength(10);
+    expect(within(list).getAllByRole("listitem")).toHaveLength(
+      PREVIOUS_CHATS_CAP,
+    );
     expect(
       screen.getByRole("button", { name: /previous chats/i }).textContent,
-    ).toContain("(10)");
+    ).toContain(`(${String(PREVIOUS_CHATS_CAP)})`);
     expect(within(list).getByText(/conversation 10\?/i)).toBeInTheDocument();
     // The very first conversation was evicted (FIFO).
     expect(

@@ -7,9 +7,13 @@ DEFAULT_TOP_K = 8
 MIN_TOP_K = 1
 MAX_TOP_K = 50
 
-NO_CONTEXT_MESSAGE_EN = "I don't have enough community corpus context to answer that question."
+NO_CONTEXT_MESSAGE_EN = (
+    "No matching sources were found in the community corpus for that question. "
+    + "Try rephrasing, or browse topics for related resources."
+)
 NO_CONTEXT_MESSAGE_ES = (
-    "No tengo suficiente contexto del corpus comunitario para responder esa pregunta."
+    "No se encontraron fuentes coincidentes en el corpus comunitario para esa pregunta. "
+    + "Intente reformularla o explore los temas para recursos relacionados."
 )
 HEDGE_DISCLAIMER_EN = (
     "This answer may not be fully supported by the sources we found. "

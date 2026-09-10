@@ -1,30 +1,38 @@
 #!/usr/bin/env python3
-"""Opt-in GPU snapshot seed helper (EV-315 / #315).
+r"""Opt-in GPU snapshot seed helper (EV-315 / #315).
 
 Primes authenticated Modal ``POST /warm`` on ``vecinita-llm`` and evaluates observed
 ``cold_kind`` values until at least one ``snapshot_restore`` is seen. Default
 ``--modal-env staging``; production runs require operator approval before use.
 
-Synthetic warm only — never send raw prompts (ADR-004). Prefer passing real
-``cold_kind`` values from logs via ``--observed-kinds`` or ``--kinds-file`` when available.
-For convenience, live runs append ``--assume-kind`` after each successful ``/warm``
-(default: ``snapshot_restore``).
+Synthetic warm only — never send raw prompts (ADR-004).
+
+Fail-closed (AC-315-01): a successful live ``/warm`` alone does **not** exit 0.
+Pass restore evidence via ``--observed-kinds``, ``--kinds-file`` (raw logs or kinds),
+or explicit opt-in ``--assume-kind`` (tests / documented override only).
 
 Examples::
 
+    # Prime only — exits 1 until kinds are supplied (still triggers captures)
     uv run python scripts/ops/seed_gpu_snapshots.py \
-      --llm-url "$VECINITA_MODAL_LLM_URL" \
+      --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" \
       --proxy-key "$VECINITA_MODAL_PROXY_KEY" \
       --max-primes 3
 
+    # Evaluate kinds pasted from Modal logs
     uv run python scripts/ops/seed_gpu_snapshots.py \
       --observed-kinds snapshot_create,snapshot_restore
+
+    # Or parse a log capture file
+    modal app logs vecinita-llm -e staging > /tmp/llm-logs.txt
+    uv run python scripts/ops/seed_gpu_snapshots.py --kinds-file /tmp/llm-logs.txt
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Final
@@ -35,6 +43,18 @@ _DEFAULT_ENV: Final[str] = "staging"
 _DEFAULT_EXPECT: Final[str] = "snapshot_restore"
 _KNOWN_KINDS: Final[frozenset[str]] = frozenset(
     {"warm", "snapshot_restore", "snapshot_create", "clean_boot"},
+)
+_KIND_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
+    re.compile(r"""['\"]cold_kind['\"]\s*:\s*['\"](\w+)['\"]"""),
+    re.compile(r"""\bcold_kind=(\w+)\b"""),
+)
+_MODAL_RESTORE: Final[re.Pattern[str]] = re.compile(
+    r"Restoring Function from memory snapshot",
+    re.IGNORECASE,
+)
+_MODAL_CREATE: Final[re.Pattern[str]] = re.compile(
+    r"Creat(?:ing|ed)(?: memory)? snapshot",
+    re.IGNORECASE,
 )
 
 
@@ -55,6 +75,31 @@ def evaluate_seed_outcome(
     return 0 if normalized.count(expect) >= min_ok else 1
 
 
+def parse_cold_kinds_from_log_text(text: str) -> list[str]:
+    """Extract ``cold_kind`` values from Modal/app log text (order preserved).
+
+    Accepts ``cold_start_stamp`` / ``cold_kind=`` tags and Modal platform lines
+    (``Restoring Function from memory snapshot`` → ``snapshot_restore``;
+    create snapshot lines → ``snapshot_create``).
+    """
+    found: list[str] = []
+    for line in text.splitlines():
+        matched_stamp = False
+        for pattern in _KIND_PATTERNS:
+            for match in pattern.finditer(line):
+                kind = match.group(1)
+                if kind in _KNOWN_KINDS:
+                    found.append(kind)
+                    matched_stamp = True
+        if matched_stamp:
+            continue
+        if _MODAL_RESTORE.search(line):
+            found.append("snapshot_restore")
+        elif _MODAL_CREATE.search(line):
+            found.append("snapshot_create")
+    return found
+
+
 def _proxy_headers(proxy_key: str) -> dict[str, str]:
     return {
         "Content-Type": "application/json",
@@ -66,12 +111,20 @@ def _parse_kinds(value: str) -> list[str]:
     return [kind.strip() for kind in value.split(",") if kind.strip()]
 
 
-def _read_kinds_file(path: Path) -> list[str]:
+def read_kinds_file(path: Path) -> list[str]:
+    """Read kinds from a file of CSV kinds or raw Modal logs."""
     raw = path.read_text(encoding="utf-8")
+    parsed = parse_cold_kinds_from_log_text(raw)
+    if parsed:
+        return parsed
+    # Plain kinds-only files (one kind or comma-separated per line) — not freeform logs
     kinds: list[str] = []
     for line in raw.splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
+            continue
+        if " " in stripped and "cold_kind" not in stripped:
+            # Likely a log/noise line without stamps — skip rather than invent kinds
             continue
         kinds.extend(_parse_kinds(stripped))
     return kinds
@@ -112,8 +165,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     _ = parser.add_argument(
         "--llm-url",
-        default=os.environ.get("VECINITA_MODAL_LLM_URL", ""),
-        help="Modal LLM base URL (or VECINITA_MODAL_LLM_URL)",
+        default=os.environ.get("VECINITA_MODAL_LLM_URL", "")
+        or os.environ.get("VECINITA_STAGING_MODAL_LLM_URL", ""),
+        help="Modal LLM base URL (or VECINITA_STAGING_MODAL_LLM_URL / VECINITA_MODAL_LLM_URL)",
     )
     _ = parser.add_argument(
         "--proxy-key",
@@ -130,12 +184,15 @@ def main(argv: list[str] | None = None) -> int:
     _ = parser.add_argument(
         "--kinds-file",
         type=Path,
-        help="File containing cold_kind values from logs, one per line or comma-separated",
+        help="File with cold_kind values or raw Modal logs containing cold_start_stamp",
     )
     _ = parser.add_argument(
         "--assume-kind",
-        default=_DEFAULT_EXPECT,
-        help="cold_kind to append after each successful live /warm",
+        default="",
+        help=(
+            "Opt-in only: append this cold_kind after each live /warm "
+            "(tests/override — prefer --kinds-file from logs)"
+        ),
     )
     _ = parser.add_argument("--expect", default=_DEFAULT_EXPECT)
     _ = parser.add_argument("--min-ok", type=int, default=1)
@@ -147,7 +204,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    observed_kinds: list[str]
     if args.observed_kinds:
         observed_kinds = _parse_kinds(args.observed_kinds)
         return evaluate_seed_outcome(
@@ -156,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
             min_ok=args.min_ok,
         )
     if args.kinds_file is not None:
-        observed_kinds = _read_kinds_file(args.kinds_file)
+        observed_kinds = read_kinds_file(args.kinds_file)
         return evaluate_seed_outcome(
             observed_kinds,
             expect=args.expect,
@@ -170,7 +226,12 @@ def main(argv: list[str] | None = None) -> int:
         print("Need --llm-url and --proxy-key (or env)", file=sys.stderr)
         return 2
 
-    observed_kinds = []
+    assume_kind = args.assume_kind.strip()
+    if assume_kind and assume_kind not in _KNOWN_KINDS:
+        print(f"unknown --assume-kind: {assume_kind!r}", file=sys.stderr)
+        return 2
+
+    observed_kinds: list[str] = []
     for index in range(args.max_primes):
         try:
             _post_warm(
@@ -187,14 +248,23 @@ def main(argv: list[str] | None = None) -> int:
         except (httpx.HTTPError, TimeoutError, OSError) as exc:
             print(f"prime {index + 1}/{args.max_primes} failed: {exc}", file=sys.stderr)
             return 1
-        observed_kinds.append(args.assume_kind)
-        print(
-            (
-                f"prime {index + 1}/{args.max_primes}: "
-                f"modal_env={args.modal_env} cold_kind={args.assume_kind}"
-            ),
-            file=sys.stderr,
+        if assume_kind:
+            observed_kinds.append(assume_kind)
+        assume_suffix = f" assume_kind={assume_kind}" if assume_kind else ""
+        msg = (
+            f"prime {index + 1}/{args.max_primes}: "
+            f"modal_env={args.modal_env} warm_ok{assume_suffix}"
         )
+        print(msg, file=sys.stderr)
+
+    if not observed_kinds:
+        miss = (
+            "no restore evidence: live /warm succeeded but cold_kind was not observed. "
+            "Pass --kinds-file (Modal logs) or --observed-kinds, "
+            "or opt-in --assume-kind for documented override only."
+        )
+        print(miss, file=sys.stderr)
+        return 1
 
     return evaluate_seed_outcome(
         observed_kinds,

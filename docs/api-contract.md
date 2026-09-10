@@ -13,11 +13,11 @@ Contracts are **greenfield** (ADR-003). Public routes must not accept identity f
 | Surface | Auth | Notes |
 |---------|------|-------|
 | **ChatRAG Backend** (`/api/v1/*`, `/health`) | **None (anonymous)** | Stateless; CORS restricted to the ChatRAG frontend origin only (RD-079). Identity fields still rejected (`400`). |
-| **Data Management — Modal** (`/jobs*`) | **Supabase JWT** (operator) | `Authorization: Bearer <supabase_jwt>`; `401` missing/invalid. |
-| **Internal Write API** (`/internal/v1/*`) | **Supabase JWT** (operator) **or** `VECINITA_INTERNAL_API_KEY` (service-to-service) | Operator requests use the bearer JWT; Modal→write service calls keep the machine API key. Write routes require role `admin` (`403` for `viewer`). |
-| **Admin user management** (`/admin/users*`, EV-006 F35) | **Supabase JWT**, role `admin` only | Wraps the Supabase **Admin API** server-side (`SUPABASE_SECRET_KEY` never in browser). Hosted on **DM Modal ASGI** (ADR-030). `viewer` → `403`. |
+| **Data Management — Modal** (`/jobs*`, `/admin/*`) | **Supabase JWT + `X-Vecinita-Proxy-Key`** | **Both** required. JWT-only → `401`. Proxy header is `VECINITA_MODAL_PROXY_KEY` (not Modal's reserved `Modal-Key`). |
+| **Internal Write API** (`/internal/v1/*`) | **Supabase JWT** (operator) **or** `VECINITA_INTERNAL_API_KEY` (service-to-service) | Send as `Authorization: Bearer <token-or-key>` — **not** `X-API-Key`. Operator JWT needs role `admin` for writes (`403` for `viewer`). |
+| **Admin user management** (`/admin/users*`, EV-006 F35) | **JWT + proxy** (same as DM Modal), role `admin` only | Wraps the Supabase **Admin API** server-side (`SUPABASE_SECRET_KEY` never in browser). Hosted on **DM Modal ASGI** (ADR-030). `viewer` → `403`. |
 
-- **Scheme**: OpenAPI `securitySchemes` — `bearerAuth` (`type: http`, `scheme: bearer`, `bearerFormat: JWT`) on admin routes; the internal-write API also documents the existing `apiKeyAuth` for service calls.
+- **Scheme**: OpenAPI `securitySchemes` — DM: `bearerAuth` + `modalProxyAuth` (`X-Vecinita-Proxy-Key`); write: `bearerAuth` + `internalApiKey` (HTTP bearer API key). Do not probe write with `X-API-Key`.
 - **Token**: Supabase-issued JWT obtained by the DM frontend via `@supabase/supabase-js`. Backends verify the **HS256** signature (`SUPABASE_JWT_SECRET`), `exp`, and `aud`; role read from the **`app_metadata.role`** claim (resolved 04-tech-plan, TP-S004-01/02, ADR-027).
 - **Roles**: `admin` (full read/write), `viewer` (read-only). Write methods (`POST`/`PATCH`/`DELETE`) require `admin`.
 - **Attribution**: write handlers record `actor_id` (opaque Supabase user UUID) + `actor_role` on `audit_log` — no email/name/PII (extends ADR-016).
@@ -116,6 +116,9 @@ Base path: `/api/v1`
 
 - **Purpose**: Non-streaming bilingual Q&A.
 - **Auth**: None (public).
+- **OpenAPI**: Runtime `/openapi.json` **must** publish `requestBody` → `AskRequest` with
+  required `question` (1–4000). Static mirror: `openapi/chat-rag.yaml`. Field name is
+  **`question`** (not `message`). (EV-ux-backlog-polish UX-9)
 - **Request**:
 
 ```json
@@ -129,6 +132,11 @@ Base path: `/api/v1`
 When `language` is set, retrieval filters `documents.language` to that value and the response uses the same language. When omitted, the backend auto-detects language from the question text (ADR-013).
 
 When `tags` is non-empty, retrieval filters by those tags only (LLM tag inference skipped). When omitted or empty, backend infers tags from the question before retrieval.
+
+When retrieval returns no chunks above threshold, `answer` is the localized empty-retrieval
+message (`NO_CONTEXT_MESSAGE_EN` / `_ES`) stating that **no matching sources were found**,
+with a short next-step hint; `sources` is `[]`. This is distinct from weak-context answers
+that still include `sources` and may append a hedge disclaimer. (EV-ux-backlog-polish UX-8)
 
 - **Response** `200`:
 

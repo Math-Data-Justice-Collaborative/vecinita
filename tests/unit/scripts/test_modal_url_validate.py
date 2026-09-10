@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import pytest
-from deploy.modal_url_validate import validate_modal_service_url
+from deploy.modal_url_validate import (
+    assert_mirrored_staging_embed_url,
+    validate_modal_service_url,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -98,3 +101,19 @@ def test_validate_accepts_staging_env_rerank_url() -> None:
 def test_validate_rejects_staging_playground_as_prod_llm() -> None:
     with pytest.raises(ValueError, match="vecinita-llm"):
         validate_modal_service_url("VECINITA_MODAL_LLM_URL", STAGING_LLM_PLAYGROUND)
+
+
+def test_mirrored_staging_embed_rejects_staging_environment_host() -> None:
+    """EV-338 / BUG-2026-09-03 — mirrored prod vectors need vecinita-- embed on staging DO."""
+    with pytest.raises(ValueError, match="vecinita--"):
+        assert_mirrored_staging_embed_url(STAGING_EMBED, allow_staging_embed=False)
+
+
+def test_mirrored_staging_embed_accepts_prod_host() -> None:
+
+    assert_mirrored_staging_embed_url(GOOD_EMBED, allow_staging_embed=False)
+
+
+def test_mirrored_staging_embed_waiver_allows_staging_host() -> None:
+
+    assert_mirrored_staging_embed_url(STAGING_EMBED, allow_staging_embed=True)

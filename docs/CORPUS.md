@@ -41,6 +41,7 @@ When personal skills say `[Corpus: tech-spec]`, open **config** + **deps** +
 | Topic | Path |
 |-------|------|
 | Env / secrets matrix | [staging-secrets-matrix.md](staging-secrets-matrix.md) |
+| Hosting / cost envelope | [hosting-migration-summary.md](hosting-migration-summary.md) — cite `[Corpus: hosting]` or `[Corpus: ADR-004]` |
 | Local dev | [LOCAL_DEV.md](LOCAL_DEV.md) |
 | Eval golden set | [eval-golden-set.md](eval-golden-set.md) |
 | OpenAPI (write API) | [../openapi/internal-write.yaml](../openapi/internal-write.yaml) |
@@ -64,6 +65,7 @@ The EV-037 waiver for a standing staff-maintainability runbook is **lifted** (EV
 [Corpus: feature-list.md §F77]   → LoRA fine-tune + human promote
 [Corpus: feature-list.md §F84]   → admin Monitoring + staging Grafana/Loki (#114)
 [Corpus: feature-list.md §F85]   → FAQ fast-path canned answers (#79 / #320; Layer D)
+[Corpus: feature-list.md §F86]   → Beta feature labeling + admin feedback issue link
 [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md]
 [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
 [Spec: docs/adr/ADR-053-modal-lora-finetune.md]

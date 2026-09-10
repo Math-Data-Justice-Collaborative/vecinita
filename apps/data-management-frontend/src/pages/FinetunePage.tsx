@@ -21,10 +21,13 @@ import {
   type FinetuneEvalReport,
 } from "@/api/finetune";
 import type { Job } from "@/api/types";
+import { BetaFeatureNotice } from "@/components/BetaFeatureNotice";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { PageLoadingState } from "@/components/PageLoadingState";
+import { useLoadTimeout } from "@/hooks/useLoadTimeout";
 import {
   Table,
   TableBody,
@@ -51,6 +54,7 @@ export function FinetunePage() {
   const [pin, setPin] = useState<FinetuneAdapterPin | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const initialLoadTimedOut = useLoadTimeout(loading && !pin);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [evalReport, setEvalReport] = useState<FinetuneEvalReport | null>(null);
@@ -222,8 +226,15 @@ export function FinetunePage() {
         </div>
       </div>
 
+      <BetaFeatureNotice feature="finetune" />
+
       {loading && !pin ? (
-        <p className="text-muted-foreground">{tr("shared.loading")}</p>
+        <PageLoadingState
+          timedOut={initialLoadTimedOut}
+          onRetry={() => {
+            void load(() => true);
+          }}
+        />
       ) : null}
 
       {error ? (

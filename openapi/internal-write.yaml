@@ -3132,6 +3132,7 @@ components:
       required:
         - run_id
         - status
+        - created_at
         - metrics_summary
       properties:
         run_id:
@@ -3144,6 +3145,9 @@ components:
             - running
             - completed
             - failed
+        created_at:
+          type: string
+          format: date-time
         started_at:
           type: string
           format: date-time

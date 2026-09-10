@@ -10,6 +10,7 @@ import { requireAdminConfig } from "@/config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageLoadingState } from "@/components/PageLoadingState";
 import {
   Table,
   TableBody,
@@ -19,23 +20,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAdminT } from "@/hooks/useAdminT";
+import { useLoadTimeout } from "@/hooks/useLoadTimeout";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
+import { JOB_STATUS_VARIANT } from "@/lib/jobStatusBadge";
 import { TruncatedText } from "@/components/TruncatedText";
 
 const POLL_MS = 4000;
 const SSE_RETRY_BASE_MS = 2000;
 const SSE_RETRY_MAX_MS = 30000;
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 type StatusFilter = JobStatus | "all";
 
-const STATUS_VARIANT: Record<JobStatus, BadgeVariant> = {
-  pending: "outline",
-  running: "secondary",
-  completed: "default",
-  failed: "destructive",
-  cancelled: "outline",
-};
+const STATUS_VARIANT = JOB_STATUS_VARIANT;
 
 const STATUS_KEY: Record<JobStatus, StringMessageKey> = {
   pending: "admin.jobs.status.pending",
@@ -80,6 +76,7 @@ export function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sseFailed, setSseFailed] = useState(false);
+  const initialLoadTimedOut = useLoadTimeout(loading && jobs.length === 0);
   const statusFilterRef = useRef(statusFilter);
   useEffect(() => {
     statusFilterRef.current = statusFilter;
@@ -250,7 +247,7 @@ export function JobsPage() {
         </div>
       </div>
 
-      {error ? (
+      {error && jobs.length > 0 ? (
         <p role="alert" className="text-sm text-destructive">
           {error}
         </p>
@@ -269,8 +266,30 @@ export function JobsPage() {
           <CardTitle>{tr("admin.jobs.title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading && jobs.length === 0 ? (
-            <p className="text-muted-foreground">{tr("shared.loading")}</p>
+          {error && jobs.length === 0 ? (
+            <div className="space-y-3">
+              <p
+                role="alert"
+                className="text-sm text-destructive"
+                data-testid="jobs-inline-error"
+              >
+                {error}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => void load()}
+                data-testid="jobs-inline-retry"
+              >
+                {tr("shared.refresh")}
+              </Button>
+            </div>
+          ) : loading && jobs.length === 0 ? (
+            <PageLoadingState
+              timedOut={initialLoadTimedOut}
+              onRetry={() => {
+                void load();
+              }}
+            />
           ) : jobs.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {tr("admin.jobs.empty")}
@@ -309,7 +328,11 @@ export function JobsPage() {
                       </TableCell>
                       <TableCell>{typeKey ? tr(typeKey) : jobType}</TableCell>
                       <TableCell>
-                        <Badge variant={STATUS_VARIANT[job.status]}>
+                        <Badge
+                          variant={STATUS_VARIANT[job.status]}
+                          data-variant={STATUS_VARIANT[job.status]}
+                          data-testid={`job-status-badge-${job.status}`}
+                        >
                           {tr(STATUS_KEY[job.status])}
                         </Badge>
                       </TableCell>

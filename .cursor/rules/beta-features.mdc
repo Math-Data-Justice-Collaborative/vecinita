@@ -1,0 +1,30 @@
+# Beta features (admin)
+
+[Corpus: feature-list.md §F86]
+
+When adding or shipping a **new**, **flaky**, or **sometimes-failing** product surface
+(especially admin GPU / Modal / playground / fine-tune paths), **recommend** marking it
+Beta and linking the umbrella feedback issue.
+
+## Do
+
+1. Ask the operator (AskQuestion) whether the surface should be **Beta**.
+2. If yes (default for new/unstable admin features):
+   - Add UI chrome via `BetaFeatureNotice` (page banner + optional nav chip).
+   - List the surface in README §Beta features.
+   - Point feedback to
+     https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/374
+     (override with `VITE_BETA_FEEDBACK_ISSUE_URL` if the umbrella issue moves).
+3. Use label `beta-feedback` on related issues.
+4. Cite `[Corpus: feature-list.md §F86]` / UJ-099 / AC-BETA*.
+
+## Do not
+
+- Mark stable ChatRAG ask as Beta without AskQuestion.
+- Invent a second feedback channel (Discussions, email) for the same Beta loop.
+- Paste secrets or PII into the feedback issue (ADR-004).
+
+## Graduate from Beta
+
+When a surface is hardened: remove `BetaFeatureNotice` mounts, update README, and note
+graduation in the PR / CHANGELOG.

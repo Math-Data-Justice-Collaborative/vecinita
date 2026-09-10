@@ -8,6 +8,10 @@ from fastapi import FastAPI
 from vecinita_llm_client import LlmClient, LlmClientError
 from vecinita_shared_schemas.cors import configure_cors
 from vecinita_shared_schemas.internal_write import HealthResponse
+from vecinita_shared_schemas.openapi_security import (
+    attach_openapi_security_schemes,
+    internal_write_security_schemes,
+)
 
 from vecinita_internal_write_api.deps import (
     database_url as _database_url,  # noqa: F401  # pyright: ignore[reportUnusedImport]  # test import
@@ -123,4 +127,5 @@ def create_app(  # noqa: PLR0913  # factory accepts injectable clients for tests
     def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]
         return HealthResponse(status="ok")
 
+    attach_openapi_security_schemes(app, internal_write_security_schemes())
     return app

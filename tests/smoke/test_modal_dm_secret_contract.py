@@ -5,6 +5,8 @@ Offline checks that deploy scripts document SUPABASE_SECRET_KEY for /admin/users
 
 from __future__ import annotations
 
+import os
+import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -56,3 +58,43 @@ def test_data_management_modal_app_docstring_references_data_mgmt_url() -> None:
     """Scheduled freshness tick documents self-URL for ModalJobsEnqueueClient."""
     text = DM_MODAL_APP.read_text(encoding="utf-8")
     assert "VECINITA_MODAL_DATA_MGMT_URL" in text
+
+
+def test_sync_modal_secret_blocks_prod_supabase_url_in_staging() -> None:
+    """Staging Modal DM secret sync must reject the known prod Supabase project URL."""
+    result = subprocess.run(  # noqa: S603
+        ["/bin/bash", str(SYNC_MODAL_SECRET)],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        env={
+            **os.environ,
+            "MODAL_ENVIRONMENT": "staging",
+            "SUPABASE_URL": "https://cfuvghdsuwactfeamtym.supabase.co",
+        },
+    )
+    assert result.returncode != 0
+    combined = (result.stdout + result.stderr).lower()
+    assert "prod supabase project" in combined
+    assert "staging" in combined
+
+
+def test_sync_modal_secret_blocks_retired_staging_supabase_project() -> None:
+    """Staging Modal DM secret sync must reject the retired standalone staging project URL."""
+    result = subprocess.run(  # noqa: S603
+        ["/bin/bash", str(SYNC_MODAL_SECRET)],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        env={
+            **os.environ,
+            "MODAL_ENVIRONMENT": "staging",
+            "SUPABASE_URL": "https://camkatfbjguwvymfgdme.supabase.co",
+        },
+    )
+    assert result.returncode != 0
+    combined = (result.stdout + result.stderr).lower()
+    assert "retired standalone staging supabase project" in combined
+    assert "staging" in combined

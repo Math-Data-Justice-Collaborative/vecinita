@@ -17,14 +17,24 @@ const enStrings = {
   "shared.languageGroupLabel": "Language",
   "shared.tooltip.themeToggle": "Switch light/dark theme",
   "shared.tooltip.languageToggle": "Switch interface language",
+  "shared.envBanner.staging": "Staging — not production. Test corpus only.",
+  "shared.envBanner.local": "Local development — not staging or production.",
+  "shared.envBanner.regionLabel": "Deployment environment",
+  "shared.pageLoading.slow":
+    "This is taking longer than usual. You can keep waiting or retry.",
+  "shared.pageLoading.retry": "Retry",
   "admin.tooltip.forceSignout": "Sign this operator out of all sessions",
   "chat.tooltip.newChat": "Start a new conversation",
   "chat.ask": "Ask",
-  "chat.appSubtitle": "Bilingual community Q&A — answers stay in your browser only.",
+  "chat.appSubtitle":
+    "Bilingual community Q&A — answers stay in your browser only.",
   "chat.appTitle": "Vecinita",
-  "chat.askServerError": "The assistant is temporarily unavailable. Please try again.",
-  "chat.askStartingWait": "The assistant is starting up — please wait a moment and try again.",
-  "chat.askStillStarting": "The assistant is still starting up. Please wait a moment and try again.",
+  "chat.askServerError":
+    "The assistant is temporarily unavailable. Please try again.",
+  "chat.askStartingWait":
+    "The assistant is starting up — please wait a moment and try again.",
+  "chat.askStillStarting":
+    "The assistant is still starting up. Please wait a moment and try again.",
   "chat.askUnauthorized": "You are not authorized to use the assistant.",
   "chat.asking": "Asking…",
   "chat.backToChat": "Back to chat",
@@ -32,20 +42,27 @@ const enStrings = {
   "chat.clearAllHistory": "Clear all history",
   "chat.clearHistory": "Clear history",
   "chat.coldStartConsentAccept": "Accept",
-  "chat.coldStartConsentCopy": "We’re not tracking you. We only remember which tips you’ve already seen so we don’t repeat them right away — if you allow it.",
+  "chat.coldStartConsentCopy":
+    "We’re not tracking you. We only remember which tips you’ve already seen so we don’t repeat them right away — if you allow it.",
   "chat.coldStartConsentLabel": "Cold-start message preferences",
   "chat.coldStartConsentOptOut": "No thanks",
   "chat.coldStartDonateCta": "Support the river → Donate",
-  "chat.coldStartStatus": "The assistant is starting up — this can take up to a minute on the first question…",
+  "chat.coldStartStatus":
+    "The assistant is starting up — this can take up to a minute on the first question…",
   "chat.corpusBrowseLabel": "Corpus browse",
   "chat.corpusChunk": "Corpus chunk",
   "chat.deleteConversation": "Delete conversation",
-  "chat.emptyHint": "Ask a question in English or Spanish about your community.",
-  "chat.energyAdvisory": "Approximate — based on GPU TDP x utilization x wall time, not live power meters.",
+  "chat.emptyHint":
+    "Ask a question in English or Spanish about your community.",
+  "chat.energyAdvisory":
+    "Approximate — based on GPU TDP x utilization x wall time, not live power meters.",
   "chat.energyCarPrefix": "≈",
   "chat.energyCarSuffix": "of average car travel",
   "chat.energyEstimateLabel": "Approx. energy",
-  "chat.energyUseGuideBody": "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
+  "chat.energyDetailsShow": "Show energy details",
+  "chat.energyDetailsHide": "Hide energy details",
+  "chat.energyUseGuideBody":
+    "Ask specific questions (place, program, or need) for clearer answers. Energy and CO2e are heuristic estimates from assumed GPU power x time — useful for context, not billing. Tip: shorter, focused questions usually finish faster.",
   "chat.energyUseGuideToggle": "How we estimate energy",
   "chat.feedbackCategoryLabel": "Category",
   "chat.feedbackCategory_bug": "Bug",
@@ -54,8 +71,10 @@ const enStrings = {
   "chat.feedbackCategory_wrong_answer": "Wrong answer",
   "chat.feedbackMessageLabel": "Message",
   "chat.feedbackMessageRequired": "Please enter a message.",
-  "chat.feedbackIntro": "Your note is stored anonymously for the team to review. We do not need your name or contact details.",
-  "chat.feedbackPrivacyNote": "Do not include private or sensitive information — no names, emails, phone numbers, addresses, IDs or SSNs, immigration or case details, medical information, or other personal data. Feedback is for product and experience comments only.",
+  "chat.feedbackIntro":
+    "Your note is stored anonymously for the team to review. We do not need your name or contact details.",
+  "chat.feedbackPrivacyNote":
+    "Do not include private or sensitive information — no names, emails, phone numbers, addresses, IDs or SSNs, immigration or case details, medical information, or other personal data. Feedback is for product and experience comments only.",
   "chat.feedbackSubmit": "Submit feedback",
   "chat.feedbackSubmitFailed": "Could not submit feedback. Please try again.",
   "chat.feedbackSubmitting": "Submitting…",
@@ -76,7 +95,8 @@ const enStrings = {
   "chat.previousChats": "Previous chats",
   "chat.questionPlaceholder": "e.g. Where can I get food assistance?",
   "chat.relevancePercent": "{n}% relevant",
-  "chat.relevanceTip": "How closely this source matched what you asked. Higher % means a stronger match.",
+  "chat.relevanceTip":
+    "How closely this source matched what you asked. Higher % means a stronger match.",
   "chat.requestFailed": "Request failed",
   "chat.roleAssistant": "Vecinita",
   "chat.roleUser": "You",
@@ -170,6 +190,14 @@ const enStrings = {
   "admin.finetune.promoteConfirmLabel":
     "I reviewed the eval evidence and judge this adapter better than base (human promote only).",
   "admin.finetune.promote": "Promote to prod",
+  "admin.beta.badge": "Beta",
+  "admin.beta.badgeTitle": "This feature is in beta",
+  "admin.beta.heading": "Beta feature",
+  "admin.beta.description.finetune":
+    "Fine-tune train and promote are available for early use but may be incomplete or flaky (GPU cold starts). Please share feedback.",
+  "admin.beta.description.playground":
+    "Evaluation Playground and model download are available for early use but may be incomplete or flaky. Please share feedback.",
+  "admin.beta.feedbackLink": "Send feedback on GitHub",
   "admin.feedback.title": "Feedback",
   "admin.feedback.subtitle":
     "Anonymous community product feedback (no visitor email).",
@@ -213,6 +241,7 @@ const enStrings = {
   "admin.users.inviteSubtitle": "Send an email invitation with a sign-up link.",
   "admin.users.inviteEmail": "Email address",
   "admin.users.inviteRole": "Role",
+  "admin.users.inviteEmailInvalid": "Enter a valid email address.",
   "admin.users.roleAdmin": "Admin",
   "admin.users.roleViewer": "Viewer",
   "admin.users.sendInvite": "Send invite",
@@ -265,6 +294,7 @@ const enStrings = {
   "admin.auth.loginFailed": "Sign in failed",
   "admin.auth.signOut": "Sign out",
   "admin.auth.signOutAllDevices": "Log out of all devices",
+  "admin.auth.moreAccountActions": "More account actions",
   "admin.auth.idleWarningTitle": "Still there?",
   "admin.auth.idleWarningBody":
     "You will be signed out on this device in {seconds} seconds due to inactivity.",
@@ -752,14 +782,25 @@ const esStrings = {
   "shared.languageGroupLabel": "Idioma",
   "shared.tooltip.themeToggle": "Cambiar tema claro/oscuro",
   "shared.tooltip.languageToggle": "Cambiar idioma de la interfaz",
+  "shared.envBanner.staging":
+    "Staging — no es producción. Solo corpus de prueba.",
+  "shared.envBanner.local": "Desarrollo local — no es staging ni producción.",
+  "shared.envBanner.regionLabel": "Entorno de despliegue",
+  "shared.pageLoading.slow":
+    "Esto está tardando más de lo habitual. Puedes seguir esperando o reintentar.",
+  "shared.pageLoading.retry": "Reintentar",
   "admin.tooltip.forceSignout": "Cerrar todas las sesiones de este operador",
   "chat.tooltip.newChat": "Iniciar una conversación nueva",
   "chat.ask": "Preguntar",
-  "chat.appSubtitle": "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador.",
+  "chat.appSubtitle":
+    "Preguntas y respuestas bilingües — las respuestas permanecen solo en tu navegador.",
   "chat.appTitle": "Vecinita",
-  "chat.askServerError": "El asistente no está disponible temporalmente. Inténtalo de nuevo.",
-  "chat.askStartingWait": "El asistente se está iniciando — espera un momento e inténtalo de nuevo.",
-  "chat.askStillStarting": "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
+  "chat.askServerError":
+    "El asistente no está disponible temporalmente. Inténtalo de nuevo.",
+  "chat.askStartingWait":
+    "El asistente se está iniciando — espera un momento e inténtalo de nuevo.",
+  "chat.askStillStarting":
+    "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
   "chat.askUnauthorized": "No tienes autorización para usar el asistente.",
   "chat.asking": "Preguntando…",
   "chat.backToChat": "Volver al chat",
@@ -767,20 +808,26 @@ const esStrings = {
   "chat.clearAllHistory": "Borrar todo el historial",
   "chat.clearHistory": "Borrar historial",
   "chat.coldStartConsentAccept": "Aceptar",
-  "chat.coldStartConsentCopy": "No te rastreamos. Solo recordamos qué consejos ya viste para no repetirlos de inmediato — si lo permites.",
+  "chat.coldStartConsentCopy":
+    "No te rastreamos. Solo recordamos qué consejos ya viste para no repetirlos de inmediato — si lo permites.",
   "chat.coldStartConsentLabel": "Preferencias de mensajes al iniciar",
   "chat.coldStartConsentOptOut": "No, gracias",
   "chat.coldStartDonateCta": "Apoya el río → Donar",
-  "chat.coldStartStatus": "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
+  "chat.coldStartStatus":
+    "El asistente se está iniciando — la primera pregunta puede tardar hasta un minuto…",
   "chat.corpusBrowseLabel": "Explorar corpus",
   "chat.corpusChunk": "Fragmento del corpus",
   "chat.deleteConversation": "Eliminar conversación",
   "chat.emptyHint": "Pregunta en inglés o español sobre tu comunidad.",
-  "chat.energyAdvisory": "Aproximado — basado en TDP de GPU x utilización x tiempo, no medidores de potencia en vivo.",
+  "chat.energyAdvisory":
+    "Aproximado — basado en TDP de GPU x utilización x tiempo, no medidores de potencia en vivo.",
   "chat.energyCarPrefix": "≈",
   "chat.energyCarSuffix": "de viaje en auto promedio",
   "chat.energyEstimateLabel": "Energía aprox.",
-  "chat.energyUseGuideBody": "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
+  "chat.energyDetailsShow": "Mostrar detalles de energía",
+  "chat.energyDetailsHide": "Ocultar detalles de energía",
+  "chat.energyUseGuideBody":
+    "Haz preguntas concretas (lugar, programa o necesidad) para respuestas más claras. La energía y el CO2e son estimaciones heurísticas de potencia de GPU asumida x tiempo — útiles como contexto, no para facturación. Consejo: preguntas cortas y enfocadas suelen terminar antes.",
   "chat.energyUseGuideToggle": "Cómo estimamos la energía",
   "chat.feedbackCategoryLabel": "Categoría",
   "chat.feedbackCategory_bug": "Error",
@@ -789,8 +836,10 @@ const esStrings = {
   "chat.feedbackCategory_wrong_answer": "Respuesta incorrecta",
   "chat.feedbackMessageLabel": "Mensaje",
   "chat.feedbackMessageRequired": "Escribe un mensaje.",
-  "chat.feedbackIntro": "Tu nota se guarda de forma anónima para que el equipo la revise. No necesitamos tu nombre ni datos de contacto.",
-  "chat.feedbackPrivacyNote": "No incluyas información privada o sensible: ni nombres, correos, teléfonos, direcciones, identificaciones o SSN, detalles de inmigración o casos, información médica ni otros datos personales. Los comentarios son solo sobre el producto y la experiencia.",
+  "chat.feedbackIntro":
+    "Tu nota se guarda de forma anónima para que el equipo la revise. No necesitamos tu nombre ni datos de contacto.",
+  "chat.feedbackPrivacyNote":
+    "No incluyas información privada o sensible: ni nombres, correos, teléfonos, direcciones, identificaciones o SSN, detalles de inmigración o casos, información médica ni otros datos personales. Los comentarios son solo sobre el producto y la experiencia.",
   "chat.feedbackSubmit": "Enviar comentarios",
   "chat.feedbackSubmitFailed": "No se pudieron enviar. Inténtalo de nuevo.",
   "chat.feedbackSubmitting": "Enviando…",
@@ -811,7 +860,8 @@ const esStrings = {
   "chat.previousChats": "Chats anteriores",
   "chat.questionPlaceholder": "p. ej. ¿Dónde puedo conseguir ayuda con comida?",
   "chat.relevancePercent": "{n}% relevante",
-  "chat.relevanceTip": "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
+  "chat.relevanceTip":
+    "Qué tan cerca coincidió esta fuente con lo que preguntaste. Un % más alto significa una coincidencia más fuerte.",
   "chat.requestFailed": "La solicitud falló",
   "chat.roleAssistant": "Vecinita",
   "chat.roleUser": "Tú",
@@ -819,9 +869,12 @@ const esStrings = {
   "chat.searchPlaceholder": "Buscar documentos…",
   "chat.sourcesHeading": "Fuentes",
   "chat.suggestedQuestionsLabel": "Prueba a preguntar",
-  "chat.suggestion1": "¿Dónde puedo conseguir ayuda con comida en Rhode Island?",
-  "chat.suggestion2": "¿Cómo solicito ayuda para pagar el alquiler en Providence?",
-  "chat.suggestion3": "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
+  "chat.suggestion1":
+    "¿Dónde puedo conseguir ayuda con comida en Rhode Island?",
+  "chat.suggestion2":
+    "¿Cómo solicito ayuda para pagar el alquiler en Providence?",
+  "chat.suggestion3":
+    "¿Dónde puedo encontrar clases gratis de inglés en Providence?",
   "chat.switchToDark": "Cambiar a tema oscuro",
   "chat.switchToLight": "Cambiar a tema claro",
   "chat.themeToggleLabel": "Tema",
@@ -906,6 +959,14 @@ const esStrings = {
   "admin.finetune.promoteConfirmLabel":
     "Revisé la evidencia de evaluación y juzgo que este adaptador es mejor que la base (promoción humana solamente).",
   "admin.finetune.promote": "Promover a producción",
+  "admin.beta.badge": "Beta",
+  "admin.beta.badgeTitle": "Esta función está en beta",
+  "admin.beta.heading": "Función en beta",
+  "admin.beta.description.finetune":
+    "El entrenamiento y la promoción de ajuste fino están disponibles para uso temprano, pero pueden ser incompletos o inestables (arranques en frío de GPU). Comparte tus comentarios.",
+  "admin.beta.description.playground":
+    "El Playground de evaluación y la descarga de modelos están disponibles para uso temprano, pero pueden ser incompletos o inestables. Comparte tus comentarios.",
+  "admin.beta.feedbackLink": "Enviar comentarios en GitHub",
   "admin.feedback.title": "Comentarios",
   "admin.feedback.subtitle":
     "Comentarios anónimos del producto (sin correo del visitante).",
@@ -953,6 +1014,7 @@ const esStrings = {
     "Envía una invitación por correo con un enlace de registro.",
   "admin.users.inviteEmail": "Correo electrónico",
   "admin.users.inviteRole": "Rol",
+  "admin.users.inviteEmailInvalid": "Introduce una dirección de correo válida.",
   "admin.users.roleAdmin": "Administrador",
   "admin.users.roleViewer": "Lector",
   "admin.users.sendInvite": "Enviar invitación",
@@ -1007,6 +1069,7 @@ const esStrings = {
   "admin.auth.loginFailed": "Error al iniciar sesión",
   "admin.auth.signOut": "Cerrar sesión",
   "admin.auth.signOutAllDevices": "Cerrar sesión en todos los dispositivos",
+  "admin.auth.moreAccountActions": "Más acciones de cuenta",
   "admin.auth.idleWarningTitle": "¿Sigues ahí?",
   "admin.auth.idleWarningBody":
     "Se cerrará la sesión en este dispositivo en {seconds} segundos por inactividad.",

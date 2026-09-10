@@ -24,12 +24,26 @@ cd "$ROOT"
 
 APPLY=0
 MERGE=0
+PROD_SUPABASE_PROJECT_REF="cfuvghdsuwactfeamtym"
+RETIRED_STAGING_SUPABASE_PROJECT_REF="camkatfbjguwvymfgdme"
 for arg in "$@"; do
   case "$arg" in
     --apply) APPLY=1 ;;
     --merge) MERGE=1 ;;
   esac
 done
+
+if [[ "${MODAL_ENVIRONMENT:-}" == "staging" && -n "${SUPABASE_URL:-}" ]]; then
+  trimmed_supabase_url="${SUPABASE_URL%/}"
+  if [[ "$trimmed_supabase_url" == *"${PROD_SUPABASE_PROJECT_REF}.supabase.co" ]]; then
+    echo "ERROR: MODAL_ENVIRONMENT=staging but SUPABASE_URL points at the prod Supabase project (${PROD_SUPABASE_PROJECT_REF}). Refuse to sync prod Supabase auth into staging." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_supabase_url" == *"${RETIRED_STAGING_SUPABASE_PROJECT_REF}.supabase.co" ]]; then
+    echo "ERROR: MODAL_ENVIRONMENT=staging but SUPABASE_URL points at the retired standalone staging Supabase project (${RETIRED_STAGING_SUPABASE_PROJECT_REF}). Refuse to sync the old staging auth project into branch-backed staging." >&2
+    exit 1
+  fi
+fi
 
 # shellcheck source=../modal_ensure_workspace.sh
 source "${ROOT}/scripts/modal_ensure_workspace.sh"

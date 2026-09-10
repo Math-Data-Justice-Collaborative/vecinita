@@ -617,14 +617,8 @@ class ChatRagService:
             cache.store_retrieve(request.question, language, chunks)
 
         if not chunks:
+            # Do not exact-cache empty refusals (BUG-2026-09-09 / store_answer no-op).
             message = no_context_message(language)
-            empty = CachedAnswer(
-                answer=message,
-                language=language,
-                sources=(),
-                query_embedding=tuple(query_embedding) if query_embedding is not None else None,
-            )
-            cache.store_answer(request.question, language, empty)
             return AskStreamSession(
                 sources=[],
                 cache_hit=cache_hit,
@@ -641,29 +635,53 @@ class ChatRagService:
         )
         model_id = production.model_id or self._llm_model_id
         parts: list[str] = []
+        verify_output = self._output_verify_enabled()
 
         def _token_stream() -> Iterator[str]:
-            parts.extend(
-                self._llm.generate_stream(
-                    prompt,
-                    max_tokens=production.max_tokens,
-                    model_id=model_id,
-                ),
-            )
+            if verify_output:
+                parts.extend(
+                    self._llm.generate_stream(
+                        prompt,
+                        max_tokens=production.max_tokens,
+                        model_id=model_id,
+                    ),
+                )
+                draft = "".join(parts)
+                verified = self._apply_output_verify(
+                    request,
+                    chunks,
+                    draft,
+                    language=language,
+                    packer=knobs.packer,
+                    max_chars=knobs.context_max_chars,
+                )
+                cache.store_answer(
+                    request.question,
+                    language,
+                    CachedAnswer(
+                        answer=verified,
+                        language=language,
+                        sources=tuple(chunks),
+                        query_embedding=(
+                            tuple(query_embedding) if query_embedding is not None else None
+                        ),
+                    ),
+                )
+                yield verified
+                return
+            for token in self._llm.generate_stream(
+                prompt,
+                max_tokens=production.max_tokens,
+                model_id=model_id,
+            ):
+                parts.append(token)
+                yield token
             draft = "".join(parts)
-            verified = self._apply_output_verify(
-                request,
-                chunks,
-                draft,
-                language=language,
-                packer=knobs.packer,
-                max_chars=knobs.context_max_chars,
-            )
             cache.store_answer(
                 request.question,
                 language,
                 CachedAnswer(
-                    answer=verified,
+                    answer=draft,
                     language=language,
                     sources=tuple(chunks),
                     query_embedding=(
@@ -671,7 +689,6 @@ class ChatRagService:
                     ),
                 ),
             )
-            yield verified
 
         return AskStreamSession(
             sources=_sources_from_chunks(chunks),
@@ -707,25 +724,35 @@ class ChatRagService:
         )
         model_id = production.model_id or self._llm_model_id
         parts: list[str] = []
+        verify_output = self._output_verify_enabled()
 
         def _token_stream() -> Iterator[str]:
-            parts.extend(
-                self._llm.generate_stream(
-                    prompt,
-                    max_tokens=production.max_tokens,
-                    model_id=model_id,
-                ),
-            )
-            draft = "".join(parts)
-            verified = self._apply_output_verify(
-                request,
-                chunks,
-                draft,
-                language=language,
-                packer=knobs.packer,
-                max_chars=knobs.context_max_chars,
-            )
-            yield verified
+            if verify_output:
+                parts.extend(
+                    self._llm.generate_stream(
+                        prompt,
+                        max_tokens=production.max_tokens,
+                        model_id=model_id,
+                    ),
+                )
+                draft = "".join(parts)
+                verified = self._apply_output_verify(
+                    request,
+                    chunks,
+                    draft,
+                    language=language,
+                    packer=knobs.packer,
+                    max_chars=knobs.context_max_chars,
+                )
+                yield verified
+                return
+            for token in self._llm.generate_stream(
+                prompt,
+                max_tokens=production.max_tokens,
+                model_id=model_id,
+            ):
+                parts.append(token)
+                yield token
 
         return AskStreamSession(
             sources=_sources_from_chunks(chunks),

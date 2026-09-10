@@ -1,4 +1,10 @@
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { renderWithProviders } from "./renderWithProviders";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
@@ -47,6 +53,7 @@ function renderDashboard() {
 describe("Dashboard page", () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -55,7 +62,25 @@ describe("Dashboard page", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     renderDashboard();
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByTestId("page-loading")).toBeInTheDocument();
+  });
+
+  it("shows slow-load retry after timeout and reloads (UX-3)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const fetchMock = vi.fn().mockReturnValue(new Promise(() => {}));
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderDashboard();
+    expect(screen.getByTestId("page-loading")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+    expect(screen.getByTestId("page-loading-retry")).toBeInTheDocument();
+
+    const callsBefore = fetchMock.mock.calls.length;
+    fireEvent.click(screen.getByTestId("page-loading-retry"));
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBefore);
   });
 
   it("renders stat cards with fetched data", async () => {

@@ -116,6 +116,52 @@ describe("admin auth protected routes (TC-084)", () => {
     );
   });
 
+  it("uses the signed-in JWT for the initial dashboard stats request", async () => {
+    setSupabaseClientForTests(
+      buildSupabaseMock({
+        access_token: "jwt-token",
+        user: {
+          id: "user-1",
+          email: "admin@vecinita.admin",
+          app_metadata: { role: "admin" },
+        },
+      }) as never,
+    );
+    const fetchMock = vi
+      .fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            total_documents: 0,
+            total_chunks: 0,
+            tag_distribution: [],
+            language_breakdown: {},
+            recent_activity: [],
+            top_served: [],
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderApp("/dashboard");
+
+    await waitFor(() => {
+      const firstCall = fetchMock.mock.calls[0];
+      expect(firstCall?.[0]).toBe(
+        "http://localhost:8002/internal/v1/stats/summary",
+      );
+      const init = firstCall?.[1];
+      expect(init).toBeDefined();
+      expect(init?.headers).toMatchObject({
+        Authorization: "Bearer jwt-token",
+      });
+    });
+  });
+
   it("logout clears session via signOut", async () => {
     setSupabaseClientForTests(
       buildSupabaseMock({

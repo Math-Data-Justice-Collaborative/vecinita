@@ -1,4 +1,10 @@
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { ActionIcon } from "vecinita-frontend-ui";
 
@@ -9,6 +15,7 @@ import {
   isTokenEvent,
   streamAsk,
 } from "../api/ask";
+import { recordAskStarted } from "../api/prewarmPolicy";
 import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
 import { SLOW_STREAM_WAIT_MS } from "../coldstart/constants";
@@ -20,6 +27,7 @@ import { t } from "vecinita-frontend-i18n";
 import { ColdStartWait } from "./ColdStartWait";
 import { parseEnergyEstimate } from "../api/energyEstimate";
 import { EnergyEstimatePanel } from "./EnergyEstimatePanel";
+import { MessageMarkdown } from "./MessageMarkdown";
 import { SourceList } from "./SourceList";
 import { SuggestedQuestions } from "./SuggestedQuestions";
 
@@ -93,8 +101,7 @@ function ChatPanelView({
     }
   }, [messages.length]);
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function submitQuestion() {
     const trimmed = question.trim();
     if (!trimmed || loading) {
       return;
@@ -104,6 +111,7 @@ function ChatPanelView({
     setWaitUxActive(false);
     sawFirstTokenRef.current = false;
     setLoading(true);
+    recordAskStarted();
     appendUserMessage(trimmed);
     setQuestion("");
     const assistantId = appendAssistantPlaceholder();
@@ -152,6 +160,23 @@ function ChatPanelView({
     }
   }
 
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    await submitQuestion();
+  }
+
+  function handleQuestionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.nativeEvent.isComposing ||
+      event.key !== "Enter" ||
+      event.shiftKey
+    ) {
+      return;
+    }
+    event.preventDefault();
+    void submitQuestion();
+  }
+
   const isEmpty = messages.length === 0;
 
   return (
@@ -180,9 +205,13 @@ function ChatPanelView({
                   ? t(locale, "chat.roleUser")
                   : t(locale, "chat.roleAssistant")}
               </p>
-              <p className="message-content">
-                {msg.content || (loading ? "…" : "")}
-              </p>
+              {msg.role === "assistant" ? (
+                <MessageMarkdown
+                  content={msg.content || (loading ? "…" : "")}
+                />
+              ) : (
+                <p className="message-content">{msg.content}</p>
+              )}
               {msg.sources && msg.sources.length > 0 ? (
                 <SourceList sources={msg.sources} locale={locale} />
               ) : null}
@@ -221,6 +250,7 @@ function ChatPanelView({
             onChange={(e) => {
               setQuestion(e.target.value);
             }}
+            onKeyDown={handleQuestionKeyDown}
             disabled={loading}
             placeholder={t(locale, "chat.questionPlaceholder")}
           />
@@ -229,6 +259,7 @@ function ChatPanelView({
               type="submit"
               disabled={loading || !question.trim()}
               data-testid="chat-ask-submit"
+              data-priority="primary"
             >
               <ActionIcon
                 motion="pulse"
@@ -242,10 +273,11 @@ function ChatPanelView({
             </button>
             <button
               type="button"
-              className="secondary"
+              className="secondary chat-clear-history"
               disabled={loading || isEmpty}
               onClick={clearHistory}
               data-testid="chat-clear-history"
+              data-priority="secondary"
             >
               <ActionIcon motion="press" pending={false}>
                 <span aria-hidden="true">⌫</span>

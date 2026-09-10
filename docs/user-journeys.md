@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Source**: [feature-list.md](feature-list.md), [spec.md](spec.md), [decisions.md#Requirements decisions](decisions.md#requirements-decisions-01-requirements)  
-> **Last updated**: 2026-09-03 (EV-338 / #338 — UJ-094 staging corpus mirror; prior EV-036 UJ-088–089)
+> **Last updated**: 2026-09-09 (EV-ux-backlog-polish — UJ-005/035 deltas + UJ-097/098)
 
 Product-facing journeys describe what a **caller** does — not internal module tests.  
 **E2E tier (v1):** **local** (TestClient + test DB + mocked Modal) — `uv run pytest tests/e2e -m "e2e and not live"`. **live** staging (`@pytest.mark.live`) after deploy: `tests/smoke/test_staging_health.py`, `test_staging_latency.py` (AC-C6 p95). **UI (T0-ui):** Playwright against preview bundles — `tests/ui/`, `make test-ui` (see `tests/ui/README.md`). Vitest remains the fast component layer; Playwright covers real-browser shell/navigation.
@@ -93,6 +93,11 @@ Product-facing journeys describe what a **caller** does — not internal module 
 | UJ-092 | Tune LLM scaledown_window from gaps | Operator | Env + staging evidence → AskQuestion prod flip | ADR-022 EV-319 #319 | staging |
 | UJ-093 | FAQ fast-path canned answer (skip LLM) | Community member | ChatRAG ask/stream → FAQ match → faq_bypass | F85 EV-320 #320 / #79 | local |
 | UJ-094 | Re-seed staging corpus from prod mirror | Operator | Prod read-only dump → staging restore → H2/H3 | F83 EV-338 #338 | staging |
+| UJ-095 | Promote with cold staging + warm-before-smoke | Operator | Idle staging → warm Modal → H1–H5 / `staging-smoke` → merge `main` | F83 EV-354 #354 | staging |
+| UJ-096 | Choose browser-entry prewarm trigger from bounce-cost evidence | Operator | Compare mount / dwell / focus / keystroke trigger policies | F40 delta EV-359 #359 | staging |
+| UJ-097 | Ask primary vs Clear history secondary | Community member | ChatRAG composer `.form-actions` | F1 / F11 polish EV-ux-backlog | local |
+| UJ-098 | Job status badges by semantic color | Operator | Admin Jobs list + detail | F32 polish EV-ux-backlog | local |
+| UJ-099 | See Beta label + open feedback issue | Admin operator | DM Fine-tune + Evaluation playground | F86 EV-beta-feature-labeling | local |
 
 ## Visual journey maps
 
@@ -302,11 +307,16 @@ retrieval returns new content; re-ingest of unchanged URLs does not blindly re-e
 **Steps**:
 
 1. Ask a question outside seeded corpus (or empty DB fixture).
-2. Receive explicit "no relevant information" (or equivalent) — not fabricated policy text.
+2. Receive an explicit **empty-retrieval** message stating that **no matching sources were
+   found**, with a short next-step hint (try another question / browse topics) — not
+   fabricated policy text.
+3. Confirm the message is distinct from weak-context answers that still return `sources[]`
+   (those keep the hedge disclaimer path).
 
-**Acceptance**: No false citations; HTTP 200 with clear message; no PII logged.
+**Acceptance**: No false citations; HTTP 200; `sources: []`; copy matches
+`NO_CONTEXT_MESSAGE_EN` / `_ES` (EV-ux-backlog-polish UX-8); no PII logged.
 
-**Automated tests**: `tests/e2e/test_uj005_empty_retrieval.py`
+**Automated tests**: `tests/e2e/test_uj005_empty_retrieval.py`; TC-003
 
 ---
 
@@ -2014,13 +2024,16 @@ session report for Path A.
 
 **Steps**:
 
-1. From the account menu, the operator clicks **"Log out of all devices"**.
-2. The SPA calls `supabase.auth.signOut()` with the default **`global`** scope → all refresh tokens revoked across devices.
-3. The operator is redirected to `/login`; other devices lose access on their next token refresh.
+1. In the desktop sidebar account area, **Sign out** remains the primary control
+   (local session).
+2. The operator opens the demoted control / menu and clicks **"Log out of all devices"**
+   (EV-ux-backlog-polish UX-5 — not peer-primary with Sign out).
+3. The SPA calls `supabase.auth.signOut()` with the default **`global`** scope → all refresh tokens revoked across devices.
+4. The operator is redirected to `/login`; other devices lose access on their next token refresh.
 
-**Acceptance**: the action revokes all refresh tokens (global scope); ordinary logout uses `{scope:"local"}`; the current device is redirected to login. Documented caveat: already-issued access tokens remain valid until `exp` (≤ 1h). (ADR-031 TP-S005-18)
+**Acceptance**: the action revokes all refresh tokens (global scope); ordinary logout uses `{scope:"local"}`; the current device is redirected to login; **Log out of all devices** is visually secondary to **Sign out**. Documented caveat: already-issued access tokens remain valid until `exp` (≤ 1h). (ADR-031 TP-S005-18)
 
-**Automated tests**: `apps/data-management-frontend/src/test/test_logout_all_devices.test.tsx` (Vitest): "log out of all devices" calls `signOut()` (global); standard logout calls `signOut({scope:"local"})`.
+**Automated tests**: `apps/data-management-frontend/src/test/test_logout_all_devices.test.tsx` (Vitest): "log out of all devices" calls `signOut()` (global); standard logout calls `signOut({scope:"local"})`; hierarchy assert (UX-5).
 
 **E2E tier**: local (Vitest component smoke).
 
@@ -2472,4 +2485,139 @@ corpus-db-safety ack for staging write; staging ChatRAG pointed at staging DB.
 
 **Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety]
 [Spec: docs/adr/ADR-054-distinct-staging-and-production.md]
+
+---
+
+### UJ-095: Promote with cold staging + warm-before-smoke (F83 / EV-354 / #354)
+
+**Actor**: Operator / maintainer
+
+**Goal**: Keep staging Modal **idle (scale-to-zero)** for cost, then still pass
+`staging-smoke` / H1–H5 on a promote PR by warming required services first.
+
+**Features**: F83 delta — EV-354; ADR-054 cost posture; related EV-323 idle levers
+
+**Preconditions**: Distinct staging stack healthy; `VECINITA_EMBED_MIN_CONTAINERS=0` on
+staging Modal; obs droplet powered off unless drilling Grafana; no prod secret cross-wire.
+
+**Steps**:
+
+1. Leave staging Modal apps cold between promotes (embed/LLM/playground/FT/rerank not
+   always-warm).
+2. Open promote PR `stage`→`main` (or main-bound PR that runs `staging-smoke`).
+3. CI or operator runs **warm-before-smoke** (hit staging embed/LLM `/warm` or documented
+   helper) then H1–H5.
+4. Merge only when CI + `staging-smoke` green (AC-ST5/AC-ST8/AC-ST12).
+5. Do not power on obs droplet unless monitoring drill needed (AC-ST11).
+
+**Acceptance**: AC-ST9–AC-ST14; TC-325–TC-327.
+
+**Automated tests**: TC-325 (config unit); TC-326 (warm helper / workflow contract);
+TC-327 (runbook/docs guard); live smoke after warm (Build).
+
+**E2E tier**: staging (T2) — smoke path; no UI.
+
+**Refs**: [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: ADR-004]
+[Spec: docs/adr/ADR-054-distinct-staging-and-production.md] #354
+
+### UJ-096: Choose browser-entry prewarm trigger from bounce-cost evidence (F40 delta / EV-359 / #359)
+
+**Actor**: Operator / maintainer
+
+**Goal**: Decide whether ChatRAG browser-entry prewarm should stay on **mount** or move to
+**dwell**, **focus**, or **first keystroke** based on privacy-safe evidence about bounce
+visits, hidden latency, and idle T4 cost.
+
+**Preconditions**: Existing `POST /api/v1/warm` contract remains available; staging or
+production-safe counters can distinguish `prewarm_requested` from `ask_started` without
+logging prompts or identity data; `scaledown_window` posture for the evaluated environment is
+known or bounded.
+
+**Steps**:
+
+1. Record the current default policy (`mount`) and the candidate alternatives (`dwell`,
+   `focus`, `first keystroke`).
+2. Measure or bound the rate of prewarms that do **not** lead to an ask.
+3. Estimate or observe isolated idle-T4 cost under candidate `scaledown_window` settings.
+4. Compare whether each trigger hides restore latency enough to justify its bounce cost.
+5. Pick one recommended trigger policy and document whether staging/prod should temporarily
+   differ while evidence is still thin.
+6. Keep the existing mount trigger unchanged until a later build gate approves a change.
+
+**Acceptance**: One recommended trigger policy, explicit privacy-safe metrics only, and a
+documented interaction with `scaledown_window`; no silent change to the live prewarm trigger.
+
+**Automated tests**: TC-328 (evidence/report contract). Existing mount-prewarm contract stays
+covered by TC-318-02 / UJ-090 until a later implementation slice changes behavior.
+
+**E2E tier**: staging (analysis / ops).
+
+**Refs**: [Corpus: feature-list.md §F40] [Corpus: ADR-022 §Amendment EV-318]
+[Corpus: ADR-004] [Corpus: config] #359
+
+### UJ-097: Ask primary vs Clear history secondary (F1 / F11 polish / EV-ux-backlog)
+
+**Actor**: Community member
+
+**Goal**: Submit an ask without accidentally clearing conversation history.
+
+**Steps**:
+
+1. Open ChatRAG composer with an active conversation (or empty).
+2. Observe **Ask** as the primary CTA and **Clear history** as a secondary, spaced control
+   (not equal-weight adjacent twins).
+3. Submit Ask — message sends; Clear remains available but harder to mis-tap.
+
+**Acceptance**: Ask primary; Clear demoted/spaced (UX-6); existing clear behavior unchanged.
+
+**Automated tests**: Vitest `ChatPanel` / UJ-097 layout contract; TC-329.
+
+**E2E tier**: local (Vitest).
+
+**Refs**: [Corpus: feature-list.md §F1] [Corpus: journeys] EV-ux-backlog-polish
+
+### UJ-098: Job status badges by semantic color (F32 polish / EV-ux-backlog)
+
+**Actor**: Operator
+
+**Goal**: Distinguish completed / running / failed / pending / cancelled at a glance on
+Jobs list and job detail.
+
+**Steps**:
+
+1. Open Admin → Jobs with mixed statuses (or fixtures).
+2. Confirm each status badge uses a distinct semantic variant (completed = success-leaning;
+   failed = destructive; running = progress; pending/cancelled = muted).
+
+**Acceptance**: Same variant map on list + detail (UX-7); no invented `skipped` job status.
+
+**Automated tests**: Vitest JobsPage / JobDetailPage variant asserts; TC-330.
+
+**E2E tier**: local (Vitest).
+
+**Refs**: [Corpus: feature-list.md §F32] [Corpus: journeys] EV-ux-backlog-polish
+
+### UJ-099: See Beta label + open feedback issue (F86)
+
+**Actor**: Admin operator
+
+**Goal**: Recognize Fine-tune and Evaluation Playground as Beta and open the umbrella
+GitHub feedback issue without leaving the admin chrome unclear.
+
+**Steps**:
+
+1. Open Admin → Fine-tune. Confirm **Beta** badge + banner with feedback link.
+2. Open Admin → Evaluation → Playground. Confirm the same Beta chrome (and on model
+   download panel when visible).
+3. Confirm Fine-tune / Evaluation nav items show a compact Beta chip.
+4. Click the feedback link → umbrella GitHub issue opens (new tab).
+
+**Acceptance**: AC-BETA1–AC-BETA3; en/es strings present; no PII sent to GitHub from the app
+(link-only).
+
+**Automated tests**: Vitest admin Beta chrome + Finetune/Playground mounts (TC-338, TC-339).
+
+**E2E tier**: local (Vitest; optional Playwright later).
+
+**Refs**: [Corpus: feature-list.md §F86] [Corpus: journeys] EV-beta-feature-labeling
 

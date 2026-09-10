@@ -5,6 +5,7 @@ Stage weights: modal run infra/modal/embedding_app.py::stage_embedding_weights
 
 Runtime: ``VECINITA_EMBED_RUNTIME`` = fastembed | sentence_transformers | onnx
 Model: ``VECINITA_EMBEDDING_MODEL_ID`` (default multilingual-e5-small)
+ASGI warm: ``VECINITA_EMBED_MIN_CONTAINERS`` = 0 (default) | 1 (EV-323 / #323)
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Protocol, cast
+from typing import Final, Protocol, cast
 
 import modal
 from infra.modal.repo_paths import resolve_repo_root
@@ -28,6 +29,31 @@ from vecinita_embedding_client.prefixes import resolve_embed_runtime
 APP_NAME = "vecinita-embedding"
 VOLUME_NAME = "embedding-models"
 _LOG = logging.getLogger(__name__)
+
+# Deploy-import env (EV-323 / #323 / ADR-004): warm ASGI vs scale-to-zero.
+EMBED_MIN_CONTAINERS_ENV: Final[str] = "VECINITA_EMBED_MIN_CONTAINERS"
+_DEFAULT_EMBED_MIN_CONTAINERS: Final[int] = 0
+_ALLOWED_EMBED_MIN_CONTAINERS: Final[frozenset[int]] = frozenset({0, 1})
+
+
+def _embed_min_containers_from_env() -> int:
+    """Parse ASGI ``min_containers`` from deploy-import env (default 0)."""
+    raw = os.environ.get(EMBED_MIN_CONTAINERS_ENV)
+    if raw is None:
+        return _DEFAULT_EMBED_MIN_CONTAINERS
+    try:
+        value = int(raw.strip())
+    except ValueError as exc:
+        msg = f"{EMBED_MIN_CONTAINERS_ENV} must be 0 or 1"
+        raise ValueError(msg) from exc
+    if value not in _ALLOWED_EMBED_MIN_CONTAINERS:
+        msg = f"{EMBED_MIN_CONTAINERS_ENV} must be 0 or 1"
+        raise ValueError(msg)
+    return value
+
+
+# Fixed at ``modal deploy`` import time (not container Secret runtime).
+_EMBED_MIN_CONTAINERS: Final[int] = _embed_min_containers_from_env()
 
 
 _REPO_ROOT = resolve_repo_root()
@@ -181,9 +207,9 @@ class EmbeddingService:
     image=image,
     memory=EMBED_MEMORY_MIB,
     secrets=_EMBED_SECRETS,
-    # Keep one ASGI worker so /health is not stuck behind cold import of
-    # sentence_transformers/fastembed (image.imports) after app stop/drain.
-    min_containers=1,
+    # Default 0 = scale-to-zero (EV-323 / ADR-004). Set VECINITA_EMBED_MIN_CONTAINERS=1
+    # at modal deploy import time to keep one warm ASGI worker (faster /health).
+    min_containers=_EMBED_MIN_CONTAINERS,
 )
 @modal.asgi_app()
 def embedding_api():

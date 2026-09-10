@@ -25,19 +25,25 @@ permissions:
 env:
   VECINITA_MODAL_WORKSPACE: vecinita
   MODAL_ENVIRONMENT: staging
+  # Pinned Supabase CLI — same constraint as deploy-modal.yml / supabase.yml (ADR-030 §8).
+  SUPABASE_CLI_VERSION: "2.84.2"
 
 jobs:
   deploy-staging:
     name: deploy-staging
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     environment: staging
     outputs:
       chat_url: ${{ steps.urls.outputs.chat_url }}
+      admin_frontend_url: ${{ steps.urls.outputs.admin_frontend_url }}
     env:
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_SMTP_PASS: ${{ secrets.SUPABASE_SMTP_PASS }}
+      RESEND_SENDER_EMAIL: ${{ secrets.RESEND_SENDER_EMAIL }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
       VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
@@ -57,7 +63,7 @@ jobs:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
 
       - name: Require staging Environment credentials
         run: |
@@ -75,46 +81,22 @@ jobs:
           fi
 
       - name: Install uv
-        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5.4.2
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
         with:
           enable-cache: true
 
       - name: Python 3.11
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.11"
 
       - name: Sync dependencies
         run: uv sync --group dev
 
-      - name: Deploy Modal apps to Environment staging
-        run: |
-          set -euo pipefail
-          export VECINITA_MODAL_WORKSPACE=vecinita
-          export MODAL_ENVIRONMENT=staging
-          bash scripts/deploy/modal.sh
-
       - name: Ensure staging DO apps exist
         run: |
           set -euo pipefail
           uv run --with pydo --with pyyaml scripts/deploy/do_apps.py create-all --env staging
-
-      - name: Sync staging DO secrets
-        run: |
-          set -euo pipefail
-          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets --env staging
-
-      - name: Deploy staging DO apps
-        run: |
-          set -euo pipefail
-          for app in \
-            vecinita-staging-write-api \
-            vecinita-staging-chat-api \
-            vecinita-staging-chat-fe \
-            vecinita-staging-admin-fe; do
-            echo "==> Deploying ${app}"
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy --name "${app}"
-          done
 
       - name: Export staging URLs
         id: urls
@@ -125,40 +107,148 @@ jobs:
           # shellcheck disable=SC1091
           set -a && source /tmp/staging-urls.env && set +a
           echo "chat_url=${VECINITA_STAGING_CHAT_URL:-}" >> "$GITHUB_OUTPUT"
+          echo "admin_frontend_url=${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect Supabase access token
+        id: supabase_token
+        run: |
+          if [ -z "${SUPABASE_ACCESS_TOKEN:-}" ]; then
+            echo "SUPABASE_ACCESS_TOKEN not configured — skipping Supabase sync"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Supabase CLI
+        if: steps.supabase_token.outputs.skip != 'true'
+        uses: supabase/setup-cli@3c2f5e2ae34c34e428e8e206e2c4d21fa2d20fbf  # v2.1.1
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+
+      - name: Sync staging Supabase auth/config
+        if: steps.supabase_token.outputs.skip != 'true'
+        env:
+          VECINITA_ADMIN_FRONTEND_URL: ${{ steps.urls.outputs.admin_frontend_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VECINITA_ADMIN_FRONTEND_URL:-}" ]; then
+            echo "::error::VECINITA_ADMIN_FRONTEND_URL unresolved from staging DO app URLs." >&2
+            exit 1
+          fi
+          bash scripts/supabase/ci_sync.sh sync-staging
+
+      - name: Deploy Modal apps to Environment staging
+        run: |
+          set -euo pipefail
+          export VECINITA_MODAL_WORKSPACE=vecinita
+          export MODAL_ENVIRONMENT=staging
+          bash scripts/deploy/modal.sh
+
+      - name: Require mirrored-corpus embed URL (vecinita--)
+        # EV-338 / BUG-2026-09-03 — prod→staging mirrored vectors need prod embed pin.
+        # Waiver: set Environment variable VECINITA_ALLOW_STAGING_EMBED=1 only when
+        # staging intentionally re-embeds under Modal Environment staging.
+        env:
+          VECINITA_ALLOW_STAGING_EMBED: ${{ vars.VECINITA_ALLOW_STAGING_EMBED || '' }}
+        run: |
+          set -euo pipefail
+          bash scripts/deploy/check_staging_embed_mirror_align.sh
+
+      - name: Sync staging DO secrets
+        run: |
+          set -euo pipefail
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py sync-all-secrets --env staging
+
+      - name: Deploy staging DO apps
+        run: |
+          set -euo pipefail
+          # Write API: fire-and-forget (smoke uses ChatRAG + admin FE primarily).
+          echo "==> Deploying vecinita-staging-write-api"
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy \
+            --name vecinita-staging-write-api
+          # ChatRAG API: wait ACTIVE so OpenAPI/H3 smoke hits the tip-of-stage image
+          # (branch retarget + force_build can take minutes; fire-and-forget raced smoke).
+          echo "==> Deploying vecinita-staging-chat-api (wait ACTIVE)"
+          uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy \
+            --name vecinita-staging-chat-api --wait --timeout-s 900
+          # Frontends: wait for ACTIVE so banner/UX bundles are live before smoke
+          # (BUG-2026-09-09-staging-fe-deploy-no-wait). Cap wait at 2×900s + slack.
+          for app in \
+            vecinita-staging-chat-fe \
+            vecinita-staging-admin-fe; do
+            echo "==> Deploying ${app} (wait ACTIVE)"
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py deploy \
+              --name "${app}" --wait --timeout-s 900
+          done
 
   staging-smoke:
     name: staging-smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     needs: deploy-staging
     environment: staging
     env:
       VECINITA_STAGING_CHAT_URL: ${{ needs.deploy-staging.outputs.chat_url }}
+      VECINITA_STAGING_ADMIN_FRONTEND_URL: ${{ needs.deploy-staging.outputs.admin_frontend_url }}
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      VECINITA_MODAL_DATA_MGMT_URL: ${{ secrets.VECINITA_MODAL_DATA_MGMT_URL }}
+      VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_ADMIN_EMAIL: ${{ secrets.SUPABASE_ADMIN_EMAIL }}
+      SUPABASE_ADMIN_PASSWORD: ${{ secrets.SUPABASE_ADMIN_PASSWORD }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5.4.2
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d  # v10.0.1
         with:
           enable-cache: true
 
-      - name: Resolve staging chat URL
+      - name: Resolve staging URLs
         run: |
           set -euo pipefail
-          if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ]; then
-            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging \
+          if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ] || [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
+            # --frontend exports admin FE URL used by H4/H5 smokes (Bugbot on #372).
+            uv run --with pydo --with pyyaml scripts/deploy/do_apps.py urls --env staging --frontend \
               | tee /tmp/staging-urls.env
             # shellcheck disable=SC1091
             set -a && source /tmp/staging-urls.env && set +a
-            echo "VECINITA_STAGING_CHAT_URL=${VECINITA_STAGING_CHAT_URL}" >> "$GITHUB_ENV"
           fi
           if [ -z "${VECINITA_STAGING_CHAT_URL:-}" ]; then
             echo "::error::VECINITA_STAGING_CHAT_URL unset — staging apps missing?" >&2
             exit 1
           fi
+          if [ -z "${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" ]; then
+            echo "::error::VECINITA_STAGING_ADMIN_FRONTEND_URL unset — staging admin FE missing?" >&2
+            exit 1
+          fi
+          echo "VECINITA_STAGING_CHAT_URL=${VECINITA_STAGING_CHAT_URL}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_CHAT_FRONTEND_URL=${VECINITA_STAGING_CHAT_FRONTEND_URL:-}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_ADMIN_FRONTEND_URL=${VECINITA_STAGING_ADMIN_FRONTEND_URL:-}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_WRITE_URL=${VECINITA_STAGING_WRITE_URL:-}" >> "$GITHUB_ENV"
+          echo "VECINITA_STAGING_ADMIN_API_URL=${VECINITA_STAGING_ADMIN_API_URL:-}" >> "$GITHUB_ENV"
 
-      - name: H1–H3 staging smoke
+      - name: Warm staging Modal (idle posture)
+        env:
+          VECINITA_MODAL_EMBED_URL: ${{ secrets.VECINITA_MODAL_EMBED_URL }}
+          VECINITA_MODAL_LLM_URL: ${{ secrets.VECINITA_MODAL_LLM_URL }}
+          VECINITA_MODAL_PROXY_KEY: ${{ secrets.VECINITA_MODAL_PROXY_KEY }}
         run: |
           set -euo pipefail
-          uv run pytest tests/smoke/test_staging_health.py -m live -q --tb=short
+          # EV-354 / #354 / TC-326 / UJ-095 — scale-to-zero staging needs warm before H1–H3
+          uv run python scripts/ops/warm_staging_for_smoke.py
+
+      - name: H1–H3 + admin staging smoke
+        run: |
+          set -euo pipefail
+          # TC-336: ChatRAG live OpenAPI requestBody gate (fails until OpenAPI-affecting
+          # ChatRAG image is redeployed — see staging-runbook § Adversarial).
+          uv run pytest \
+            tests/smoke/test_staging_health.py \
+            tests/smoke/test_staging_connectivity.py \
+            tests/smoke/test_staging_ev002_admin.py \
+            tests/smoke/test_staging_f84_metrics.py \
+            tests/smoke/test_staging_openapi_request_bodies.py \
+            tests/smoke/test_staging_fe_environment_banner.py \
+            -m live -q --tb=short

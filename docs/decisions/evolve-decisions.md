@@ -1794,3 +1794,155 @@ verify with HANDOFF dispositions if new Patterns appear.
 
 **Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Corpus: corpus-db-safety] [Corpus: no-live-prod-corpus-push] [Spec: ADR-054]
 
+---
+
+## EV-311 — Close cold-start umbrella on evidence (#311) (2026-09-04)
+
+**Session:** `EV-311-infra-sub-second-chatrag-latency-on-cheap-server`  
+**Ticket:** [#311](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/311)  
+**Filter:** open + `priority:high` only  
+**Intake / requirements:** operator **recommended** (close on evidence; defer #315/#317/#319)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-311-D1 | Scope | Close umbrella on evidence; no #315/#317/#319 impl this cycle |
+| EV-311-D2 | Env | Staging Modal forced-cold only; prod cite EV-313 (no prod stop without AskQuestion) |
+| EV-311-D3 | Harness | `cold_start_bench.py` generate + `--force-cold`; N≈20 smoke; optional N≥100 |
+| EV-311-D4 | E2E | Staging ChatRAG `chat-ask` and/or H3; never silent 504 |
+| EV-311-D5 | SLO | Green / Useful / Red per ADR-022; Useful + documented frontier may close |
+| EV-311-D6 | Docs | ADR-022 EV-311 frontier table + staging-runbook + modal README; session research note |
+| EV-311-D7 | UI | Docs/repo only (no UI feature interview) |
+| EV-311-D8 | New Fn | None — latency system already in ADR-022 / F40/F64/F85 |
+
+**Build evidence (2026-09-04):** Force-cold harness fixed for Modal CLI 1.5+. Staging restore
+after snapshot re-enable measured **Red** (~22–72s n=5). FAQ E2E Useful (~226ms).
+**Do not close #311** until restore enters Useful/Green or AskQuestion waiver.
+
+**Cites:** [Spec: ADR-022 §Amendment EV-311] [Corpus: acceptance] [Corpus: tests] [Corpus: staging] [Corpus: ADR-004] #311
+
+---
+
+## EV-323 — Full-stack cost reduce (keep staging+prod) (#323) (2026-09-04)
+
+**Session:** `EV-323-infra-cost-reduce-full-stack`  
+**Ticket:** [#323](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/323)  
+**Intake:** operator **recommended** (analyze + execute via `.env`; ≤$50; standard)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-323-D1 | Billing scope | **Vecinita-attributable only** (exclude metar/empiric on shared DO team) |
+| EV-323-D2 | Environments | Keep staging + prod (ADR-054); trim/compress only |
+| EV-323-D3 | Target | Full-stack ≤ **$50/mo** Vecinita envelope (ADR-004 hard) |
+| EV-323-D4 | Orphan DB | `vecinita-staging-restored-20260701` = delete **candidate**; AskQuestion before destroy |
+| EV-323-D5 | Supabase | Operator supplies management PAT (org/project read) for plan metering |
+| EV-323-D6 | Execute | Staging first; prod size/plan/auth mutate = AskQuestion |
+| EV-323-D7 | UI | N/A |
+| EV-323-D8 | New Fn | None — ops under ADR-004 / ADR-054 / #323 |
+
+**Cites:** [Corpus: ADR-004] [Corpus: ADR-054] [Corpus: staging] #323 #319
+
+---
+
+## EV-323 follow-up — DO projects + DB naming (2026-09-04)
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-323-D9 | DO projects | [first-project](https://cloud.digitalocean.com/projects/2621c952-fc44-4b89-a15b-aa4164664db4/resources) = **staging**; project **vecinita** = **prod** |
+| EV-323-D10 | “Orphan” DB | **Cancel destroy** — `vecinita-staging-restored-20260701` is **live prod** corpus (ChatRAG + write API; 119 docs) |
+| EV-323-D11 | Cluster rename | **Impossible on DO managed DB** — document alias `vecinita-prod-db` in runbooks; host FQDN stays |
+| EV-323-D12 | Staging DB | Keep `vecinita-staging-db` as staging corpus |
+| EV-323-D13 | `vecinita-staging-obs` | **Power off** (keep disk; ~$6/mo idle avoided). ID `596408528` / `159.203.137.236`. Power on when Grafana/Loki needed. |
+
+**Cites:** [Corpus: ADR-004] [Corpus: ADR-055] [Corpus: staging] #323
+
+## EV-354 — Staging idle cost posture (#354) (2026-09-05)
+
+**Session:** `EV-354-staging-cost-effectiveness`  
+**Ticket:** https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/354
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-354-D1 | Feature mapping | **F83 delta** (no new Fn) |
+| EV-354-D2 | Lever package | A+B+C+D — Modal idle + obs off + warm-before-smoke |
+| EV-354-D3 | Modal extras | Keep playground / FT / rerank **deployed**, scale-to-zero |
+| EV-354-D4 | Warm path | CI (`deploy-staging.yml`) + runbook helper |
+| EV-354-D5 | $ target | Soft — document staging-attributable delta |
+| EV-354-D6 | Prod DB alias | Do **not** destroy `vecinita-staging-restored-20260701` (EV-323-D10) |
+| EV-354-D7 | Shared Postgres | Still deferred (EV-STG-D7) |
+| EV-354-D8 | UI | N/A |
+
+**Acceptance:** AC-ST9–AC-ST14 · UJ-095 · TC-325–TC-327  
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Spec: ADR-054] [Corpus: ADR-004]
+
+## EV-latency-cost-efficiency — Milestone 7 latency and cost efficiency (2026-09-07)
+
+**Session:** `EV-latency-cost-efficiency`  
+**Tickets:** `#311` parent frame, then `#317`, `#319`, `#359`, `#354`, and `#323`
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-LCE-D1 | Resume mode | Advance from `spec-development/context` into requirements using the approved issue order |
+| EV-LCE-D2 | Goal frame | Reduce latency while preserving low idle cost, reliability, and Stage->Main safety |
+| EV-LCE-D3 | Session shape | Ordered planning/spec cycle first; build gate stays closed until later approval |
+| EV-LCE-D4 | First slice | `#317` thin Modal CPU ingress first as the smallest behavior-preserving cold-path lever |
+| EV-LCE-D5 | Second slice | `#319` scaledown tuning after `#317`, using privacy-safe timestamp-only gap evidence |
+| EV-LCE-D6 | Prewarm policy slice | `#359` is a follow-on decision slice about trigger policy, not an immediate change to the mount-prewarm contract |
+| EV-LCE-D7 | Staging slice | `#354` remains a staging-idle posture slice that must preserve F83 / `staging-smoke` credibility |
+| EV-LCE-D8 | Broad cost research | `#323` stays last as a research/output slice, not a host-migration mandate |
+| EV-LCE-D9 | Draft-docs delta | Minimal standing-doc delta only; add the missing `#359` journey/test/acceptance mapping |
+| EV-LCE-D10 | `#323` evidence waiver | Proceed with a plan-level whole-stack cost recommendation without the exact Supabase invoice / compute sizing; do not claim a verified `< $30/mo` envelope on that basis |
+
+**Artifacts:** Session requirements note at
+`~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-latency-cost-efficiency/reports/requirements-slice.md`
+plus `reports/prewarm-trigger-policy.md`, `reports/whole-stack-cost-baseline.md`, and
+`reports/whole-stack-cost-recommendation.md`
+
+**Cites:** [Corpus: feature-list.md §F40] [Corpus: staging] [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md] [Spec: docs/adr/ADR-054-distinct-staging-and-production.md] [Corpus: ADR-004]
+
+## EV-staging-api-adversarial (2026-09-09)
+
+Staging adversarial / Schemathesis contract pass after UX plunge + write-auth work.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-SAA-D1 | Schemathesis | Dev dep + in-process unit smoke (TC-334); prefer live `/openapi.json` for staging runs |
+| EV-SAA-D2 | Mutation | Request/negative fuzz first (`staging_api_probe.sh`); mutmut deferred |
+| EV-SAA-D3 | OpenAPI gaps | Publish Feedback requestBody + write/DM `securitySchemes`; live gate TC-336 in `staging-smoke` |
+| EV-SAA-D4 | Drift | Weekly repo↔live check via `scripts/ops/openapi_live_drift.py` (TC-337) |
+| EV-SAA-D5 | DM auth docs | Document dual auth JWT + `X-Vecinita-Proxy-Key` in api-contract + DM runbook |
+| EV-SAA-D6 | Redeploy | Staging ChatRAG (+ write/DM when OpenAPI changes) required after OpenAPI merges before closing adversarial cycle |
+
+**Cites:** [Corpus: staging] [Corpus: api] [Corpus: tests] [Spec: docs/test-plan.md §TC-333–TC-337]
+
+
+## EV-beta-feature-labeling (2026-09-09)
+
+Admin Beta labeling for Fine-tune + Evaluation playground; README/About; umbrella feedback issue; agent process.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-BETA-D1 | Scope | Fine-tune + Eval playground (+ model download); not Automations/Rebuild/ChatRAG this cycle |
+| EV-BETA-D2 | Feedback | One umbrella GH issue + label `beta-feedback` (not Discussions; not one issue per surface) |
+| EV-BETA-D3 | Docs surface | README + GitHub repo About/description |
+| EV-BETA-D4 | Feature id | New **F86** (not silent UX-only without Fn) |
+| EV-BETA-D5 | Related issues | #352 / #345 stay ops/tester; new issue is product Beta-surface feedback |
+| EV-BETA-D6 | Scale | Standard evolve |
+| EV-BETA-D7 | UI preview | Skip non-deployed preview; specify from docs + existing admin UI |
+| EV-BETA-D8 | Config | Issue URL via `VITE_BETA_FEEDBACK_ISSUE_URL` with documented default after create |
+
+**Cites:** [Corpus: feature-list.md §F86] [Corpus: frontend-i18n] · context brief `beta-feature-labeling.md`
+
+
+## EV-do-apps-github-sync-services (2026-09-10)
+
+Extend `do_apps.py` GitHub source sync to App Platform `services[]` (parity with
+`static_sites[]` from PR #378). Helper-only; staging backend YAML stays on `main`.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-do-apps-D1 | Scale | micro |
+| EV-do-apps-D2 | Scope | Sync `services[].github` `{repo,branch,deploy_on_push}` on create/create-all |
+| EV-do-apps-D3 | Staging YAML | Leave staging backend `github.branch` on `main` this cycle |
+| EV-do-apps-D4 | Safety | Github keys only — preserve encrypted live envs |
+
+**Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Spec: docs/staging-runbook.md §DigitalOcean CD]

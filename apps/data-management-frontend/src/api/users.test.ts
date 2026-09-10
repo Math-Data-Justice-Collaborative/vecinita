@@ -139,6 +139,29 @@ describe("users API client", () => {
     );
   });
 
+  it("inviteUser unwraps backend validation JSON into a readable message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            detail: [
+              {
+                type: "value_error",
+                loc: ["body", "email"],
+                msg: "Value error, invalid email address",
+              },
+            ],
+          },
+          422,
+        ),
+      ),
+    );
+    await expect(inviteUser(CLIENT, "x@example.org", "admin")).rejects.toThrow(
+      "Invalid email address",
+    );
+  });
+
   it("changeUserRole patches the role", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(SUMMARY)));
     await changeUserRole(CLIENT, USER_ID, "viewer");
@@ -256,6 +279,19 @@ describe("users API client", () => {
     );
     await listUsers(CLIENT, 1, 50, "alice");
     expect(lastUrl()).toContain("q=alice");
+  });
+
+  it("listUsers omits q when the provided search query is whitespace only", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ users: [], total: 0, page: 1, page_size: 50 }),
+        ),
+    );
+    await listUsers(CLIENT, 1, 50, "   ");
+    expect(lastUrl()).not.toContain("q=");
   });
 
   it("sendTestEmail posts to the test endpoint", async () => {
@@ -409,6 +445,54 @@ describe("users API client", () => {
     await expect(inviteUser(CLIENT, "a@b.com", "admin")).rejects.toThrow(
       /bad invite/,
     );
+  });
+
+  it("inviteUser unwraps object-style validation JSON into a readable message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            detail: {
+              msg: "Value error, operator email already invited",
+            },
+          },
+          422,
+        ),
+      ),
+    );
+    await expect(inviteUser(CLIENT, "a@b.com", "admin")).rejects.toThrow(
+      "Operator email already invited",
+    );
+  });
+
+  it("inviteUser falls back to the raw payload when validation JSON lacks a string message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          {
+            detail: [{ msg: 123 }],
+          },
+          422,
+        ),
+      ),
+    );
+    await expect(inviteUser(CLIENT, "a@b.com", "admin")).rejects.toThrow(
+      /"detail"/,
+    );
+  });
+
+  it("revokeInvite posts to the retract endpoint", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(null, { status: 204 })),
+    );
+    await revokeInvite(CLIENT, USER_ID);
+    expect(lastUrl()).toBe(
+      `${CLIENT.baseUrl}/admin/users/${USER_ID}/revoke-invite`,
+    );
+    expect(lastInit()?.method).toBe("POST");
   });
 
   it("revokeInvite throws when response is not ok", async () => {

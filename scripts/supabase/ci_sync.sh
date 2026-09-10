@@ -8,11 +8,20 @@ cd "$ROOT"
 
 # Supabase docs use SUPABASE_PROJECT_ID; repo workflow also sets SUPABASE_PROJECT_REF.
 PROJECT_REF="${SUPABASE_PROJECT_REF:-${SUPABASE_PROJECT_ID:-cfuvghdsuwactfeamtym}}"
+RETIRED_STAGING_PROJECT_REF="camkatfbjguwvymfgdme"
 
 require_token() {
   if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
     echo "SKIP: SUPABASE_ACCESS_TOKEN not set — cloud sync disabled."
     exit 0
+  fi
+}
+
+require_env() {
+  local key="$1"
+  if [[ -z "${!key:-}" ]]; then
+    echo "ERROR: ${key} is required." >&2
+    exit 1
   fi
 }
 
@@ -37,9 +46,101 @@ branch_project_ref_from_url() {
   sed -n 's|https://\([^.]*\)\.supabase\.co.*|\1|p' <<<"$url"
 }
 
+prepare_staging_config_root() {
+  local project_ref="$1"
+  local admin_origin="$2"
+  local sender_email="$3"
+  local temp_root
+
+  temp_root="$(mktemp -d)"
+  cp -R "$ROOT/supabase" "$temp_root/"
+
+  TMP_SUPABASE_CONFIG_ROOT="$temp_root" \
+  TMP_SUPABASE_PROJECT_REF="$project_ref" \
+  TMP_SUPABASE_ADMIN_ORIGIN="$admin_origin" \
+  TMP_SUPABASE_ADMIN_EMAIL="$sender_email" \
+  python3 <<'PY'
+from __future__ import annotations
+
+import os
+import re
+from pathlib import Path
+
+root = Path(os.environ["TMP_SUPABASE_CONFIG_ROOT"])
+project_ref = os.environ["TMP_SUPABASE_PROJECT_REF"]
+admin_origin = os.environ["TMP_SUPABASE_ADMIN_ORIGIN"].rstrip("/")
+admin_email = os.environ["TMP_SUPABASE_ADMIN_EMAIL"]
+config_path = root / "supabase" / "config.toml"
+text = config_path.read_text(encoding="utf-8")
+
+project_pattern = re.compile(r'^project_id\s*=\s*"[^"]+"', re.M)
+site_pattern = re.compile(r'^site_url\s*=\s*"([^"]+)"', re.M)
+email_pattern = re.compile(
+    r'(\[auth\.email\.smtp\]\s+enabled = true\s+host = "smtp\.resend\.com"\s+'
+    r'port = 465\s+user = "resend"\s+pass = "env\(SUPABASE_SMTP_PASS\)"\s+'
+    r'admin_email = )"[^"]+"',
+    re.S,
+)
+redirect_block_pattern = re.compile(
+    r"(additional_redirect_urls\s*=\s*\[)(.*?)(\n\])",
+    re.S,
+)
+
+site_match = site_pattern.search(text)
+if site_match is None:
+    raise SystemExit("site_url not found in supabase/config.toml")
+old_origin = site_match.group(1).rstrip("/")
+
+text = project_pattern.sub(f'project_id = "{project_ref}"', text, count=1)
+text = site_pattern.sub(f'site_url = "{admin_origin}"', text, count=1)
+
+redirect_match = redirect_block_pattern.search(text)
+if redirect_match is None:
+    raise SystemExit("additional_redirect_urls block not found in supabase/config.toml")
+
+redirects = re.findall(r'"([^"]+)"', redirect_match.group(2))
+rewritten: list[str] = []
+seen: set[str] = set()
+for entry in redirects:
+    updated = entry
+    if entry == old_origin:
+        updated = admin_origin
+    elif entry.startswith(f"{old_origin}/"):
+        updated = f"{admin_origin}{entry[len(old_origin):]}"
+    if updated not in seen:
+        rewritten.append(updated)
+        seen.add(updated)
+
+redirect_lines = "".join(f'\n  "{entry}",' for entry in rewritten)
+text = redirect_block_pattern.sub(
+    r"\1" + redirect_lines + r"\3",
+    text,
+    count=1,
+)
+
+if email_pattern.search(text) is None:
+    raise SystemExit("[auth.email.smtp] admin_email not found in supabase/config.toml")
+text = email_pattern.sub(rf'\1"{admin_email}"', text, count=1)
+
+config_path.write_text(text, encoding="utf-8")
+print(root)
+PY
+}
+
 preview_branch_exists() {
   local branch_name="$1"
   supabase branches get "$branch_name" --project-ref "$PROJECT_REF" --experimental -o json >/dev/null 2>&1
+}
+
+ensure_staging_branch() {
+  local branch_name="$1"
+  link_project
+  if preview_branch_exists "$branch_name"; then
+    echo "==> Staging branch already exists: ${branch_name}"
+  else
+    echo "==> Creating persistent staging branch: ${branch_name}"
+    supabase branches create "$branch_name" --project-ref "$PROJECT_REF" --experimental --yes
+  fi
 }
 
 wait_for_preview_branch() {
@@ -87,6 +188,30 @@ apply_repo_state_to_preview_branch() {
   supabase config push --project-ref "$branch_ref" --yes
 }
 
+validate_staging_supabase_url() {
+  local expected_url="$1"
+  local provided_url="${2:-}"
+  local trimmed_expected="${expected_url%/}"
+  local trimmed_provided="${provided_url%/}"
+
+  if [[ -z "$trimmed_provided" ]]; then
+    echo "ERROR: SUPABASE_URL is required and must point at the staging branch URL (${trimmed_expected})." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_provided" == *"${PROJECT_REF}.supabase.co" ]]; then
+    echo "ERROR: SUPABASE_URL points at the canonical prod Supabase project (${PROJECT_REF}). Use the staging branch URL (${trimmed_expected}) instead." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_provided" == *"${RETIRED_STAGING_PROJECT_REF}.supabase.co" ]]; then
+    echo "ERROR: SUPABASE_URL points at the retired standalone staging Supabase project (${RETIRED_STAGING_PROJECT_REF}). Use the staging branch URL (${trimmed_expected}) instead." >&2
+    exit 1
+  fi
+  if [[ "$trimmed_provided" != "$trimmed_expected" ]]; then
+    echo "ERROR: SUPABASE_URL (${trimmed_provided}) does not match the resolved staging branch URL (${trimmed_expected}). Re-sync staging secrets from the branch before deploy." >&2
+    exit 1
+  fi
+}
+
 sync_production() {
   require_token
   # Expired/revoked Management API PATs must not block Modal/DO CD. Same soft-fail
@@ -114,6 +239,63 @@ sync_production() {
   else
     echo "No supabase/migrations/*.sql — skipping db push"
   fi
+}
+
+sync_staging() {
+  require_env "SUPABASE_ACCESS_TOKEN"
+  require_env "SUPABASE_SMTP_PASS"
+  require_env "SUPABASE_SECRET_KEY"
+  require_env "SUPABASE_URL"
+  require_env "RESEND_SENDER_EMAIL"
+  require_env "VECINITA_ADMIN_FRONTEND_URL"
+  require_jq
+
+  local branch_name="${SUPABASE_STAGING_BRANCH_NAME:-staging}"
+  local admin_origin="${VECINITA_ADMIN_FRONTEND_URL%/}"
+  local branch_json
+  local db_url
+  local project_ref
+  local branch_url
+  local staging_root
+  local previous_dir="$PWD"
+
+  ensure_staging_branch "$branch_name"
+  branch_json="$(wait_for_preview_branch "$branch_name")"
+  db_url="$(jq -r '.POSTGRES_URL // empty' <<<"$branch_json")"
+  branch_url="$(jq -r '.SUPABASE_URL // empty' <<<"$branch_json")"
+  project_ref="$(branch_project_ref_from_url "$branch_url")"
+  if [[ -z "$project_ref" || -z "$branch_url" || -z "$db_url" ]]; then
+    echo "ERROR: could not resolve staging branch connection details for ${branch_name}" >&2
+    exit 1
+  fi
+  validate_staging_supabase_url "$branch_url" "${SUPABASE_URL}"
+
+  staging_root="$(prepare_staging_config_root "$project_ref" "$admin_origin" "${RESEND_SENDER_EMAIL}")"
+  trap "rm -rf '$staging_root'" RETURN
+
+  PROJECT_REF="$project_ref"
+  cd "$staging_root"
+  link_project
+  echo "==> Pushing staging auth/config from temp config.toml to branch ${branch_name}"
+  supabase config push --project-ref "$PROJECT_REF" --yes
+  if compgen -G "supabase/migrations/*.sql" > /dev/null; then
+    echo "==> Applying SQL migrations to staging branch ${branch_name}"
+    supabase db push --db-url "$db_url" --yes
+  else
+    echo "No supabase/migrations/*.sql — skipping db push"
+  fi
+  echo "==> Verifying staging auth URL config"
+  VECINITA_ADMIN_FRONTEND_URL="$admin_origin" \
+  SUPABASE_PROJECT_REF="$project_ref" \
+  SUPABASE_URL="${SUPABASE_URL}" \
+  SUPABASE_SECRET_KEY="${SUPABASE_SECRET_KEY}" \
+  bash "$ROOT/scripts/supabase/verify_live_auth_urls.sh"
+  VECINITA_ADMIN_FRONTEND_URL="$admin_origin" \
+  SUPABASE_PROJECT_REF="$project_ref" \
+  SUPABASE_URL="${SUPABASE_URL}" \
+  SUPABASE_SECRET_KEY="${SUPABASE_SECRET_KEY}" \
+  bash "$ROOT/scripts/supabase/check_live_invite_redirect.sh"
+  cd "$previous_dir"
 }
 
 preview_branch() {
@@ -152,6 +334,7 @@ Usage: $(basename "$0") <command> [args]
 
 Commands:
   sync-production          Push config (+ migrations when present) to canonical project
+  sync-staging             Ensure the persistent staging branch exists, then push config (+ migrations)
   preview-branch <name>    Create ephemeral preview branch and apply repo state
   delete-preview <name>    Tear down an ephemeral preview branch
 
@@ -159,6 +342,7 @@ Environment:
   SUPABASE_ACCESS_TOKEN    Required for cloud commands (skip gracefully when unset)
   SUPABASE_PROJECT_REF     Canonical project ref (default: cfuvghdsuwactfeamtym)
   SUPABASE_PROJECT_ID      Alias for SUPABASE_PROJECT_REF (Supabase docs convention)
+  SUPABASE_STAGING_BRANCH_NAME  Optional staging branch name (default: staging)
   SUPABASE_DB_PASSWORD     Optional — passed to supabase link when set
 EOF
 }
@@ -168,6 +352,7 @@ main() {
   shift || true
   case "$cmd" in
     sync-production) sync_production ;;
+    sync-staging) sync_staging ;;
     preview-branch) preview_branch "${1:-}" ;;
     delete-preview) delete_preview_branch "${1:-}" ;;
     -h | --help | help) usage ;;

@@ -6,15 +6,27 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# Detect the monorepo root install layout before choosing npm strategy.
 has_root_workspaces() {
   [[ -f package.json && -f package-lock.json ]] \
     && node -e "const p=require('./package.json'); process.exit(Array.isArray(p.workspaces)?0:1)"
 }
 
+# Reinstall when core workspace tool shims or the lockfile mirror are missing.
 needs_npm_ci() {
-  if [[ ! -x node_modules/.bin/eslint ]] || [[ ! -x node_modules/.bin/tsc ]]; then
-    return 0
-  fi
+  required_paths=(
+    node_modules/.bin/eslint
+    node_modules/.bin/tsc
+    node_modules/.bin/prettier
+    node_modules/.bin/vitest
+    node_modules/.bin/vite
+    node_modules/@eslint-community/eslint-utils/package.json
+  )
+  for required_path in "${required_paths[@]}"; do
+    if [[ ! -e "$required_path" ]]; then
+      return 0
+    fi
+  done
   if [[ ! -f node_modules/.package-lock.json ]]; then
     return 0
   fi
@@ -24,6 +36,7 @@ needs_npm_ci() {
   return 1
 }
 
+# Prefer a single root workspace install so shared tooling stays hoisted.
 ensure_installed() {
   if has_root_workspaces; then
     if needs_npm_ci; then
@@ -36,6 +49,7 @@ ensure_installed() {
   return 1
 }
 
+# Fall back to per-app installs for older non-workspace layouts.
 install_legacy_apps() {
   for app in chat-rag-frontend data-management-frontend; do
     echo "==> npm ci apps/${app}"

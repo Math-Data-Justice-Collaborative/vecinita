@@ -179,14 +179,15 @@ def daily_corpus_automations() -> dict[str, object]:
 @app.function(
     image=image,
     secrets=[modal.Secret.from_name("vecinita-data-management")],
-    timeout=600,
+    timeout=3600,
 )
-# Edge proxy auth blocks browser OPTIONS preflight (CORS); Modal-Key enforced in FastAPI.
-@modal.asgi_app(requires_proxy_auth=False)
-def fastapi_app():
+def process_dm_job(job_id: str) -> None:
+    """Modal worker for ingest/retag/eval/etc (ADR-038 spawn — not ASGI BackgroundTasks).
+
+    [Spec: docs/bug-reports/BUG-2026-09-09-stuck-pending-eval-jobs.md]
+    """
     from uuid import UUID
 
-    from vecinita_data_management_backend.app import create_app
     from vecinita_data_management_backend.jobs import run_job
     from vecinita_data_management_backend.store import DictJobStore
     from vecinita_data_management_backend.write_client import InternalWriteClient
@@ -196,7 +197,6 @@ def fastapi_app():
     from vecinita_tagging.translate_client import LlmTranslateClient
 
     jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
-    # modal.Dict is a MutableMapping at runtime but is not typed as one.
     store = DictJobStore(cast("MutableMapping[str, JobPayload]", jobs_dict))
     embed = EmbeddingClient()
     write = InternalWriteClient()
@@ -208,25 +208,49 @@ def fastapi_app():
         translate_client = LlmTranslateClient(llm)
     except Exception:
         logger.warning(
-            "LlmTagClient init failed — retag/translate jobs will fail. "
-            + "Ensure VECINITA_MODAL_LLM_URL is set in Modal secret '%s'.",
-            APP_NAME,
+            "LlmTagClient init failed in process_dm_job — retag/translate will fail",
             exc_info=True,
         )
-        tag_client = None
-        translate_client = None
-
-    # F77: approved finetune_train jobs call vecinita-llm-finetune::train_lora (T129.5).
     _ = os.environ.setdefault("VECINITA_FINETUNE_USE_MODAL", "1")
+    run_job(
+        UUID(job_id),
+        store=store,
+        embed_client=embed,
+        write_client=write,
+        tag_client=tag_client,
+        translate_client=translate_client,
+    )
 
-    def runner(job_id: UUID) -> None:
-        run_job(
-            job_id,
-            store=store,
-            embed_client=embed,
-            write_client=write,
-            tag_client=tag_client,
-            translate_client=translate_client,
-        )
 
-    return create_app(store=store, pipeline_runner=runner)
+@app.function(
+    image=image,
+    secrets=[modal.Secret.from_name("vecinita-data-management")],
+    timeout=600,
+)
+# Edge proxy auth blocks browser OPTIONS preflight (CORS); Modal-Key enforced in FastAPI.
+@modal.asgi_app(requires_proxy_auth=False)
+def fastapi_app():
+    from uuid import UUID
+
+    from vecinita_data_management_backend.app import create_app
+    from vecinita_data_management_backend.store import DictJobStore
+
+    jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
+    # modal.Dict is a MutableMapping at runtime but is not typed as one.
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", jobs_dict))
+
+    def spawn_job(job_id: UUID) -> str:
+        call = process_dm_job.spawn(str(job_id))
+        object_id = getattr(call, "object_id", None)
+        if isinstance(object_id, str) and object_id:
+            return object_id
+        return str(call)
+
+    def cancel_call(call_id: str) -> None:
+        modal.functions.FunctionCall.from_id(call_id).cancel()
+
+    return create_app(
+        store=store,
+        job_spawner=spawn_job,
+        cancel_modal_call=cancel_call,
+    )

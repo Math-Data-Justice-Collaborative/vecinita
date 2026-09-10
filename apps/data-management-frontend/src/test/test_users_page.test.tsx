@@ -268,6 +268,62 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     expect(await screen.findByText("invite boom")).toBeInTheDocument();
   });
 
+  it("blocks invalid invite email client-side without calling the backend", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(MIXED_USERS));
+    vi.stubGlobal("fetch", fetchMock);
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-invite-open")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("users-invite-open"));
+    fireEvent.change(screen.getByTestId("users-invite-email"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.click(screen.getByTestId("users-invite-submit"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/valid email/i);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders a human-readable invite validation error instead of raw JSON", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(MIXED_USERS))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          {
+            detail: [
+              {
+                type: "value_error",
+                loc: ["body", "email"],
+                msg: "Value error, invalid email address",
+              },
+            ],
+          },
+          422,
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-invite-open")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("users-invite-open"));
+    fireEvent.change(screen.getByTestId("users-invite-email"), {
+      target: { value: "new@example.org" },
+    });
+    fireEvent.click(screen.getByTestId("users-invite-submit"));
+
+    const alert = await screen.findByText("Invalid email address");
+    expect(alert).toHaveTextContent("Invalid email address");
+    expect(alert).not.toHaveTextContent('"detail"');
+    expect(alert).not.toHaveTextContent('"loc"');
+  });
+
   it("falls back to generic invite failure for non-Error rejections", async () => {
     const fetchMock = vi
       .fn()
@@ -533,6 +589,56 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     expect(screen.getByTestId("users-invite-role")).toHaveTextContent(/admin/i);
   });
 
+  it("does not submit search when a non-Enter key is pressed", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS));
+    vi.stubGlobal("fetch", fetchMock);
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-search-input")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId("users-search-input"), {
+      target: { value: "alice" },
+    });
+    fireEvent.keyDown(screen.getByTestId("users-search-input"), {
+      key: "Escape",
+      code: "Escape",
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears invite validation state when the dialog closes", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(MOCK_USERS)));
+    renderUsersPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("users-invite-open")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("users-invite-open"));
+    fireEvent.change(screen.getByTestId("users-invite-email"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.click(screen.getByTestId("users-invite-submit"));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/valid email/i);
+
+    fireEvent.keyDown(screen.getByRole("dialog"), {
+      key: "Escape",
+      code: "Escape",
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("users-invite-open"));
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/valid email/i)).not.toBeInTheDocument();
+  });
+
   it("ignores in-flight user list updates after unmount", async () => {
     let releaseList: (() => void) | undefined;
     const listGate = new Promise<void>((resolve) => {
@@ -551,6 +657,27 @@ describe("UsersPage (TC-088, UJ-030/031)", () => {
     const view = renderUsersPage();
     view.unmount();
     releaseList?.();
+    await Promise.resolve();
+  });
+
+  it("ignores in-flight user list failures after unmount", async () => {
+    let rejectList: ((reason?: unknown) => void) | undefined;
+    const listGate = new Promise<Response>((_resolve, reject) => {
+      rejectList = reject;
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/admin/users") && !url.includes("/admin/users/")) {
+          return listGate;
+        }
+        return Promise.resolve(jsonResponse(MOCK_USERS));
+      }),
+    );
+    const view = renderUsersPage();
+    view.unmount();
+    rejectList?.(new Error("late users failure"));
     await Promise.resolve();
   });
 });

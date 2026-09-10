@@ -26,6 +26,10 @@ from vecinita_shared_schemas.data_management import (
     JobTreeResponse,
 )
 from vecinita_shared_schemas.internal_write import AuditEventRequest, FeedbackListResponse
+from vecinita_shared_schemas.openapi_security import (
+    attach_openapi_security_schemes,
+    data_management_security_schemes,
+)
 from vecinita_shared_schemas.supabase_admin import SupabaseAdminClient, SupabaseAdminError
 
 from vecinita_data_management_backend.email_test import ResendClient
@@ -165,6 +169,7 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
     store: JobStore | None = None,
     require_proxy_auth: bool = True,
     pipeline_runner: Callable[[UUID], None] | None = None,
+    job_spawner: Callable[[UUID], str] | None = None,
     cors_env_value: str | None = None,
     admin_client: SupabaseAdminClient | None = None,
     audit_emit: Callable[[AuditEventRequest], None] | None = None,
@@ -177,7 +182,11 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
     sse_poll_interval_s: float = 0.25,
     sse_max_cycles: int | None = None,
 ) -> FastAPI:
-    """Build the Data Management ASGI app with job routes and optional pipeline runner."""
+    """Build the Data Management ASGI app with job routes and optional pipeline runner.
+
+    Prefer ``job_spawner`` (Modal ``.spawn`` → ``modal_call_id``) over ``pipeline_runner``
+    (FastAPI BackgroundTasks) for durable dispatch (ADR-038 / BUG-2026-09-09).
+    """
     app = FastAPI(title="Vecinita Data Management", version="0.1.0")
     resolved_cors = cors_env_value
     if resolved_cors is None:
@@ -193,10 +202,32 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
     job_store = store or InMemoryJobStore()
     event_broker = job_event_broker if job_event_broker is not None else JobEventBroker()
     runner = pipeline_runner
+    spawner = job_spawner
     resolved_eval_client = (
         eval_runs_client if eval_runs_client is not None else _default_eval_runs_client()
     )
     resolved_audit_emit = audit_emit if audit_emit is not None else _default_audit_emit()
+
+    def _dispatch_job(job_id: UUID, *, background: BackgroundTasks) -> None:
+        """Spawn Modal work when configured; else schedule BackgroundTasks (tests/local)."""
+        if spawner is not None:
+            try:
+                call_id = spawner(job_id)
+            except Exception as exc:
+                _ = job_store.update_job(
+                    job_id,
+                    status="failed",
+                    error_code=type(exc).__name__,
+                    error_message=str(exc)[:500],
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=f"job spawn failed: {exc}",
+                ) from exc
+            _ = job_store.update_job(job_id, modal_call_id=call_id)
+            return
+        if runner is not None:
+            background.add_task(runner, job_id)
 
     def auth_dep(
         modal_key: Annotated[str | None, Header(alias=_PROXY_HEADER)] = None,
@@ -259,8 +290,8 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
         except Exception:  # noqa: BLE001  # audit is best-effort; never fail job enqueue
             _logger.warning("audit emit failed for job.created", exc_info=True)
         # F77: do not start GPU train until POST /jobs/{id}/approve (TC-260 / TP6).
-        if runner is not None and job_type != "finetune_train":
-            background.add_task(runner, record.job_id)
+        if job_type != "finetune_train":
+            _dispatch_job(record.job_id, background=background)
         return CreateJobResponse(job_id=record.job_id, status="pending")
 
     @app.get("/jobs", response_model=JobList)
@@ -378,8 +409,7 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
                 detail="Job already approved",
             )
         updated = job_store.update_job(job_id, options_patch={"approved": True})
-        if runner is not None:
-            background.add_task(runner, job_id)
+        _dispatch_job(job_id, background=background)
         return job_record_to_schema(updated)
 
     @app.post(
@@ -411,8 +441,8 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
             initiated_by_role=auth.role,
         )
         # finetune_train still requires a fresh approve before GPU (ADR-053).
-        if runner is not None and record.job_type != "finetune_train":
-            background.add_task(runner, new_record.job_id)
+        if record.job_type != "finetune_train":
+            _dispatch_job(new_record.job_id, background=background)
         return CreateJobResponse(job_id=new_record.job_id, status="pending")
 
     @app.delete("/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -482,4 +512,5 @@ def create_app(  # noqa: PLR0913, PLR0915  # FastAPI factory: job routes + injec
         ),
     )
 
+    attach_openapi_security_schemes(app, data_management_security_schemes())
     return app

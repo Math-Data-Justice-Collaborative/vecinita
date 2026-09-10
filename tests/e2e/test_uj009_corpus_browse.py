@@ -7,9 +7,11 @@ from http import HTTPStatus
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
 from vecinita_chat_rag_backend.app import create_app
 from vecinita_chat_rag_backend.config import ChatRagSettings
-from vecinita_database.seeds.tags import load_seed_tags, load_tagged_corpus
+from vecinita_database.seeds.tags import load_seed_tags
+from vecinita_shared_schemas.db_mapping import scalar_uuid, sqlalchemy_scalar_one
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 from tests.helpers.json_response import (
@@ -33,11 +35,61 @@ def _database_url() -> str:
     )
 
 
+def _seed_public_browse_docs() -> None:
+    engine = create_engine(_database_url())
+    with engine.begin() as conn:
+        for url, title, slug in (
+            ("https://browse-housing.vecinita.test/", "Housing help center", "housing"),
+            ("https://browse-legal.vecinita.test/", "Legal Aid clinic", "legal"),
+        ):
+            doc_id = scalar_uuid(
+                sqlalchemy_scalar_one(
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO documents (url, title, language)
+                            VALUES (:url, :title, 'en')
+                            ON CONFLICT (url, language) DO UPDATE
+                            SET title = EXCLUDED.title,
+                                updated_at = now()
+                            RETURNING id
+                            """
+                        ),
+                        {"url": url, "title": title},
+                    )
+                )
+            )
+            tag_id = scalar_uuid(
+                sqlalchemy_scalar_one(
+                    conn.execute(
+                        text(
+                            """
+                            SELECT id
+                            FROM tags
+                            WHERE slug = :slug AND language = 'en'
+                            """
+                        ),
+                        {"slug": slug},
+                    )
+                )
+            )
+            _ = conn.execute(
+                text(
+                    """
+                    INSERT INTO document_tags (document_id, tag_id, source)
+                    VALUES (:document_id, :tag_id, 'llm')
+                    ON CONFLICT (document_id, tag_id) DO NOTHING
+                    """
+                ),
+                {"document_id": doc_id, "tag_id": tag_id},
+            )
+
+
 @pytest.fixture
 def browse_e2e_client() -> TestClient:
     """Browse e2e client."""
     _ = load_seed_tags(database_url=_database_url())
-    _ = load_tagged_corpus(database_url=_database_url())
+    _seed_public_browse_docs()
     settings = ChatRagSettings(
         database_url=_database_url(),
         top_k=5,

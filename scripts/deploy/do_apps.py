@@ -15,8 +15,9 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from urllib.parse import parse_qs, urlparse
 
 import yaml
@@ -58,6 +59,8 @@ _CHAT_BACKEND_NAMES = frozenset({"vecinita-chat-rag-backend", "vecinita-staging-
 _WRITE_API_NAMES = frozenset({"vecinita-internal-write-api", "vecinita-staging-write-api"})
 _CHAT_FE_NAMES = frozenset({"vecinita-chat-rag-frontend", "vecinita-staging-chat-fe"})
 _ADMIN_FE_NAMES = frozenset({"vecinita-admin-frontend", "vecinita-staging-admin-fe"})
+_PROD_SUPABASE_PROJECT_REF = "cfuvghdsuwactfeamtym"
+_RETIRED_STAGING_SUPABASE_PROJECT_REF = "camkatfbjguwvymfgdme"
 
 
 def specs_for_env(env: str) -> list[Path]:
@@ -138,13 +141,108 @@ def cmd_list(client) -> int:
     return 0
 
 
+def sync_component_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+    *,
+    list_key: str,
+) -> bool:
+    """Copy ``{list_key}[].github`` repo/branch/deploy_on_push from YAML into live spec.
+
+    Only those three keys are written so encrypted live ``envs`` stay intact.
+    Components are matched by ``name``.
+    """
+    desired_list = yaml_spec.get(list_key)
+    live_list = live_spec.get(list_key)
+    if not isinstance(desired_list, list) or not isinstance(live_list, list):
+        return False
+    changed = False
+    desired_by_name: dict[str, dict[str, object]] = {}
+    for component in desired_list:
+        if isinstance(component, dict) and isinstance(component.get("name"), str):
+            desired_by_name[str(component["name"])] = component
+    for live_component in live_list:
+        if not isinstance(live_component, dict):
+            continue
+        name = live_component.get("name")
+        if not isinstance(name, str):
+            continue
+        desired = desired_by_name.get(name)
+        if desired is None:
+            continue
+        desired_gh = desired.get("github")
+        if not isinstance(desired_gh, dict):
+            continue
+        live_gh_raw = live_component.get("github")
+        live_gh: dict[str, object]
+        if isinstance(live_gh_raw, dict):
+            live_gh = live_gh_raw
+        else:
+            live_gh = {}
+            live_component["github"] = live_gh
+        for key in ("repo", "branch", "deploy_on_push"):
+            if key not in desired_gh:
+                continue
+            if live_gh.get(key) != desired_gh[key]:
+                live_gh[key] = desired_gh[key]
+                changed = True
+    return changed
+
+
+def sync_static_site_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+) -> bool:
+    """Copy ``static_sites[].github`` branch/repo from YAML into the live app spec.
+
+    ``create-all`` previously skipped existing apps, so staging FEs kept building
+    from an old branch (``main``) even after YAML pointed at ``stage``.
+    """
+    return sync_component_github_from_yaml(live_spec, yaml_spec, list_key="static_sites")
+
+
+def sync_service_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+) -> bool:
+    """Copy ``services[].github`` branch/repo from YAML into the live app spec.
+
+    Same gap as static sites: existing backend apps kept an old ``github.branch``
+    after YAML changed. Sync github keys only — do not replace encrypted envs.
+    """
+    return sync_component_github_from_yaml(live_spec, yaml_spec, list_key="services")
+
+
+def sync_app_github_from_yaml(
+    live_spec: dict[str, object],
+    yaml_spec: dict[str, object],
+) -> bool:
+    """Sync github source for both ``static_sites[]`` and ``services[]`` components."""
+    sites_changed = sync_static_site_github_from_yaml(live_spec, yaml_spec)
+    services_changed = sync_service_github_from_yaml(live_spec, yaml_spec)
+    return sites_changed or services_changed
+
+
 def cmd_create(client, spec_path: Path) -> int:
     spec = _load_spec(spec_path)
     name = spec["name"]
     apps = _iter_apps(client)
     existing = _find_app(apps, name)
     if existing:
-        print(f"App already exists: {name} ({existing['id']}) — use deploy/update instead.")
+        app_id = existing["id"]
+        detail = client.apps.get(id=app_id)
+        app_body = detail.get("app") if isinstance(detail, dict) else None
+        if not isinstance(app_body, dict):
+            app_body = existing
+        live_spec_raw = app_body.get("spec") or {}
+        if not isinstance(live_spec_raw, dict):
+            raise SystemExit(f"Live app {name!r} has invalid spec")
+        live_spec = cast("dict[str, object]", live_spec_raw)
+        if sync_app_github_from_yaml(live_spec, cast("dict[str, object]", spec)):
+            _ = client.apps.update(id=app_id, body={"spec": live_spec})
+            print(f"Updated github source for existing app: {name} ({app_id})")
+        else:
+            print(f"App already exists: {name} ({app_id}) — github source unchanged.")
         return 0
     resp = client.apps.create(body={"spec": spec})
     app = resp.get("app") or {}
@@ -168,7 +266,51 @@ def cmd_create_all(client, *, env: str = "prod") -> int:
     return rc
 
 
-def cmd_deploy(client, name: str) -> int:
+_TERMINAL_OK = frozenset({"ACTIVE"})
+_TERMINAL_FAIL = frozenset({"ERROR", "CANCELED", "SUPERSEDED"})
+
+
+def wait_for_deployment(
+    client: Any,
+    *,
+    app_id: str,
+    deployment_id: str,
+    timeout_s: float = 900,
+    poll_s: float = 10,
+) -> str:
+    """Block until a DO App Platform deployment reaches ACTIVE (or fail).
+
+    Deploy Staging previously returned after PENDING_BUILD, so staging FEs could
+    keep serving pre-banner bundles while smoke already passed (EV-staging-responsive-plunge).
+    """
+    deadline = time.monotonic() + timeout_s
+    last_phase = "UNKNOWN"
+    while time.monotonic() < deadline:
+        resp = client.apps.get_deployment(app_id=app_id, deployment_id=deployment_id)
+        dep: Any = resp.get("deployment") if isinstance(resp, dict) else None
+        if not isinstance(dep, dict):
+            dep = resp if isinstance(resp, dict) else {}
+        phase_raw = dep.get("phase")
+        last_phase = str(phase_raw) if phase_raw is not None else "UNKNOWN"
+        print(f"… deployment {deployment_id} phase={last_phase}")
+        if last_phase in _TERMINAL_OK:
+            return last_phase
+        if last_phase in _TERMINAL_FAIL:
+            raise SystemExit(f"Deployment {deployment_id} ended in phase={last_phase}")
+        time.sleep(poll_s)
+    raise SystemExit(
+        f"Timed out after {timeout_s:.0f}s waiting for deployment "
+        + f"{deployment_id} (last phase={last_phase})"
+    )
+
+
+def cmd_deploy(
+    client: Any,
+    name: str,
+    *,
+    wait: bool = False,
+    timeout_s: float = 900,
+) -> int:
     apps = _iter_apps(client)
     app = _find_app(apps, name)
     if not app:
@@ -176,7 +318,18 @@ def cmd_deploy(client, name: str) -> int:
     app_id = app["id"]
     resp = client.apps.create_deployment(app_id=app_id, body={"force_build": True})
     dep = resp.get("deployment") or {}
-    print(f"Deployment started for {name}: deployment_id={dep.get('id')} phase={dep.get('phase')}")
+    dep_id = dep.get("id")
+    print(f"Deployment started for {name}: deployment_id={dep_id} phase={dep.get('phase')}")
+    if wait:
+        if not isinstance(dep_id, str) or not dep_id:
+            raise SystemExit(f"Deploy {name}: missing deployment id in API response")
+        phase = wait_for_deployment(
+            client,
+            app_id=str(app_id),
+            deployment_id=dep_id,
+            timeout_s=timeout_s,
+        )
+        print(f"Deployment ready for {name}: phase={phase}")
     return 0
 
 
@@ -209,6 +362,39 @@ def _apply_env_from_os(spec: dict[str, Any], keys: list[str], scope: str = "RUN_
                     )
 
 
+def validate_supabase_url_for_target(
+    name: str,
+    supabase_url: str,
+    *,
+    env_key: str = "SUPABASE_URL",
+) -> None:
+    """Fail closed when a staging-targeted auth app is pointed at disallowed Supabase refs.
+
+    Staging admin auth now lives on a branch-backed staging path under the
+    canonical project. Refuse both the canonical prod project ref and the
+    retired standalone staging project ref so staging frontend/backend secrets
+    cannot drift back to either unsupported auth target.
+    """
+    trimmed = supabase_url.strip().rstrip("/")
+    if not trimmed:
+        return
+    parsed = urlparse(trimmed)
+    host = parsed.netloc.lower()
+    if not name.startswith("vecinita-staging-"):
+        return
+    if _PROD_SUPABASE_PROJECT_REF in host:
+        raise SystemExit(
+            f"{name}: {env_key} points at the prod Supabase project "
+            + f"({_PROD_SUPABASE_PROJECT_REF}). Refuse to sync prod Supabase auth into staging."
+        )
+    if _RETIRED_STAGING_SUPABASE_PROJECT_REF in host:
+        raise SystemExit(
+            f"{name}: {env_key} points at the retired standalone staging Supabase project "
+            + f"({_RETIRED_STAGING_SUPABASE_PROJECT_REF}). Refuse to sync the old staging auth "
+            + "project into branch-backed staging."
+        )
+
+
 def cmd_sync_secrets(client, name: str) -> int:
     """Push env vars from shell into the live app spec via apps.update.
 
@@ -221,6 +407,18 @@ def cmd_sync_secrets(client, name: str) -> int:
     if not app:
         raise SystemExit(f"No app named {name!r}")
     spec = app.get("spec") or {}
+    if name == "vecinita-staging-write-api":
+        validate_supabase_url_for_target(
+            name,
+            os.environ.get("SUPABASE_URL", ""),
+            env_key="SUPABASE_URL",
+        )
+    if name == "vecinita-staging-admin-fe":
+        validate_supabase_url_for_target(
+            name,
+            os.environ.get("VITE_SUPABASE_URL", ""),
+            env_key="VITE_SUPABASE_URL",
+        )
     if name in _CHAT_BACKEND_NAMES:
         _apply_env_from_os(
             spec,
@@ -251,6 +449,15 @@ def cmd_sync_secrets(client, name: str) -> int:
                 "VECINITA_MODAL_EMBED_URL",
                 "VECINITA_MODAL_LLM_URL",
                 "VECINITA_MODAL_LLM_PLAYGROUND_URL",
+                "VECINITA_AUTOMATIONS_ENABLED",
+                "VECINITA_AUTOMATIONS_KILL_SWITCH",
+                "VECINITA_AUTOMATIONS_MAX_CONCURRENT",
+                "VECINITA_FRESHNESS_ENABLED",
+                "VECINITA_FRESHNESS_STALE_DAYS",
+                "VECINITA_FINETUNE_ENABLED",
+                "VECINITA_FINETUNE_REQUIRE_APPROVE",
+                "VECINITA_FINETUNE_MAX_CONCURRENT",
+                "VECINITA_FINETUNE_MAX_RUNS_PER_DAY",
                 "VECINITA_CHAT_RAG_URL",
                 "VECINITA_CHAT_FRONTEND_URL",
                 "VECINITA_ADMIN_FRONTEND_URL",
@@ -391,6 +598,17 @@ def main() -> int:
     )
     p_dep = sub.add_parser("deploy", help="Trigger deployment for existing app by spec name")
     _ = p_dep.add_argument("--name", required=True, help="App spec name field")
+    _ = p_dep.add_argument(
+        "--wait",
+        action="store_true",
+        help="Block until deployment phase is ACTIVE (required for FE banner parity)",
+    )
+    _ = p_dep.add_argument(
+        "--timeout-s",
+        type=float,
+        default=900,
+        help="Max seconds to wait when --wait is set (default: 900)",
+    )
     p_urls = sub.add_parser("urls", help="Print VECINITA_STAGING_* export lines")
     _ = p_urls.add_argument(
         "--env",
@@ -424,7 +642,12 @@ def main() -> int:
     if args.command == "create-all":
         return cmd_create_all(client, env=args.env)
     if args.command == "deploy":
-        return cmd_deploy(client, args.name)
+        return cmd_deploy(
+            client,
+            args.name,
+            wait=bool(getattr(args, "wait", False)),
+            timeout_s=float(getattr(args, "timeout_s", 900)),
+        )
     if args.command == "urls":
         return cmd_urls(
             client,

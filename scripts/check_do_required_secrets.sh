@@ -68,6 +68,30 @@ if ! rg -q 'VECINITA_MODAL_LLM_PLAYGROUND_URL' scripts/deploy/do_apps.py; then
   exit 1
 fi
 
+for key in \
+  VECINITA_AUTOMATIONS_ENABLED \
+  VECINITA_AUTOMATIONS_KILL_SWITCH \
+  VECINITA_AUTOMATIONS_MAX_CONCURRENT \
+  VECINITA_FRESHNESS_ENABLED \
+  VECINITA_FRESHNESS_STALE_DAYS \
+  VECINITA_FINETUNE_ENABLED \
+  VECINITA_FINETUNE_REQUIRE_APPROVE \
+  VECINITA_FINETUNE_MAX_CONCURRENT \
+  VECINITA_FINETUNE_MAX_RUNS_PER_DAY; do
+  if ! rg -q "key: ${key}" infra/do/internal-write-api.yaml; then
+    echo "ERROR: internal-write-api.yaml must declare ${key} for EV-027 ship path." >&2
+    exit 1
+  fi
+  if ! rg -q "${key}" scripts/deploy/do_apps.py; then
+    echo "ERROR: do_apps.py must sync ${key} for EV-027 ship path." >&2
+    exit 1
+  fi
+  if ! rg -q "${key}" scripts/deploy/sync_github_secrets.sh; then
+    echo "ERROR: sync_github_secrets.sh must surface ${key} for CD." >&2
+    exit 1
+  fi
+done
+
 # do_apps must sync PROXY_KEY onto chat backends (prod + staging short names).
 if ! awk '
   /if name in _CHAT_BACKEND_NAMES/ { in_block=1 }
@@ -91,6 +115,10 @@ if ! rg -q 'ci_materialize_env.sh' scripts/deploy/sync_env.sh; then
 fi
 if ! rg -q 'sync_llm_secret.sh' scripts/deploy/sync_env.sh; then
   echo "ERROR: sync_env.sh must call sync_llm_secret.sh (vecinita-llm proxy key)." >&2
+  exit 1
+fi
+if ! rg -q 'sync_finetune_secret.sh' scripts/deploy/sync_env.sh; then
+  echo "ERROR: sync_env.sh must call sync_finetune_secret.sh (vecinita-llm-finetune)." >&2
   exit 1
 fi
 if ! rg -q 'sync_modal_secret.sh --merge' scripts/deploy/sync_env.sh; then

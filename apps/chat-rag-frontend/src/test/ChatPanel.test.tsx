@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { PREWARM_POLICY_STORAGE_KEY } from "../api/prewarmPolicy";
 import { ChatPanel } from "../components/ChatPanel";
 import { renderWithLocale } from "./renderWithLocale";
 
@@ -120,6 +121,32 @@ describe("ChatPanel", () => {
         }),
       }),
     );
+  });
+
+  it("records privacy-safe prewarm evidence when the user asks after mount", async () => {
+    const sse =
+      'data: {"token":"The pantry opens at 9."}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Where is the pantry?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+
+    await waitFor(() => {
+      const raw = sessionStorage.getItem(PREWARM_POLICY_STORAGE_KEY);
+      expect(raw).not.toBeNull();
+      expect(raw).not.toContain("Where is the pantry?");
+    });
   });
 
   it("shows warm-up status when the first ask attempt fails transiently", async () => {
@@ -381,6 +408,59 @@ describe("ChatPanel", () => {
     );
   });
 
+  it("submits the focused textarea on Enter", async () => {
+    const sse =
+      'data: {"token":"Sent"}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    const textarea = screen.getByLabelText(/your question/i);
+    fireEvent.change(textarea, {
+      target: { value: "Send with keyboard" },
+    });
+    fireEvent.keyDown(textarea, { key: "Enter", code: "Enter" });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        "http://localhost:8000/api/v1/ask/stream",
+        expect.objectContaining({
+          body: JSON.stringify({
+            question: "Send with keyboard",
+            language: "en",
+          }),
+        }),
+      );
+    });
+    expect(screen.getByText(/^Sent$/)).toBeInTheDocument();
+  });
+
+  it("keeps Shift+Enter for multiline drafting without submit", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
+
+    renderWithLocale(<ChatPanel />);
+    const textarea = screen.getByLabelText(/your question/i);
+    fireEvent.change(textarea, {
+      target: { value: "Line 1" },
+    });
+    fireEvent.keyDown(textarea, {
+      key: "Enter",
+      code: "Enter",
+      shiftKey: true,
+    });
+
+    expect(fetch).not.toHaveBeenCalledWith(
+      expect.stringContaining("/api/v1/ask/stream"),
+      expect.anything(),
+    );
+  });
+
   it("includes the sidebar-selected tags in the ask request", async () => {
     const sse =
       'data: {"token":"Ok"}\n\n' +
@@ -428,6 +508,38 @@ describe("ChatPanel", () => {
     fireEvent.click(firstChip);
     expect(screen.getByLabelText(/your question/i)).toHaveValue(
       firstChip.textContent,
+    );
+  });
+
+  it("renders assistant markdown for emphasis, lists, and links", async () => {
+    const sse =
+      'data: {"token":"**Bold**\\n\\n- One\\n- Two\\n\\n[Help](https://example.org/help)"}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Show markdown" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Bold")).toBeInTheDocument();
+    });
+    expect(document.querySelector(".message-content strong")?.textContent).toBe(
+      "Bold",
+    );
+    expect(screen.getByText("One")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Help" })).toHaveAttribute(
+      "href",
+      "https://example.org/help",
     );
   });
 
@@ -513,5 +625,17 @@ describe("ChatPanel", () => {
 
     expect(screen.queryByTestId("cold-start-wait")).not.toBeInTheDocument();
     expect(screen.getByText(/^Ready$/)).toBeInTheDocument();
+  });
+
+  it("marks Ask as primary and Clear history as secondary (UJ-097 / UX-6)", () => {
+    vi.stubGlobal("fetch", mockFetchRouter({}));
+    renderWithLocale(<ChatPanel />);
+    expect(screen.getByTestId("chat-ask-submit")).toHaveAttribute(
+      "data-priority",
+      "primary",
+    );
+    const clear = screen.getByTestId("chat-clear-history");
+    expect(clear).toHaveAttribute("data-priority", "secondary");
+    expect(clear.className.split(/\s+/)).toContain("chat-clear-history");
   });
 });

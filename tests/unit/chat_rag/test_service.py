@@ -191,7 +191,8 @@ def test_ask_returns_no_context_message_when_empty() -> None:
     """Test ask returns no context message when empty."""
     service = _service(chunks=[])
     response = service.ask(AskRequest(question="Where is the clinic?"))
-    assert "context" in response.answer.lower()
+    assert "matching sources" in response.answer.lower()
+    assert "corpus" in response.answer.lower()
     assert response.sources == []
 
 
@@ -325,10 +326,10 @@ def test_ask_stream_yields_no_context_when_empty() -> None:
 
 
 def test_ask_stream_yields_llm_tokens() -> None:
-    """F82 / AC-OV5: stream buffers full generation then emits once (TC-288)."""
+    """Verify-off path should surface incremental stream tokens from the LLM client."""
     service = _service(chunks=[_chunk()])
     tokens = list(service.ask_stream(AskRequest(question="clinic hours")))
-    assert tokens == ["Streamed"]
+    assert tokens == ["Stream", "ed"]
 
 
 def test_ask_applies_output_verify_when_enabled() -> None:
@@ -761,7 +762,8 @@ def test_stream_ask_cache_empty_retrieve_returns_no_context() -> None:
         session = service.stream_ask(AskRequest(question="no hits here", language="en"))
     tokens = list(session.tokens)
     assert len(tokens) == 1
-    assert "context" in tokens[0].lower()
+    assert "matching sources" in tokens[0].lower()
+    assert "corpus" in tokens[0].lower()
     assert llm.prompts == []
 
 
@@ -796,7 +798,8 @@ def test_ask_cache_miss_empty_retrieve_returns_no_context_none_hit() -> None:
     )
     with patch.object(service, "_production_config", return_value=EvalConfig(top_k=5)):
         response = service.ask(AskRequest(question="no hits here", language="en"))
-    assert "context" in response.answer.lower()
+    assert "matching sources" in response.answer.lower()
+    assert "corpus" in response.answer.lower()
     assert response.cache_hit == "none"
     assert llm.prompts == []
 

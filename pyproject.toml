@@ -29,6 +29,7 @@ dev = [
     "vecinita-tagging",
     "vecinita-rag",
     "vecinita-shared-schemas",
+    "schemathesis>=4.0,<5",
 ]
 
 [tool.uv]

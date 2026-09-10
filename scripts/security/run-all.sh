@@ -15,7 +15,9 @@ export PATH="${BIN_DIR}:${PATH}"
 export REPORTS
 export SEC_TOOLS_DIR="${PREFIX}"
 
+# Emit prefixed status lines for long-running security tools.
 log() { printf '[security] %s\n' "$*"; }
+# Emit prefixed error lines on stderr for failing security tools.
 err() { printf '[security] ERROR: %s\n' "$*" >&2; }
 
 mkdir -p "${REPORTS}"
@@ -24,6 +26,7 @@ if [[ "${SEC_INSTALL:-1}" == "1" ]]; then
   bash "${ROOT}/scripts/security/install-tools.sh"
 fi
 
+# Fail fast when a required scanner binary is unavailable.
 need() { command -v "$1" >/dev/null 2>&1 || { err "missing $1 — run scripts/security/install-tools.sh"; exit 1; }; }
 
 # Avoid set -e abort when SEC_FAIL_FAST=0 and the last command in run() is a
@@ -83,10 +86,17 @@ run 2ms 2ms filesystem --path "${ROOT}" \
   --ignore-pattern '.pytest_cache' \
   --ignore-pattern '.ruff_cache' \
   --ignore-pattern '.env' \
+  --ignore-pattern '.env.staging' \
   --ignore-pattern '*.env' \
+  --ignore-pattern '.env.*' \
   --ignore-pattern 'prod.env' \
+  --ignore-pattern '.staging-db-url.local' \
+  --ignore-pattern '.staging-supabase-db-pass.local' \
+  --ignore-pattern '.staging-supabase-keys.local' \
+  --ignore-pattern '.staging-supabase-ref.local' \
   --ignore-pattern '.deploy-keys.local' \
   --ignore-pattern '.tmp' \
+  --ignore-pattern '.staging-*.local' \
   --ignore-pattern 'admin-fe-spec.yaml' \
   --ignore-pattern 'internal-write-api-spec.yaml' \
   --ignore-pattern 'chat-rag-spec.yaml' \
@@ -134,7 +144,7 @@ if [[ "${SEC_SKIP_SBOM:-0}" != "1" ]]; then
     SBOM_ARGS+=(
       -li true
       -pm true
-      -lto "${SEC_SBOM_LICENSE_TIMEOUT_SEC:-300}"
+      -lto "${SEC_SBOM_LICENSE_TIMEOUT_SEC:-30}"
     )
   fi
   run SBOM sbom-tool "${SBOM_ARGS[@]}"

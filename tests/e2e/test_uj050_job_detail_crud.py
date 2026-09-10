@@ -9,14 +9,22 @@ from __future__ import annotations
 
 import json
 from http import HTTPStatus
-from typing import cast
+from typing import NoReturn, cast
 from uuid import UUID
 
 import pytest
+from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 from vecinita_data_management_backend.app import create_app
 from vecinita_data_management_backend.store import InMemoryJobStore
-from vecinita_shared_schemas.auth import AuthPrincipal, get_principal, reset_auth_config_for_tests
+from vecinita_shared_schemas.auth import (
+    AuthContext,
+    AuthPrincipal,
+    get_principal,
+    require_admin_write,
+    reset_auth_config_for_tests,
+    resolve_operator_or_service,
+)
 from vecinita_shared_schemas.json_types import JsonObject, as_json_object
 
 from tests.helpers.json_response import json_str, response_json_object
@@ -51,6 +59,30 @@ def _client(
         sse_max_cycles=sse_max_cycles,
     )
     app.dependency_overrides[get_principal] = lambda: principal
+    app.dependency_overrides[resolve_operator_or_service] = lambda: AuthContext(
+        principal=principal,
+        is_service=False,
+    )
+    return TestClient(app)
+
+
+def _viewer_client(
+    store: InMemoryJobStore,
+    *,
+    sse_max_cycles: int = 3,
+) -> TestClient:
+    app = create_app(
+        store=store,
+        require_proxy_auth=False,
+        sse_poll_interval_s=0.05,
+        sse_max_cycles=sse_max_cycles,
+    )
+    app.dependency_overrides[get_principal] = lambda: _VIEWER
+
+    def _forbid_viewer_write() -> NoReturn:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    app.dependency_overrides[require_admin_write] = _forbid_viewer_write
     return TestClient(app)
 
 
@@ -153,7 +185,7 @@ def test_uj050_admin_cancel_retry_delete_and_viewer_forbidden() -> None:
     _ = store.update_job(terminal.job_id, status="completed")
 
     admin = _client(store, _ADMIN)
-    viewer = _client(store, _VIEWER)
+    viewer = _viewer_client(store)
 
     assert viewer.post(f"/jobs/{running.job_id}/cancel").status_code == HTTPStatus.FORBIDDEN
     assert viewer.post(f"/jobs/{failed.job_id}/retry").status_code == HTTPStatus.FORBIDDEN

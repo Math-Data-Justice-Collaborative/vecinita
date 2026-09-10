@@ -11,7 +11,7 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from pydantic import ValidationError
 from vecinita_shared_schemas.auth import require_authenticated, require_service
-from vecinita_shared_schemas.chat_rag import FeedbackCreateResponse
+from vecinita_shared_schemas.chat_rag import FeedbackCreateResponse, FeedbackRequest
 from vecinita_shared_schemas.internal_write import (
     AuditCleanupResponse,
     AuditEventRequest,
@@ -33,6 +33,25 @@ from vecinita_internal_write_api.feedback_notify import (
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
+
+
+def _feedback_request_openapi_extra() -> dict[str, object]:
+    """Publish FeedbackRequest body in OpenAPI (Request-only handlers omit it otherwise).
+
+    [Corpus: api] EV-staging-api-adversarial / F68 / TC-337 internal-write drift
+    """
+    return {
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": FeedbackRequest.model_json_schema(
+                        ref_template="#/components/schemas/{model}"
+                    ),
+                },
+            },
+        },
+    }
 
 
 def register_audit_feedback_routes(app: FastAPI, *, engine: Engine) -> None:
@@ -112,6 +131,7 @@ def register_audit_feedback_routes(app: FastAPI, *, engine: Engine) -> None:
         "/internal/v1/feedback",
         response_model=FeedbackCreateResponse,
         status_code=status.HTTP_201_CREATED,
+        openapi_extra=_feedback_request_openapi_extra(),
     )
     async def create_feedback_route(  # pyright: ignore[reportUnusedFunction]
         request: Request,

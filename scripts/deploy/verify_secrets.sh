@@ -15,6 +15,8 @@ source "${ROOT}/scripts/modal_ensure_workspace.sh"
 
 REQUIRED_SECRET="vecinita-data-management"
 LLM_SECRET="vecinita-llm"
+RERANK_SECRET="vecinita-rerank"
+FINETUNE_SECRET="vecinita-llm-finetune"
 REQUIRED_VOLUMES=(embedding-models llm-models rerank-models llm-finetune-adapters)
 REQUIRED_APPS=(
   vecinita-embedding
@@ -24,8 +26,6 @@ REQUIRED_APPS=(
   vecinita-rerank
   vecinita-llm-finetune
 )
-RERANK_SECRET="vecinita-rerank"
-FINETUNE_SECRET="vecinita-llm-finetune"
 
 echo "==> Modal profile"
 modal profile current
@@ -66,11 +66,11 @@ if ! grep -qx "${RERANK_SECRET}" <<<"${secret_names}"; then
 fi
 echo "OK secret ${RERANK_SECRET} exists"
 
-echo "==> Required secret: ${FINETUNE_SECRET} (F80 / EV-031)"
+echo "==> Required secret: ${FINETUNE_SECRET} (ADR-053 FT worker)"
 if ! grep -qx "${FINETUNE_SECRET}" <<<"${secret_names}"; then
   echo "ERROR: missing Modal secret '${FINETUNE_SECRET}'." >&2
   echo "Create with: bash scripts/deploy/sync_finetune_secret.sh --apply" >&2
-  echo "  (requires F80 + internal-write keys in shell — see infra/modal/.env.example)" >&2
+  echo "  (requires VECINITA_INTERNAL_WRITE_URL + VECINITA_INTERNAL_API_KEY; flags stay off by default)" >&2
   exit 1
 fi
 echo "OK secret ${FINETUNE_SECRET} exists"

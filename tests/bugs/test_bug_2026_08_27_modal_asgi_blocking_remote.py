@@ -48,14 +48,14 @@ def _assert_no_blocking_remote(path: str) -> None:
             )
 
 
-def test_embedding_asgi_keeps_min_containers_warm() -> None:
-    """ASGI web worker must stay warm so /health is not blocked on image.imports cold start."""
+def test_embedding_asgi_wires_min_containers_from_env() -> None:
+    """ASGI min_containers is deploy-import env (EV-323); optional warm via =1."""
     source = Path("infra/modal/embedding_app.py").read_text(encoding="utf-8")
     assert "def embedding_api()" in source
-    # min_containers appears on the ASGI function decorator block before embedding_api.
     api_idx = source.index("def embedding_api()")
-    window = source[max(0, api_idx - 400) : api_idx]
-    assert "min_containers=1" in window
+    window = source[max(0, api_idx - 500) : api_idx]
+    assert "min_containers=_EMBED_MIN_CONTAINERS" in window
+    assert "VECINITA_EMBED_MIN_CONTAINERS" in source
 
 
 def test_embedding_asgi_uses_nonblocking_modal_calls() -> None:

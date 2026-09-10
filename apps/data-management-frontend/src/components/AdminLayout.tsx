@@ -36,6 +36,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BetaFeatureNotice } from "@/components/BetaFeatureNotice";
+import { EnvironmentBanner } from "@/components/EnvironmentBanner";
 import { IdleTimeoutGuard } from "@/components/IdleTimeoutGuard";
 import { useAdminT } from "@/hooks/useAdminT";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -58,25 +60,32 @@ function UserMenu() {
         variant="outline"
         size="sm"
         className="h-auto w-full whitespace-normal text-left"
-        data-testid="admin-sign-out-all-devices"
-        onClick={() => {
-          void signOutAllDevices();
-        }}
-      >
-        {tr("admin.auth.signOutAllDevices")}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-auto w-full whitespace-normal text-left"
         data-testid="admin-sign-out"
+        data-priority="primary"
         onClick={() => {
           void signOut();
         }}
       >
         {tr("admin.auth.signOut")}
       </Button>
+      <details className="group" data-testid="admin-sign-out-more">
+        <summary className="cursor-pointer list-none text-xs text-muted-foreground underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden">
+          {tr("admin.auth.moreAccountActions")}
+        </summary>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-2 h-auto w-full justify-start whitespace-normal px-0 text-left text-muted-foreground"
+          data-testid="admin-sign-out-all-devices"
+          data-priority="secondary"
+          onClick={() => {
+            void signOutAllDevices();
+          }}
+        >
+          {tr("admin.auth.signOutAllDevices")}
+        </Button>
+      </details>
     </div>
   );
 }
@@ -171,11 +180,25 @@ function NavItems({ onClick }: { onClick?: () => void }) {
         >
           <Icon className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1">{label}</span>
-          {to === "/evaluation" ? (
-            <ModelDownloadProgressIndicator
-              className="ml-auto shrink-0 text-xs"
-              testId="admin-nav-playground-download-in-progress"
+          {to === "/finetune" ? (
+            <BetaFeatureNotice
+              feature="finetune"
+              compact
+              data-testid="beta-nav-chip-finetune"
             />
+          ) : null}
+          {to === "/evaluation" ? (
+            <>
+              <BetaFeatureNotice
+                feature="playground"
+                compact
+                data-testid="beta-nav-chip-evaluation"
+              />
+              <ModelDownloadProgressIndicator
+                className="ml-auto shrink-0 text-xs"
+                testId="admin-nav-playground-download-in-progress"
+              />
+            </>
           ) : null}
         </NavLink>
       ))}
@@ -230,12 +253,17 @@ function MobileHeader({ showChrome }: { showChrome: boolean }) {
               {tr("admin.nav.mobileMenuDescription")}
             </SheetDescription>
           </SheetHeader>
-          <div className="px-3 py-4">
-            <NavItems
-              onClick={() => {
-                setOpen(false);
-              }}
-            />
+          <div className="flex h-full flex-col">
+            <div className="flex-1 overflow-auto px-3 py-4">
+              <NavItems
+                onClick={() => {
+                  setOpen(false);
+                }}
+              />
+            </div>
+            <div className="space-y-3 border-t px-3 py-3">
+              <UserMenu />
+            </div>
           </div>
         </SheetContent>
       </Sheet>
@@ -262,6 +290,7 @@ export function AdminLayout() {
           <IdleTimeoutGuard />
           <DesktopSidebar showChrome={isDesktop} />
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <EnvironmentBanner />
             <MobileHeader showChrome={!isDesktop} />
             <main
               className="min-h-0 flex-1 overflow-auto p-4 md:p-6 lg:p-8"

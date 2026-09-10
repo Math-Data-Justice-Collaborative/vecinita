@@ -100,3 +100,58 @@ def test_ci_materialize_env_check_alembic_requires_database_url() -> None:
     )
     assert proc.returncode == 1
     assert "DATABASE_URL" in proc.stderr
+
+
+def test_ci_materialize_env_check_finetune_requires_write_api_env() -> None:
+    """Finetune secret sync needs the write API target and shared internal key."""
+    if not _BASH.is_file():
+        return
+    env = {
+        k: v
+        for k, v in os.environ.items()
+        if k
+        not in {
+            "VECINITA_INTERNAL_WRITE_URL",
+            "VECINITA_STAGING_WRITE_URL",
+            "VECINITA_INTERNAL_API_KEY",
+        }
+    }
+    proc = subprocess.run(  # noqa: S603
+        [str(_BASH), str(_SCRIPT), "--check", "finetune"],
+        cwd=_REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 1
+    assert "VECINITA_INTERNAL_WRITE_URL" in proc.stderr
+    assert "VECINITA_INTERNAL_API_KEY" in proc.stderr
+
+
+def test_ci_materialize_env_check_finetune_accepts_safe_defaults() -> None:
+    """Finetune check passes with required write creds; script supplies safe defaults."""
+    if not _BASH.is_file():
+        return
+    env = {
+        **os.environ,
+        "VECINITA_INTERNAL_WRITE_URL": "https://write.example",
+        "VECINITA_INTERNAL_API_KEY": "internal-key",
+    }
+    for key in (
+        "VECINITA_AUTOMATIONS_KILL_SWITCH",
+        "VECINITA_FINETUNE_ENABLED",
+        "VECINITA_FINETUNE_REQUIRE_APPROVE",
+        "VECINITA_FINETUNE_MAX_CONCURRENT",
+        "VECINITA_FINETUNE_MAX_RUNS_PER_DAY",
+    ):
+        _ = env.pop(key, None)
+    proc = subprocess.run(  # noqa: S603
+        [str(_BASH), str(_SCRIPT), "--check", "finetune"],
+        cwd=_REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout

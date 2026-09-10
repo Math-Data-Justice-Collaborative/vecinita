@@ -12,23 +12,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { type StatsSummary, fetchStatsSummary } from "@/api/admin";
-import { requireCorpusConfig } from "@/config";
+import { useAuth } from "@/auth/auth-context";
+import { PageLoadingState } from "@/components/PageLoadingState";
+import { requireInternalWriteReadConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
+import { useLoadTimeout } from "@/hooks/useLoadTimeout";
 import { formatLocaleDateTime } from "@/lib/formatLocaleDateTime";
 
 export function DashboardPage() {
   const tr = useAdminT();
   const { locale } = useLocale();
+  const { loading: authLoading, accessToken } = useAuth();
   const [stats, setStats] = useState<StatsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const showLoading = authLoading || loading;
+  const loadTimedOut = useLoadTimeout(showLoading);
 
   const load = useCallback(
     async (isActive: () => boolean) => {
       setLoading(true);
       setError(null);
       try {
-        const client = requireCorpusConfig();
+        const client = requireInternalWriteReadConfig();
         const data = await fetchStatsSummary(client);
         if (!isActive()) return;
         setStats(data);
@@ -45,14 +51,17 @@ export function DashboardPage() {
   );
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     let active = true;
     void load(() => active);
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [authLoading, accessToken, load]);
 
-  if (loading) {
+  if (showLoading) {
     return (
       <div className="space-y-6">
         <div>
@@ -63,7 +72,12 @@ export function DashboardPage() {
             {tr("admin.dashboard.subtitle")}
           </p>
         </div>
-        <p className="text-muted-foreground">{tr("shared.loading")}</p>
+        <PageLoadingState
+          timedOut={loadTimedOut}
+          onRetry={() => {
+            void load(() => true);
+          }}
+        />
       </div>
     );
   }

@@ -11,7 +11,7 @@ Environments** — never commit to git.
 
 | Env | DO apps | Postgres | Supabase | Modal | GitHub Environment |
 |-----|---------|----------|----------|-------|-------------------|
-| **staging** | `vecinita-staging-*` (short names ≤32: `write-api`, `chat-api`, `chat-fe`, `admin-fe`) | `vecinita-staging-db` | project `vecinita-staging` | Workspace **`vecinita`**, Environment **`staging`** | `staging` |
+| **staging** | `vecinita-staging-*` (short names ≤32: `write-api`, `chat-api`, `chat-fe`, `admin-fe`) | `vecinita-staging-db` | canonical project `cfuvghdsuwactfeamtym` via long-lived branch `staging` | Workspace **`vecinita`**, Environment **`staging`** | `staging` |
 | **prod** | current sole stack (legacy names OK) | current managed DB | ref `cfuvghdsuwactfeamtym` | Workspace **`vecinita`**, Environment **`main`** | `production` |
 
 Use **separate** secret values per environment (never point staging apps at prod
@@ -24,8 +24,9 @@ suffixes: `*_STAGING` on Environment `staging`; unsuffixed or `*_PROD` on `produ
 | `VECINITA_ENV` | `staging` on staging apps; `production` on prod |
 | `VECINITA_MODAL_WORKSPACE` | Always **`vecinita`** (both envs) |
 | `MODAL_ENVIRONMENT` | `staging` for staging deploys; `main` (or unset) for prod |
+| `VECINITA_EMBED_MIN_CONTAINERS` | Staging Modal embed deploy-import: **`0`** (AC-ST9 / EV-354). Do not set `1` on staging. Prod change = AskQuestion. |
 | `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET` | Workspace `vecinita` token (same OK for GH Env staging + production) |
-| `SUPABASE_URL` / keys / project ref | Staging project only on staging admin FE + write API |
+| `SUPABASE_URL` / keys / project ref | Staging admin FE + write API must use the resolved **staging branch** URL/keys, never prod and never retired `camkatfbjguwvymfgdme`; GitHub Environment `staging` also needs `SUPABASE_ACCESS_TOKEN` so `deploy-staging.yml` can run `scripts/supabase/ci_sync.sh sync-staging` |
 | `DATABASE_URL` | Staging Postgres only on staging DO backends (never Modal) |
 | `RESEND_API_KEY` / `RESEND_SENDER_EMAIL` / `SUPABASE_SMTP_PASS` | **Distinct values per env** (EV-305 / #305). Same Resend **account** OK; staging uses its own API key + From (e.g. `noreply+staging@josephcmcg.com`). Never reuse the prod `re_` key on staging Modal / write-api / staging Supabase SMTP. |
 
@@ -38,7 +39,7 @@ Same Resend account; **isolated path** = separate API key + staging sender under
 |---------|---------------|------------|
 | Resend API key | Staging-only `re_…` (GH Env `staging`, Modal env `staging`, staging write-api) | Prod `re_…` (GH Env `production`, Modal `main`, prod write-api) |
 | `RESEND_SENDER_EMAIL` / SMTP `admin_email` | Staging local-part on verified domain (e.g. `noreply+staging@josephcmcg.com`) | Prod From (e.g. `noreply@josephcmcg.com`) |
-| `SUPABASE_SMTP_PASS` | = staging Resend key → **staging** Supabase project | = prod Resend key → **prod** Supabase project |
+| `SUPABASE_SMTP_PASS` | = staging Resend key → canonical project branch `staging` | = prod Resend key → canonical project `main` |
 | Feedback notify To | `VECINITA_FEEDBACK_NOTIFY_EMAIL` on staging write-api only until prod AskQuestion | Prod write-api — AskQuestion required |
 
 **Operator provision (#306):** Resend dashboard → create API key labeled staging → add/verify
@@ -48,6 +49,13 @@ staging From on the existing domain (plus-addressing preferred; no new DNS subdo
 **Wire (#307):** sync staging Modal DM (`MODAL_ENVIRONMENT=staging`), `vecinita-staging-write-api`,
 and staging Supabase SMTP pass from the staging key only. Confirm Resend dashboard traffic for
 test-send / notify attributes to the staging key.
+
+**CI deploy parity:** staging GitHub Environment secrets must include
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_SMTP_PASS`, `SUPABASE_SECRET_KEY`, `SUPABASE_URL`,
+`SUPABASE_STAGING_BRANCH_NAME` (default `staging` when omitted), and
+`RESEND_SENDER_EMAIL` so the staging deploy can push Auth config with the live staging
+admin frontend origin before Modal/DO redeploy. `SUPABASE_URL` must already be the
+resolved branch URL, not the canonical prod URL and not the retired standalone staging project.
 
 **Docs (#309):** this table + staging-runbook §Dual Resend. **E2E (#308):** after notify code is
 on the staging image (#212), POST feedback → inbox + staging-key traffic.
@@ -59,7 +67,7 @@ on the staging image (#212), POST feedback → inbox + staging-key traffic.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | Managed Postgres connection string (read + pgvector) |
-| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix) |
+| `VECINITA_MODAL_EMBED_URL` | Yes | Modal `vecinita-embedding` **base** URL (**`vecinita--`** prefix; no `/health` suffix). **After a prod→staging corpus mirror (EV-338), GitHub Environment `staging` and staging DO apps must keep this on `vecinita--` (same model as prod vectors).** Do **not** point staging ChatRAG at `vecinita-staging--` embed while serving mirrored e5 vectors — scores collapse (~0.02) and H3 returns no-context (BUG-2026-09-03-staging-embed-url-mirror-regress). Deploy Staging fails closed unless `VECINITA_ALLOW_STAGING_EMBED=1`. |
 | `VECINITA_MODAL_LLM_URL` | Yes | Modal `vecinita-llm` base URL |
 | `VECINITA_MODAL_RERANK_URL` | When CE on | Modal `vecinita-rerank` base URL (**`vecinita--vecinita-rerank`** prefix; no `/health` suffix) |
 | `VECINITA_RAG_RERANK_CE` | No (default `false`) | F45 CE rerank; **staging `true`** after Modal deploy + AC-BB9; prod stays `false` (AC-FO4) |
@@ -191,11 +199,11 @@ See [.cursor/skills/connectivity-gates.md](../.cursor/skills/connectivity-gates.
 
 Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). ChatRAG stays anonymous.
 
-### Supabase project (`cfuvghdsuwactfeamtym`)
+### Supabase auth (`cfuvghdsuwactfeamtym`)
 
 | Variable | Where | Required | Description |
 |----------|-------|----------|-------------|
-| `SUPABASE_URL` | DO write API, Modal DM ASGI, operator shell | Yes | `https://cfuvghdsuwactfeamtym.supabase.co` — JWKS at `/auth/v1/.well-known/jwks.json` (ES256, ADR-028) |
+| `SUPABASE_URL` | DO write API, Modal DM ASGI, operator shell | Yes | **Prod:** `https://cfuvghdsuwactfeamtym.supabase.co`; **staging:** resolved long-lived branch URL from `sync-staging` — JWKS at `/auth/v1/.well-known/jwks.json` (ES256, ADR-028) |
 | `SUPABASE_SECRET_KEY` | Operator shell / seed script only | Yes | Admin API (`inviteUserByEmail`, `seed_first_admin.py`) — **never** in browser builds |
 | `SUPABASE_PUBLISHABLE_KEY` | DM frontend build (`VITE_*`) | Yes | Browser-safe publishable key |
 | `SUPABASE_ADMIN_EMAIL` | `prod.env` / seed script | Bootstrap | First admin email (`admin@vecinita.admin`) |
@@ -229,19 +237,19 @@ Identity for **admin surfaces only** (DM UI, DM Modal API, internal-write API). 
 - **Disable operator:** Dashboard → delete/ban user.
 - **Role change:** set `app_metadata.role` to `admin` or `viewer` (never `user_metadata`).
 - **First admin:** `uv run python scripts/seed_first_admin.py` (idempotent).
-- **Env sync:** `supabase/README.md` — ephemeral preview branches; tear down after PR merge.
+- **Env sync:** `supabase/README.md` — one long-lived `staging` branch plus ephemeral preview branches; preview branches tear down after PR merge.
 - **JWT key rotation:** automatic via JWKS refresh (no `SUPABASE_JWT_SECRET` with ES256).
 
 ### GitHub Actions (Supabase CI workflow)
 
 | Secret | Required | Description |
 |--------|----------|-------------|
-| `SUPABASE_ACCESS_TOKEN` | For cloud sync jobs | Personal access token from [Supabase dashboard account tokens](https://supabase.com/dashboard/account/tokens); enables `preview-branch` + `sync-production` in `.github/workflows/supabase.yml` |
+| `SUPABASE_ACCESS_TOKEN` | For cloud sync jobs | Personal access token from [Supabase dashboard account tokens](https://supabase.com/dashboard/account/tokens); enables `preview-branch`, `sync-staging`, and `sync-production` in `.github/workflows/supabase.yml` / `deploy-staging.yml` |
 | `SUPABASE_DB_PASSWORD` | Optional | Database password for `supabase link` when applying SQL migrations via `db push` |
 | `SUPABASE_PROJECT_ID` | Yes (cloud sync) | Canonical project ref (`cfuvghdsuwactfeamtym`) |
 | `SUPABASE_PUBLISHABLE_KEY` | Deploy / future CI | New `sb_publishable_*` key (browser-safe; maps to `VITE_SUPABASE_PUBLISHABLE_KEY`) |
 | `SUPABASE_SECRET_KEY` | Deploy / seed CI | New `sb_secret_*` key (admin API; replaces legacy `service_role`) |
-| `SUPABASE_URL` | Deploy / CI | `https://cfuvghdsuwactfeamtym.supabase.co` |
+| `SUPABASE_URL` | Deploy / CI | Prod canonical URL on `production`; resolved staging-branch URL on GitHub Environment `staging` |
 | `SUPABASE_SMTP_PASS` | **EV-006 sync-production** | Resend API key (`re_...`); resolves `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)` at `config push`. **Operator prerequisite: verified Resend domain** before setting. |
 
 Offline **validate** job runs without these secrets. Cloud jobs skip when the token is absent.
@@ -293,7 +301,7 @@ Builds on EV-005. Adds the live admin user-management surface and production ema
 
 | Variable / item | Where | Required | Description |
 |-----------------|-------|----------|-------------|
-| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase project env | Yes (prod); staging project separately | Resend API key for **that** Supabase project; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)`. Staging project must use staging Resend key (EV-305). |
+| `SUPABASE_SMTP_PASS` | GitHub Actions secret + Supabase branch env | Yes (prod + staging) | Resend API key for that auth target; referenced by `[auth.email.smtp] pass = env(SUPABASE_SMTP_PASS)`. The staging branch must use the staging Resend key (EV-305). |
 | Verified Resend sending domain | Resend dashboard (operator) | Yes (prod + staging path) | SPF/DKIM-verified domain for `admin_email`/sender (RD-090). One domain OK for both paths. |
 | Sender address + name | `config.toml` `[auth.email.smtp]` / dashboard | Yes | Prod e.g. `noreply@josephcmcg.com`; staging e.g. `noreply+staging@josephcmcg.com` (EV-305 A1) |
 

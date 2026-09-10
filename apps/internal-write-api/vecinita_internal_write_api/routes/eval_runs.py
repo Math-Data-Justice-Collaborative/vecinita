@@ -25,6 +25,7 @@ from vecinita_internal_write_api.eval_service import (
     EvalRunPresetNotFoundError,
     create_eval_run,
     execute_eval_run,
+    fail_eval_run_dispatch,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
@@ -82,6 +83,11 @@ def register_eval_run_routes(  # noqa: PLR0913, PLR0915 — route factory wires 
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
         if retag_jobs is None:
+            fail_eval_run_dispatch(
+                engine,
+                run_id=created.response.run_id,
+                error_message="Eval job client not configured",
+            )
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Eval job client not configured",
@@ -93,6 +99,11 @@ def register_eval_run_routes(  # noqa: PLR0913, PLR0915 — route factory wires 
                 question=created.question,
             )
         except DataManagementJobsClientError as exc:
+            fail_eval_run_dispatch(
+                engine,
+                run_id=created.response.run_id,
+                error_message=str(exc),
+            )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=str(exc),

@@ -19,6 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { PageLoadingState } from "@/components/PageLoadingState";
+import { useLoadTimeout } from "@/hooks/useLoadTimeout";
 import {
   Table,
   TableBody,
@@ -40,6 +42,7 @@ export function AutomationsPage() {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialLoadTimedOut = useLoadTimeout(loading && !config);
 
   const load = useCallback(
     async (isActive: () => boolean) => {
@@ -126,7 +129,12 @@ export function AutomationsPage() {
       </div>
 
       {loading && !config ? (
-        <p className="text-muted-foreground">{tr("shared.loading")}</p>
+        <PageLoadingState
+          timedOut={initialLoadTimedOut}
+          onRetry={() => {
+            void load(() => true);
+          }}
+        />
       ) : null}
 
       {error ? (

@@ -81,4 +81,6 @@ def test_uj005_empty_retrieval_message(empty_client: TestClient) -> None:
     assert response.status_code == HTTPStatus.OK
     body = response_json_object(response)
     assert body["sources"] == []
-    assert "corpus" in json_str(body, "answer").lower()
+    answer = json_str(body, "answer").lower()
+    assert "matching sources" in answer or "fuentes coincidentes" in answer
+    assert "corpus" in answer

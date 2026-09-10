@@ -27,8 +27,9 @@ import {
   type AuditPage as AuditPageData,
   fetchAuditLog,
 } from "@/api/admin";
+import { useAuth } from "@/auth/auth-context";
 import { TruncatedText } from "@/components/TruncatedText";
-import { requireCorpusConfig } from "@/config";
+import { requireInternalWriteReadConfig } from "@/config";
 import { useAdminT } from "@/hooks/useAdminT";
 import { auditEventLabelKey } from "@/lib/auditEventLabel";
 import { formatActorLabel } from "@/lib/formatActorLabel";
@@ -48,6 +49,7 @@ const ENTITY_TYPE_FILTER_KEY: Record<
 
 export function AuditPage() {
   const tr = useAdminT();
+  const { loading: authLoading, accessToken } = useAuth();
   const [searchParams] = useSearchParams();
   const [data, setData] = useState<AuditPageData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export function AuditPage() {
       setLoading(true);
       setError(null);
       try {
-        const client = requireCorpusConfig();
+        const client = requireInternalWriteReadConfig();
         const result = await fetchAuditLog(client, params);
         if (!isActive()) return;
         setData(result);
@@ -93,6 +95,9 @@ export function AuditPage() {
   );
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     let active = true;
     const entityId = searchParams.get("entity_id");
     const actorId = searchParams.get("actor_id");
@@ -108,7 +113,7 @@ export function AuditPage() {
     return () => {
       active = false;
     };
-  }, [load, searchParams]);
+  }, [authLoading, accessToken, load, searchParams]);
 
   const handleApplyFilters = () => {
     const params: {
@@ -133,7 +138,7 @@ export function AuditPage() {
     });
   };
 
-  if (loading && !data) {
+  if ((authLoading || loading) && !data) {
     return (
       <div className="space-y-6">
         <div>

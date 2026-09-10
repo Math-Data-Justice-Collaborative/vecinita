@@ -1,7 +1,7 @@
 # Test Plan
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-09-03 (EV-338 / #338 — TC-321–324 staging corpus mirror; prior TC-320 FAQ)  
+> **Last updated**: 2026-09-05 (EV-354 / #354 — TC-325–327 staging idle + warm-before-smoke; prior EV-338 TC-321–324)  
 > **Source**: [user-journeys.md](user-journeys.md), [spec.md](spec.md), [feature-list.md](feature-list.md)
 
 ## Scope
@@ -10,7 +10,7 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 
 **Shipped (do not treat as “planned”):** Corpus browse and tagging, admin dashboard suite, shared frontend i18n/UI packages (bilingual chrome), multilingual embedding pin.
 
-**Still building / planned:** Browser-local chat history, some admin auth polish items, website scrape/crawl tree, corpus catch-up + freshness (in progress), LoRA fine-tune + human promote.
+**Still building / planned:** Browser-local chat history, some admin auth polish items, website scrape/crawl tree, and the remaining live prod LoRA promote/rollback gate after EV-031 enabled corpus automations/freshness and the F80 eval path.
 
 **Excludes (CI default):** Real Modal GPU invocations in GitHub Actions, multimodal ingest.
 
@@ -40,6 +40,8 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-075 Ask after multilingual cutover | `tests/e2e/test_uj075_multilingual_ask.py` | TC-237, TC-238 | — (no UI) |
 | UJ-087 Staging before main | smoke + ruleset/rule checks | TC-294–TC-298 | — |
 | UJ-094 Staging corpus mirror from prod | ops checklist + corpus guards | TC-321–TC-324 | — |
+| UJ-095 Cold staging + warm-before-smoke | config unit + CI/helper contract | TC-325–TC-327 | — |
+| UJ-096 Browser-entry prewarm trigger policy | evidence/report contract + optional staging counters | TC-328 | — |
 | UJ-088 Monitoring rates | `tests/e2e/test_uj088_monitoring_metrics.py` | TC-299–TC-304 | Vitest Monitoring page |
 | UJ-089 Staging Grafana/Loki | staging obs checklist / smoke | TC-305–TC-306 | — |
 | UJ-077 Citation URL validation display | Vitest `SourceList` / URL helper | TC-242, TC-243, TC-244 | opt |
@@ -54,6 +56,12 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
 | UJ-005 Empty retrieval | `tests/e2e/test_uj005_empty_retrieval.py` | TC-003 |
+| UJ-097 Ask vs Clear hierarchy | Vitest `ChatPanel` | TC-329 |
+| UJ-098 Job status badge colors | Vitest JobsPage / JobDetailPage | TC-330 |
+| UJ-099 Beta label + feedback link | Vitest BetaBadge / Finetune / Playground | TC-338, TC-339 |
+| README + GH About Beta copy | docs / ops checklist | TC-340 |
+| UJ-035 Sign-out hierarchy | Vitest logout + AdminLayout | TC-097, TC-331 |
+| OpenAPI AskRequest body | unit / OpenAPI export | TC-332 |
 | UJ-006 Job failure | `tests/e2e/test_uj006_job_failure.py` | TC-013 |
 | UJ-007 Reject identity | `tests/e2e/test_uj007_reject_identity.py` | TC-030, TC-031 |
 | UJ-008 Unauthorized admin | `tests/e2e/test_uj008_unauthorized_admin.py` | TC-014 |
@@ -181,7 +189,9 @@ EV-005 (F34): **TC-082** verifies strict ChatRAG CORS (allow only the ChatRAG fr
 
 - **Objective**: No hallucinated answer when no chunks match.
 - **Input**: Off-corpus question.
-- **Expected**: Clear no-context message; no fake citations.
+- **Expected**: Clear empty-retrieval message (no matching sources + short next-step hint);
+  `sources: []`; distinct from hedge path when sources exist (EV-ux-backlog UX-8).
+- **Refs**: UJ-005 · `NO_CONTEXT_MESSAGE_EN` / `_ES`
 
 ### TC-010: Job submit and complete (UJ-002)
 
@@ -1800,6 +1810,19 @@ Detailed inventory: `docs/data-management-plan.md` (interview pending).
 - **When** prod `vecinita-llm` health/models is queried
 - **Then** `VECINITA_FINETUNE_ADAPTER_ID` is unset / base model only
 
+### TC-325: Prod adapter promote smoke (F80, AC-FT12)
+
+- **Given** eval evidence exists and the operator explicitly approves prod promote
+- **When** the chosen adapter is promoted onto prod `vecinita-llm`
+- **Then** the prod adapter pin/health surfaces reflect the selected adapter and post-promote
+  smoke/health checks pass
+
+### TC-326: Prod adapter rollback smoke (F80, AC-FT12)
+
+- **Given** a promoted adapter is active on prod `vecinita-llm`
+- **When** the operator clears the pin for rollback to base
+- **Then** prod returns to the base model and the same smoke/health checks pass after rollback
+
 ### TC-294: Staging stack H1–H5 (UJ-087, F83)
 - **Objective**: Distinct staging DO + DB pass liveness, DB, RAG, CORS, frontend host checks without prod `DATABASE_URL`.
 - **Input**: Staging URLs / `VECINITA_STAGING_*` env; smoke scripts from staging-runbook.
@@ -2114,6 +2137,25 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
   percentiles; samples never include question/answer text (ADR-004).
 - **Refs**: AC-320-05 · ADR-022 EV-320 · #314
 
+### TC-311-01: Staging restore frontier smoke (EV-311 / #311)
+
+- **Objective**: Re-baseline Modal GPU restore latency for umbrella close.
+- **Setup**: Staging; `VECINITA_LLM_GPU_SNAPSHOT=true` deployed; opt-in
+  `uv run python scripts/ops/cold_start_bench.py --n 20 --force-cold --output …`
+  (optional `--n 100` for publishable p95). Synthetic prompts only.
+- **Expected**: JSON report; `cold_kind` breakdown; classify Green / Useful / Red per
+  ADR-022 EV-311; CI does not require live N=20/100.
+- **Refs**: AC-311-01 · AC-311-03 · TC-314-02 · [Spec: ADR-022 §Amendment EV-311]
+
+### TC-311-02: Staging ChatRAG E2E ask under latency stack (EV-311 / #311)
+
+- **Objective**: End-to-end staging ask does not silent-504; record latency vs restore path.
+- **Setup**: Staging ChatRAG URL; `cold_start_bench.py --mode chat-ask` and/or smoke H3 after
+  optional force-cold on `vecinita-llm`.
+- **Expected**: 200 (or documented stream tokens); no gateway 504; latency noted in session
+  evidence (not claimed as Green restore p50 unless measured on `/generate`).
+- **Refs**: AC-311-02 · H3 · [Corpus: staging]
+
 ### TC-321: Staging vs prod host confirmation (EV-338 / #338)
 
 - **Objective**: Operator (or script) refuses restore when staging and prod hosts are identical
@@ -2142,4 +2184,118 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Setup**: `POST` staging ChatRAG `/api/v1/ask` pantry-style question (or `staging_smoke` H3).
 - **Expected**: HTTP 200; non-empty `answer`; `language` in `en`/`es`; prod corpus unchanged.
 - **Refs**: UJ-094 · staging-runbook H3 · [Corpus: staging]
+
+### TC-325: Staging embed min_containers resolves to 0 (EV-354 / #354)
+
+- **Objective**: Staging Modal embedding idle posture uses `VECINITA_EMBED_MIN_CONTAINERS=0`
+  (or unset → 0); never silently force always-warm on staging.
+- **Setup**: Unit on `_embed_min_containers_from_env` / deploy-import resolution; staging
+  deploy env documented in secrets matrix / runbook.
+- **Expected**: Default and staging-intended value is `0`; invalid values fail closed.
+- **Refs**: AC-ST9 · UJ-095 · [Corpus: config] · EV-323 / #323
+
+### TC-326: Warm-before-smoke helper or workflow step (EV-354 / #354)
+
+- **Objective**: Promote path can warm staging Modal services before H1–H5 so cold idle
+  does not flake `staging-smoke`.
+- **Setup**: Documented script and/or `deploy-staging.yml` step before smoke pytest;
+  unit or contract test that the warm entrypoint exists and is referenced.
+- **Expected**: Warm step is invocable; smoke job still runs H1–H5 afterward; timeout
+  budget accounts for cold start.
+- **Refs**: AC-ST10 · AC-ST12 · UJ-095 · `.github/workflows/deploy-staging.yml`
+
+### TC-327: Obs droplet default powered off (EV-354 / #354)
+
+- **Objective**: Runbook states staging Grafana/Loki droplet defaults **off** (EV-323-D13);
+  power-on is drill-only.
+- **Setup**: Docs guard or checklist assert in runbook §EV-036 / idle posture.
+- **Expected**: Default cost posture = powered off; recreate/destroy still AskQuestion.
+- **Refs**: AC-ST11 · UJ-095 · [Corpus: staging] · ADR-055
+
+### TC-328: Browser-entry prewarm trigger policy evidence is privacy-safe and decision-ready (EV-359 / #359)
+
+- **Objective**: Ensure the trigger-policy analysis for ChatRAG prewarm compares mount,
+  dwell, focus, and first-keystroke using privacy-safe evidence and explicit cost framing.
+- **Setup**: Session evidence and/or staging counters for `prewarm_requested`,
+  `ask_started`, and `prewarm_to_ask_hit_rate`; bounded idle-cost estimate for the active
+  `scaledown_window` posture.
+- **Expected**: A documented recommendation for one trigger policy; no raw prompts,
+  identities, or chat bodies in the evidence; existing mount-prewarm contract remains in
+  force until a later build-approved implementation change.
+- **Refs**: AC-359-01 · AC-359-02 · AC-359-03 · UJ-096 · [Corpus: ADR-004] · [Corpus: config]
+
+### TC-329: Ask primary vs Clear secondary (UJ-097, EV-ux-backlog UX-6)
+
+- **Objective**: Composer presents Ask as primary and Clear history as demoted/spaced.
+- **Expected**: Clear has secondary styling and/or separator spacing from Ask; ask submit unchanged.
+- **Refs**: UJ-097 · [Corpus: journeys]
+
+### TC-330: Job status badge semantic variants (UJ-098, EV-ux-backlog UX-7)
+
+- **Objective**: Jobs list and detail use distinct badge variants per status.
+- **Expected**: completed success-leaning; failed destructive; running distinct; pending/cancelled muted; same map both pages.
+- **Refs**: UJ-098 · [Corpus: journeys]
+
+### TC-331: Sign-out hierarchy (UJ-035, EV-ux-backlog UX-5)
+
+- **Objective**: Log out of all devices is demoted relative to Sign out.
+- **Expected**: Sign out remains primary (`admin-sign-out`); all-devices control secondary; scopes unchanged.
+- **Refs**: UJ-035 · TC-097 · [Corpus: journeys]
+
+### TC-332: Live OpenAPI AskRequest body (EV-ux-backlog UX-9)
+
+- **Objective**: FastAPI `/openapi.json` documents ask `requestBody` with required `question`.
+- **Expected**: `POST /api/v1/ask` and stream ask schemas include `AskRequest.question`; checked-in `openapi/chat-rag.yaml` stays in sync.
+- **Refs**: [Corpus: api] · [Spec: openapi/chat-rag.yaml]
+
+### TC-333: OpenAPI FeedbackRequest body + error responses (EV-staging-api-adversarial)
+
+- **Objective**: `POST /api/v1/feedback` OpenAPI publishes `FeedbackRequest` and documents `400`/`503`.
+- **Expected**: Required `category` + `message`; `additionalProperties: false`; responses include 201/400/503.
+- **Refs**: F68 · [Corpus: api] · `tests/unit/chat_rag/test_openapi_feedback_request_body.py`
+
+### TC-334: Schemathesis ChatRAG smoke (in-process)
+
+- **Objective**: Schemathesis generation against safe ChatRAG ops does not produce 5xx.
+- **Expected**: `/health`, `/api/v1/tags`, `/api/v1/warm` pass limited Hypothesis examples without server errors.
+- **Refs**: [Corpus: tests] · `tests/unit/chat_rag/test_schemathesis_chat_rag_smoke.py`
+
+### TC-335: OpenAPI securitySchemes on write + DM
+
+- **Objective**: Runtime `/openapi.json` publishes auth schemes matching ADR-011 / repo YAML.
+- **Expected**: Write: `bearerAuth` + `internalApiKey` (HTTP bearer). DM: `bearerAuth` + `modalProxyAuth` (`X-Vecinita-Proxy-Key`).
+- **Refs**: [Corpus: api] · `packages/shared-schemas/.../openapi_security.py`
+
+### TC-336: Staging OpenAPI requestBody gate (live)
+
+- **Objective**: Staging ChatRAG OpenAPI includes requestBody for ask/stream/feedback after deploy.
+- **Expected**: `VECINITA_STAGING_CHAT_URL/openapi.json` has `requestBody` on those POSTs; fails closed until ChatRAG redeployed.
+- **Refs**: [Corpus: staging] · `tests/smoke/test_staging_openapi_request_bodies.py` · `staging-smoke` job
+
+### TC-337: OpenAPI repo↔live drift helpers
+
+- **Objective**: Normalize `servers.url` + compare requestBody / securitySchemes between repo YAML and live `/openapi.json`.
+- **Expected**: Drift messages when live lacks documented requestBody or write/DM securitySchemes; CLI exits non-zero on drift.
+- **Refs**: [Corpus: api] · `scripts/ops/openapi_live_drift.py` · `tests/unit/scripts/test_openapi_live_drift.py`
+
+### TC-338: Fine-tune + Playground Beta chrome (UJ-099, F86)
+
+- **Objective**: Fine-tune page and Evaluation Playground render Beta badge + banner with feedback URL.
+- **Input**: Vitest mounts of `FinetunePage` and Evaluation playground tab with mocked data.
+- **Expected**: `data-testid` for beta badge/banner; link `href` matches configured umbrella issue URL; `target="_blank"` + `rel` includes `noopener`.
+- **Refs**: [Corpus: feature-list.md §F86] [Corpus: acceptance] AC-BETA1–2 · `apps/data-management-frontend/src/test/`
+
+### TC-339: Admin nav Beta chips (UJ-099, F86)
+
+- **Objective**: Nav entries for `/finetune` and `/evaluation` show compact Beta chip.
+- **Input**: Vitest `AdminLayout` (or NavItems) render with admin auth.
+- **Expected**: Beta chip test ids present on those nav items only (not Dashboard/Corpus).
+- **Refs**: [Corpus: feature-list.md §F86] AC-BETA3
+
+### TC-340: README + GitHub About Beta documentation (F86)
+
+- **Objective**: README lists Beta surfaces + feedback issue; repo description mentions Beta feedback.
+- **Input**: README assertion (string/grep in test or manual checklist in verify-impl); `gh api repos/...` description check in verify-impl.
+- **Expected**: Both surfaces name Fine-tune and Playground as Beta and include the issue URL (or `issues/new` label link).
+- **Refs**: [Corpus: feature-list.md §F86] AC-BETA4
 

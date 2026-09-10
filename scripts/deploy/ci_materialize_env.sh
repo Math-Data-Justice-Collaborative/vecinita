@@ -9,6 +9,7 @@
 #   bash scripts/deploy/ci_materialize_env.sh --check modal
 #   bash scripts/deploy/ci_materialize_env.sh --check do
 #   bash scripts/deploy/ci_materialize_env.sh --check alembic
+#   bash scripts/deploy/ci_materialize_env.sh --check finetune
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -76,12 +77,6 @@ case "$CHECK_TARGET" in
           VECINITA_MODAL_EMBED_URL VECINITA_MODAL_LLM_URL VECINITA_INTERNAL_WRITE_URL \
           VECINITA_INTERNAL_API_KEY VECINITA_MODAL_PROXY_KEY VECINITA_CORS_ORIGINS SUPABASE_URL
         ;;
-      finetune)
-        _missing "Finetune secret sync" \
-          VECINITA_AUTOMATIONS_KILL_SWITCH VECINITA_FINETUNE_ENABLED \
-          VECINITA_FINETUNE_REQUIRE_APPROVE VECINITA_FINETUNE_MAX_CONCURRENT \
-          VECINITA_FINETUNE_MAX_RUNS_PER_DAY VECINITA_INTERNAL_WRITE_URL VECINITA_INTERNAL_API_KEY
-        ;;
       do)
         _missing "DO sync" \
           DATABASE_URL VECINITA_INTERNAL_API_KEY VECINITA_CORS_ORIGINS SUPABASE_URL \
@@ -98,8 +93,11 @@ case "$CHECK_TARGET" in
       alembic)
         _missing "Alembic upgrade" DATABASE_URL
         ;;
+      finetune)
+        _missing "Finetune Modal secret sync" VECINITA_INTERNAL_WRITE_URL VECINITA_INTERNAL_API_KEY
+        ;;
       *)
-        echo "Usage: $0 --check {modal|do|alembic}" >&2
+        echo "Usage: $0 --check {modal|do|alembic|finetune}" >&2
         exit 2
         ;;
     esac

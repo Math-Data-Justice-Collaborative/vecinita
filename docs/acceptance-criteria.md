@@ -433,6 +433,10 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
   content hash (`VECINITA_FINETUNE_ADAPTER_HASH`) with constant-time compare; fail closed on
   mismatch; `/health` exposes ready metadata; kill-switch `VECINITA_LLM_LORA_RESOLVE`
   (default `post_restore`) (EV-316 / #316, TC-316-01, TC-316-02, ADR-022).
+- [ ] **AC-FT12**: Live prod adapter promote remains a separate operator gate after EV-031 eval
+  path. After explicit AskQuestion approval, prod `vecinita-llm` pins the chosen adapter and
+  passes post-promote smoke/health; rollback clears the pin back to base and re-passes the same
+  smoke/health path (TC-325, TC-326).
 
 ### Cold-start Layer E harness (EV-314 / #314)
 
@@ -455,12 +459,12 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 
 ### Seed GPU snapshots after deploy (EV-315 / #315)
 
-- [ ] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
+- [x] **AC-315-01**: Opt-in seed script primes authenticated Modal `/warm` until observed
   samples are `cold_kind=snapshot_restore` (or exits non-zero if create persists)
-  (TC-315-01, TC-315-02).
-- [ ] **AC-315-02**: Create-path latency documented separately from restore percentiles;
+  (TC-315-01, TC-315-02). Live `/warm` alone fails closed without kinds evidence.
+- [x] **AC-315-02**: Create-path latency documented separately from restore percentiles;
   staging runbook + `infra/modal/README.md` describe the procedure.
-- [ ] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
+- [x] **AC-315-03**: Prod prime is AskQuestion-gated; default Environment is staging;
   CD hard gate deferred this cycle.
 
 ### Thin Modal CPU ingress (EV-317 / #317)
@@ -490,6 +494,18 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-320-05**: Harness/schemas can record `answer_path=faq_bypass` without overloading
   GPU `cold_kind` (ADR-022 EV-320 / TC-320-05).
 
+### EV-311 — Close cold-start umbrella on evidence (#311)
+
+- [ ] **AC-311-01**: Staging restore bench (N≈20 smoke; optional N≥100) via
+  `scripts/ops/cold_start_bench.py --force-cold` writes JSON with `cold_kind` breakdown; no
+  raw prompts (TC-311-01, TC-314-02).
+- [ ] **AC-311-02**: Staging ChatRAG E2E cold/ask path recorded (bench `chat-ask` and/or H3);
+  never silent DO 504 (TC-311-02).
+- [ ] **AC-311-03**: ADR-022 EV-311 frontier table filled with measured p50/p95 + Green/Useful/Red
+  band; Useful close allowed when Green unmet; Red blocks close.
+- [ ] **AC-311-04**: Staging-runbook + `infra/modal/README.md` describe the close procedure;
+  #315/#317/#319 explicitly deferred (not blocking).
+
 ### EV-031 — Live enable F78/F79 + F80 eval path (S035) — complete
 
 #### F78 live enable (AC-AU7)
@@ -509,11 +525,33 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [x] **AC-ST1**: `env_role` resolves to `staging` or `prod` (not `staging_as_live`) once staging H1–H5 pass (ADR-054). — runbook flipped 2026-08-28
 - [x] **AC-ST2**: Staging DO apps + `vecinita-staging-db` healthy; H1–H5 pass without touching prod DB (UJ-087, TC-294). — smoke PASS; prod docs count unchanged
 - [x] **AC-ST3**: Staging Modal uses Environment `staging` (web suffix) in workspace `vecinita`; URLs use `vecinita-staging--` prefix; secrets isolated from Environment `main` (TC-295).
-- [x] **AC-ST4**: Staging Supabase project distinct; staging admin FE uses staging Auth only (TC-296). — ref `camkatfbjguwvymfgdme`
+- [x] **AC-ST4**: Staging admin FE uses the canonical Supabase project's long-lived `staging` branch auth only, not prod root auth (TC-296).
 - [x] **AC-ST5**: GitHub ruleset on `main` requires CI + staging deploy/smoke for PR tip SHA (TC-297). — ruleset `21766359`
 - [x] **AC-ST6**: ADR-049 operational exit documented; runbook describes staging→prod path (ADR-054).
 - [x] **AC-ST7**: No operator `*-spec.yaml` or secrets committed.
 - [x] **AC-ST8**: Always-applied cursor rule Stage→Main; GitHub #212 (+ children) track ADR-054 + EV-036-D15: when `origin/stage` exists, feature/evolve PRs target **`stage` first** (CI required); promote via `stage`→`main` only with `CI success` + `staging-smoke` (or AskQuestion waiver) (TC-298). — EV-033 / EV-036-D15
+
+### EV-354 — Staging idle cost posture (F83 delta / #354)
+
+- [ ] **AC-ST9**: Staging Modal embedding uses `VECINITA_EMBED_MIN_CONTAINERS=0` (or unset→0); no always-warm staging embedding (TC-325).
+- [ ] **AC-ST10**: Staging LLM, playground, FT, and rerank remain deployed but scale-to-zero (no always-warm); optional warm before smoke (UJ-095, TC-326).
+- [ ] **AC-ST11**: Staging obs droplet default is **powered off**; runbook documents power-on only for Grafana/Loki drills (TC-327; EV-323-D13).
+- [ ] **AC-ST12**: `staging-smoke` / H1–H5 still pass after idle posture (warm preamble allowed in CI/helper) (UJ-095, TC-326).
+- [ ] **AC-ST13**: Staging-attributable cost delta documented (soft target — maximize safe idle savings; no hard staging-only $ cap) (EV-354).
+- [ ] **AC-ST14**: No staging→prod secret cross-wire; prod DB alias `vecinita-staging-restored-20260701` not destroyed this cycle (EV-323-D10).
+
+### EV-359 — Browser-entry prewarm trigger policy (F40 delta / #359)
+
+- [ ] **AC-359-01**: Standing docs compare the current **mount** trigger with candidate
+  **dwell**, **focus**, and **first-keystroke** policies; no silent behavior change before a
+  later build-gate approval (TC-328, UJ-096).
+- [ ] **AC-359-02**: Evidence for the recommendation uses privacy-safe counters or bounded
+  estimates only (`prewarm_requested`, `ask_started`, `prewarm_to_ask_hit_rate`,
+  `scaledown_window` cost framing); no prompts, identity, or chat bodies are logged
+  (TC-328, ADR-004).
+- [ ] **AC-359-03**: The chosen recommendation explicitly states its interaction with
+  `scaledown_window` and whether staging/prod may temporarily differ while evidence remains
+  thin (TC-328, UJ-096).
 
 ### EV-036 — Admin monitoring + staging Grafana/Loki (F84 / ADR-055 / #114)
 
@@ -525,3 +563,11 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 - [ ] **AC-MON6**: Staging Loki holds ADR-004 allow-listed structured logs only; short retention (TC-305).
 - [ ] **AC-MON7**: Staging Grafana shows Modal + DO panels (UJ-089).
 - [ ] **AC-MON8**: ≥1 Alertmanager rule notifies staging webhook secret; no chat content in alert payload (TC-306). Prod always-on Grafana deferred (EV-036-D11).
+
+### EV-beta-feature-labeling — Beta UI + feedback (F86)
+
+- [x] **AC-BETA1**: Fine-tune page and Evaluation Playground (incl. model download when shown) display a visible **Beta** badge and a short banner explaining Beta status (TC-338, UJ-099).
+- [x] **AC-BETA2**: Banner/badge include a link to the umbrella GitHub feedback issue (opens in new tab; `rel="noopener noreferrer"`) (TC-338).
+- [x] **AC-BETA3**: Admin nav for Fine-tune and Evaluation shows a compact Beta chip (or equivalent) so Beta is visible before opening the page (TC-339).
+- [x] **AC-BETA4**: README documents Beta surfaces and the feedback issue URL; GitHub repo About/description mentions Beta + feedback (TC-340).
+- [x] **AC-BETA5**: Cursor rule + skill checklist recommend tagging new/flaky features as Beta and linking the feedback issue during evolve/build (verified by doc presence + agent checklist cite).

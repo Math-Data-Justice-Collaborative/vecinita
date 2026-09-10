@@ -92,6 +92,21 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
   }
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const localizedTagLabels = new Map(
+    tags
+      .filter((tag) => tag.language === locale)
+      .map((tag) => [tag.slug, tag.label] as const),
+  );
+  const visibleItems = items.filter(
+    (item) => !isSyntheticCorpusArtifactUrl(item.url),
+  );
+
+  function renderItemTags(item: DocumentBrowseItem): string {
+    const labels = item.tags.map(
+      (tag) => localizedTagLabels.get(tag.slug) ?? tag.label,
+    );
+    return labels.join(", ") || t(locale, "chat.noTags");
+  }
 
   return (
     <section
@@ -149,27 +164,26 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         <p role="status">{t(locale, "chat.loadingDocuments")}</p>
       ) : null}
 
-      <div className="corpus-list-scroll" data-testid="corpus-list-scroll">
-        <ul className="corpus-list" data-testid="corpus-list">
-          {items.map((item) => (
-            <li key={item.document_id} className="corpus-item">
-              <h2>{item.title ?? t(locale, "chat.untitledDocument")}</h2>
-              <p className="corpus-tags">
-                {item.tags.map((tag) => tag.label).join(", ") ||
-                  t(locale, "chat.noTags")}
-              </p>
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="corpus-source-link"
-              >
-                {t(locale, "chat.openSource")}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {!loading ? (
+        <div className="corpus-list-scroll" data-testid="corpus-list-scroll">
+          <ul className="corpus-list" data-testid="corpus-list">
+            {visibleItems.map((item) => (
+              <li key={item.document_id} className="corpus-item">
+                <h2>{item.title ?? t(locale, "chat.untitledDocument")}</h2>
+                <p className="corpus-tags">{renderItemTags(item)}</p>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="corpus-source-link"
+                >
+                  {t(locale, "chat.openSource")}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="corpus-pagination">
         <button
@@ -195,5 +209,17 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
         </button>
       </div>
     </section>
+  );
+}
+
+function isSyntheticCorpusArtifactUrl(url: string): boolean {
+  const trimmed = url.trim().toLowerCase();
+  if (trimmed.startsWith("fixture://")) {
+    return true;
+  }
+  return (
+    trimmed.includes("example.com") ||
+    trimmed.includes("localhost") ||
+    trimmed.includes("127.0.0.1")
   );
 }

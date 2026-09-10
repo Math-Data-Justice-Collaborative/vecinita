@@ -15,7 +15,7 @@ from pathlib import Path
 
 import modal
 
-BUNDLE_NAME = "vecinita-data-management"
+BUNDLE_NAME = os.environ.get("MODAL_SECRET_EXPORT_NAME", "vecinita-data-management")
 # Only export application keys; never system/Modal-internal env vars.
 PREFIXES = ("VECINITA_", "SUPABASE_")
 

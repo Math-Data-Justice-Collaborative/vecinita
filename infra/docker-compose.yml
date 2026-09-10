@@ -4,9 +4,8 @@ services:
   postgres:
     image: pgvector/pgvector:pg15
     container_name: vecinita-postgres
-    # Local-only hardening (KICS): drop caps, no new privileges, bind loopback.
-    cap_drop:
-      - ALL
+    # Keep the local DB bound to loopback, but allow the stock image entrypoint
+    # to chmod the data dir and switch to the postgres user during init.
     security_opt:
       - no-new-privileges:true
     environment:

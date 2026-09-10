@@ -83,9 +83,10 @@
 | F78 | Corpus change automations | Live enabled (EV-031) | Data Management / infra | Modal DM, DM backend/FE, internal-write | S030 #73; EV-031 M133/M135 |
 | F79 | Corpus freshness automation | Live enabled (EV-031) | Data Management / admin | Modal schedule, ingest, DM FE, write API | S030 #219; EV-031 M133 |
 | F80 | Modal LoRA fine-tune + human promote | Eval path live (EV-031); prod promote deferred | Cross-cutting (LLM) | finetune_app.py, llm_app, llm-client, eval, admin FE | S030 #72; EV-031 M134 |
-| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule | EV-staging-do-supabase; EV-033; ADR-054 |
+| F83 | Distinct staging environment (DO + Supabase + Modal) | Implemented | Cross-cutting (infra) | DO apps/DB, Supabase project, Modal Environment `staging` (workspace `vecinita`), GH Environments + ruleset + Stage→Main agent rule; idle cost posture + warm-before-smoke (EV-354 / #354) | EV-staging-do-supabase; EV-033; ADR-054; EV-354 |
 | F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
 | F85 | FAQ fast-path (canned answers; skip LLM) | Implemented | ChatRAG | chat-rag-backend, shared-schemas | EV-320 #320 / #79; ADR-022 Layer D |
+| F86 | Beta feature labeling + feedback link (admin) | Implemented | Data Management / Cross-cutting | data-management-frontend, frontend-i18n, README, GH About, `.cursor/rules` | EV-beta-feature-labeling #374 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -827,6 +828,10 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   `POST /api/v1/warm` contract (ADR-022 prewarm lever). F40 does **not** own that work.
   Sibling latency ops (also not F40): EV-315 seed snapshots (#315), EV-317 thin CPU ingress
   (#317), EV-319 scaledown_window (#319) under ADR-022 / parent #311.
+- **Follow-on policy question**: Browser-entry prewarm currently triggers on **mount**.
+  EV-359 / `#359` is the cost/latency follow-on that will decide whether mount stays the
+  default or shifts to dwell / focus / first-keystroke based on privacy-safe bounce-rate
+  evidence. Until that slice lands, current mount behavior remains the standing contract.
 - **Out of scope (F40)**: Changing Modal spawn semantics (see #318); CMS/API-backed facts;
   admin UI; analytics of which facts were shown; focus/typing warm predictors.
 - **Source**: S016 / EV-014; GitHub #87; Phase 0 intake 2026-07-29 (S016-D1–D15);
@@ -1581,22 +1586,31 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   workspace **`vecinita`** under Modal Environment **`staging`** (web suffix `staging`;
   native Environments). Restores staging→prod paths and ends operational use of
   `staging_as_live` (ADR-049) once staging is healthy. Requires GitHub ruleset so merges to
-  `main` need CI **and** staging deploy + H1–H5 smoke.
+  `main` need CI **and** staging deploy + H1–H5 smoke. **Idle cost posture (EV-354 / #354):**
+  staging Modal apps default to scale-to-zero (`VECINITA_EMBED_MIN_CONTAINERS=0`; playground /
+  FT / rerank remain deployed but not always-warm); obs droplet defaults **powered off**;
+  promote smoke may **warm** Modal services then run H1–H5 so cheaper idle does not weaken
+  the Stage→Main gate.
 - **Inputs**: Operator tokens (DO, Modal workspace `vecinita`, Supabase); GitHub Environments
   `staging` / `production`; seed corpus for staging DB only **or** selective **prod→staging
   corpus mirror** after AskQuestion (EV-338 / #338 — preferred when staging was wiped and
-  ChatRAG parity with live community content is required).
+  ChatRAG parity with live community content is required); deploy-import env for staging
+  Modal idle knobs (`VECINITA_EMBED_MIN_CONTAINERS`, optional staging LLM scaledown).
 - **Outputs**: Distinct staging URLs; `env_role: staging` \| `prod`; ADR-054; updated
-  runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212.
-- **Acceptance**: AC-ST1–AC-ST8; TC-294–TC-298; UJ-087; staging corpus restore AC via UJ-094 /
-  TC-321–TC-324 when mirror path used.
+  runbook/secrets/CD; always-applied Stage→Main agent rule (EV-033); GH tracking via #212;
+  documented staging cost delta (soft target — maximize safe idle savings).
+- **Acceptance**: AC-ST1–AC-ST8; AC-ST9–AC-ST14 (idle posture); TC-294–TC-298; TC-325–TC-327;
+  UJ-087; UJ-095; staging corpus restore AC via UJ-094 / TC-321–TC-324 when mirror path used.
 - **Out of scope**: Live corpus clone **or staging write** without AskQuestion; Modal provision
   during Spec band (Build gate); full hostname rename of legacy prod apps in one cutover;
-  mutating **prod** during mirror (prod remains read-only).
+  mutating **prod** during mirror (prod remains read-only); shared staging+prod Postgres or
+  Supabase Auth; destroying prod DB alias `vecinita-staging-restored-20260701` (EV-323-D10);
+  whole-stack <$30 envelope (#323) beyond staging-specific idle levers.
 - **Promotion (EV-036-D15)**: When `origin/stage` exists — feature→`stage` (CI) then
   promote `stage`→`main` (CI + `staging-smoke`). Smoke remains on main-bound PRs (ADR-054).
+  Warm-before-smoke is part of the smoke path when staging is left cold (UJ-095).
 - **Source**: EV-staging-do-supabase; EV-033-stage-before-main; EV-036-D15; ADR-054;
-  ADR-049 exit; ADR-050.
+  ADR-049 exit; ADR-050; EV-354 / #354; EV-323 (idle levers).
 
 ### F84: Admin monitoring + staging Grafana/Loki/alerts (#114)
 
@@ -1639,6 +1653,25 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   per-user FAQ cache; always-on GPU; unprompted prod seed/scaledown (ops remain AskQuestion).
 - **Naming**: GitHub **#79** ≠ product **F79** (corpus freshness).
 - **Source**: EV-320; #320 · #79 · #311; ADR-004; ADR-022.
+
+### F86: Beta feature labeling + feedback link (admin)
+
+- **What it does**: Marks selected admin surfaces as **Beta** with clear UI chrome (badge,
+  page banner, optional nav chip) and a link to an umbrella GitHub issue for feedback.
+  Documents Beta surfaces in README + GitHub repo About. Adds Cursor rules/skills so
+  future evolve/build cycles **recommend** tagging new or flaky features as Beta and
+  pointing operators to the feedback issue.
+- **Initial Beta surfaces (this cycle)**: Fine-tune (F80 / admin `/finetune`); Evaluation
+  **Playground** tab + model download (F37/F38 / `/evaluation?tab=playground`).
+- **Inputs**: Shared Beta chrome component + i18n strings (en/es); config URL for the
+  umbrella issue (`VITE_BETA_FEEDBACK_ISSUE_URL` or build-time constant after issue create);
+  label `beta-feedback` on the umbrella issue.
+- **Outputs**: Visible Beta labeling on listed surfaces; README “Beta features” section;
+  updated GitHub description; rule + skill checklist for agents.
+- **Acceptance**: AC-BETA1–AC-BETA5; UJ-099; TC-338–TC-340.
+- **Out of scope**: ChatRAG public Beta banner; Automations/Freshness/Rebuild Beta this
+  cycle; changing FT/playground runtime behavior; duplicating #352 WRWC ops beta loop.
+- **Source**: EV-beta-feature-labeling; context brief `beta-feature-labeling.md`.
 
 ## Planned / Deferred (post-v1)
 

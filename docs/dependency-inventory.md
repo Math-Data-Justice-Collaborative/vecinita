@@ -34,6 +34,7 @@
 | onnxruntime | `>=1.16,<2` (CPU; Modal embed if ONNX; `ONNXRUNTIME_PIN`) | Optional ONNX embed inference | MIT | ADR-048; only if `VECINITA_EMBED_RUNTIME=onnx`; micros locked T119/T122.2 |
 | langdetect or equivalent | TBD | Bilingual auto-detect | | |
 | pytest / httpx | dev | Tests | | |
+| **schemathesis** | `>=4.0,<5` (dev) | OpenAPI property-based / contract fuzz (TC-334) | MIT | EV-staging-api-adversarial; Hypothesis-backed |
 
 ### EV-022 — Website scrape & crawl (F59–F61, ADR-045)
 
@@ -106,8 +107,10 @@
 | **tailwind-merge** | Tailwind class dedup | MIT | shadcn/ui utility |
 | **lucide-react** | Icons | ISC | shadcn/ui icons |
 | **recharts** | ^2.15.x Eval dashboard charts (`data-management-frontend`) | MIT | ADR-034 / EV-008 M64 |
+| **react-markdown** | Render assistant markdown in public ChatRAG responses | MIT | ChatRAG frontend only; markdown lists/links/code |
 | **react-router** | ^7.x Admin routing | MIT | EV-002 F23; TP-021 |
 | **react-router-dom** | ^7.x DOM bindings | MIT | EV-002 F23; TP-021 |
+| **remark-gfm** | GitHub-flavored markdown tables/lists/task syntax | MIT | `react-markdown` plugin for ChatRAG responses |
 | **vecinita-frontend-i18n** | workspace | Locale utils + EN/ES messages | — | EV-004 F31; `packages/frontend-i18n` |
 | **vecinita-frontend-ui** | workspace | Shared React locale/tag/pagination UI + Tooltip/ActionIcon (EV-024); `isSafeHttpUrl` / `citationHref` (EV-026 F72) | — | EV-004 F31; EV-024 F66/F67; EV-026 F72; depends on frontend-i18n; `@radix-ui/react-tooltip` |
 | **@supabase/supabase-js** | `^2.108.2` Supabase Auth browser session (DM frontend SPA) | MIT | **EV-005 F34** (ADR-026/027); admin frontend only; pinned 04-tech-plan (TP-S004-04) |
@@ -228,9 +231,11 @@ Python runtime). Image pins (M139):
 
 No new Python PyPI deps required for F84 metrics APIs (FastAPI + SQLAlchemy existing).
 
-**Staging Droplet (EV-036-D13, 2026-08-30):** `vecinita-staging-obs` (`s-1vcpu-1gb`, nyc3).
-Compose lives at `/opt/vecinita-obs` on the host. Grafana/Loki/AM bind **127.0.0.1** —
-use SSH tunnel. Create helper: `scripts/deploy/create_staging_obs_droplet.sh`
+**Staging Droplet (EV-036-D13, 2026-08-30; EV-323-D13 power-off 2026-09-04):**
+`vecinita-staging-obs` (`s-1vcpu-1gb`, nyc3, id `596408528`). Prefer **powered off** when idle
+(~$6/mo saved). Compose lives at `/opt/vecinita-obs` on the host. Grafana/Loki/AM bind
+**127.0.0.1** — use SSH tunnel after power-on. Create helper:
+`scripts/deploy/create_staging_obs_droplet.sh`
 (auth via `DIGITALOCEAN_TOKEN` / `DIGITALOCEAN_ACCESS_TOKEN`).
 
 ## PyPI packages intentionally not upgraded (QA-S007-003)

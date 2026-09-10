@@ -102,6 +102,67 @@ def test_supabase_ci_sync_accepts_supabase_project_id_alias() -> None:
     assert "SUPABASE_PROJECT_ID" in script
 
 
+def test_supabase_ci_sync_supports_staging_sync_command() -> None:
+    """Staging deploy needs an explicit sync command for the staging project."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert "sync-staging" in script
+    assert "sync_staging()" in script
+
+
+def test_sync_staging_uses_staging_runtime_inputs() -> None:
+    """Staging sync should derive the target branch config from staging env."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert "SUPABASE_STAGING_BRANCH_NAME" in staging_section
+    assert 'local branch_name="${SUPABASE_STAGING_BRANCH_NAME:-staging}"' in staging_section
+    assert "SUPABASE_URL" in staging_section
+    assert "RESEND_SENDER_EMAIL" in staging_section
+    assert "VECINITA_ADMIN_FRONTEND_URL" in staging_section
+    assert "config push --project-ref" in staging_section
+
+
+def test_sync_staging_pushes_migrations_via_resolved_branch_db_url() -> None:
+    """Staging sync should use the branch DB URL instead of linked-project autodiscovery."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert 'db_url="$(jq -r \'.POSTGRES_URL // empty\' <<<"$branch_json")"' in staging_section
+    assert 'supabase db push --db-url "$db_url" --yes' in staging_section
+
+
+def test_sync_staging_uses_temp_project_root_for_cli_and_migrations() -> None:
+    """Staging sync should return the temp project root, not the nested supabase dir."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert 'print(root / "supabase")' not in script
+    assert "print(root)" in script
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert 'compgen -G "supabase/migrations/*.sql"' in staging_section
+
+
+def test_sync_staging_ensures_persistent_staging_branch_before_push() -> None:
+    """Staging sync should ensure a named staging branch exists before config push."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert "ensure_staging_branch()" in script
+    staging_start = script.index("sync_staging()")
+    preview_start = script.index("preview_branch() {", staging_start)
+    staging_section = script[staging_start:preview_start]
+    assert 'ensure_staging_branch "$branch_name"' in staging_section
+    assert 'wait_for_preview_branch "$branch_name"' in staging_section
+
+
+def test_sync_staging_refuses_old_or_mismatched_staging_url() -> None:
+    """Staging sync should fail closed when staging env still points at the retired project."""
+    script = CI_SYNC.read_text(encoding="utf-8")
+    assert "validate_staging_supabase_url()" in script
+    assert "camkatfbjguwvymfgdme" in script
+    assert "retired standalone staging Supabase project" in script
+
+
 def test_sync_production_soft_fails_unauthorized_token() -> None:
     """Expired Management API PAT must not hard-fail Deploy Modal (CD unblock)."""
     script = CI_SYNC.read_text(encoding="utf-8")

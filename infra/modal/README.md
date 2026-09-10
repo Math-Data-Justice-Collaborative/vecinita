@@ -186,6 +186,10 @@ If `VECINITA_CORS_ORIGINS` is omitted, the app falls back to staging DO origins 
 - **Volume:** `embedding-models` (HF cache)
 - **Endpoints:** `GET /health`, `POST /embed`, `POST /embed/batch`
 - **Consumer env:** `VECINITA_MODAL_EMBED_URL` on DO backends (`packages/embedding-client`)
+- **ASGI `min_containers` (EV-323 / #323):** Deploy-import env `VECINITA_EMBED_MIN_CONTAINERS`
+  (`0` default = scale-to-zero / ADR-004; `1` = warm ASGI for faster `/health`). Example:
+  `VECINITA_EMBED_MIN_CONTAINERS=0 modal deploy --env staging infra/modal/embedding_app.py`
+  Prod flip requires AskQuestion.
 
 First deploy downloads weights into the Modal volume; allow several minutes on cold start.
 
@@ -211,12 +215,14 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
   **creation** can take ~70–100s — prime via `/warm` after deploy (see #315 /
   `scripts/ops/seed_gpu_snapshots.py`). Do not enable on playground.
 - **Post-deploy snapshot seed (EV-315 / #315):** After staging deploy with snapshots on, run
-  `uv run python scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop) until
-  observed samples are `cold_kind=snapshot_restore` (fail closed if create persists). Document
-  create latency separately from restore percentiles. Optional advisory CI only — not a hard
-  CD gate this cycle. Prod prime requires AskQuestion.
-  Example: `uv run python scripts/ops/seed_gpu_snapshots.py --modal-env staging --llm-url "$VECINITA_MODAL_LLM_URL" --proxy-key "$VECINITA_MODAL_PROXY_KEY" --max-primes 3`.
-  Pass real kinds from logs via `--observed-kinds` / `--kinds-file` when available.
+  `uv run python scripts/ops/seed_gpu_snapshots.py` (authenticated `/warm` loop), then evaluate
+  observed `cold_kind` from Modal logs via `--kinds-file` / `--observed-kinds`. Live `/warm`
+  alone exits **non-zero** until restore evidence is supplied (fail closed). Document create
+  latency separately from restore percentiles. Optional advisory CI only — not a hard CD gate.
+  Prod prime requires AskQuestion. Full steps: `docs/staging-runbook.md` §EV-315.
+  Example:
+  `uv run python scripts/ops/seed_gpu_snapshots.py --modal-env staging --llm-url "$VECINITA_STAGING_MODAL_LLM_URL" --proxy-key "$VECINITA_MODAL_PROXY_KEY" --max-primes 3`
+  then `… --kinds-file /tmp/llm-logs.txt`.
 - **Thin CPU ingress (EV-317 / #317):** ASGI stays on CPU; lazy-import so vLLM is not loaded at
   ASGI module import; keep `/warm` spawn (#318). Optional CPU snapshot on ingress only after
   profile evidence.
@@ -226,11 +232,15 @@ First deploy downloads weights into the Modal volume; allow several minutes on c
   AskQuestion.
 - **Layer E harness (EV-314 / #314):** Opt-in
   `uv run python scripts/ops/cold_start_bench.py --n 20 --output /tmp/cold-smoke.json`
-  (use `--n 100` for publishable p95). Forced cold:
-  `modal container stop --env staging --all vecinita-llm` (or pass `--force-cold`).
+  (use `--n 100` for publishable p95). Forced cold (`--force-cold`):
+  `modal container list -e staging --json` then `modal container stop <id> -y` for
+  matching `vecinita-llm` containers (Modal CLI 1.5+; harness does this).
   Tags use `cold_kind` ∈ `{warm, snapshot_restore, snapshot_create, clean_boot}` —
   no raw prompts (ADR-004). Do **not** conflate with `prewarm_to_ready` (#318).
   15-service-health may cite this script; do not run N=100 inside the skill by default.
+- **Umbrella close (EV-311 / #311):** Re-baseline staging restore + ChatRAG E2E; publish
+  Green/Useful/Red frontier in ADR-022 EV-311; see
+  [`docs/staging-runbook.md` §EV-311](../../docs/staging-runbook.md). Defer #315/#317/#319.
 - **Eager A/B:** `VECINITA_LLM_ENFORCE_EAGER` (default `true`) — independent of snapshot switch;
   live on Modal secret `vecinita-llm-gpu` for GPU workers
 - **Deprecated:** `vecinita-ollama`, `VECINITA_MODAL_OLLAMA_URL` — do not deploy

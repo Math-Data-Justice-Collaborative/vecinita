@@ -249,6 +249,45 @@ High-confidence **reviewed** FAQs can skip T4 entirely for a subset of asks.
 
 **Tests / AC:** TC-320-01–05 · AC-320-01–05 · UJ-093.
 
+### Amendment EV-311 — Umbrella close on evidence (#311)
+
+**Problem:** Child slices shipped (#313/#314/#316/#318/#320) but parent #311 still open without
+a published restore frontier vs the original SLO table. Remaining children (#315 seed,
+#317 thin ingress, #319 scaledown) stay `priority:medium` backlog.
+
+**Decision (EV-311 / #311 — 2026-09-04):**
+
+1. **Close the umbrella on evidence**, not by implementing medium children in this cycle.
+2. **Staging only** for forced-cold bench (`modal container stop` + `scripts/ops/cold_start_bench.py`).
+   Cite EV-313 prod cutover; do **not** run prod `container stop` without a separate AskQuestion.
+3. **Harness:** `generate` mode + `--force-cold`; smoke **N≈20** (TC-314-02 / TC-311-01). Optional
+   **N≥100** for publishable p95 when smoke looks Good — not required to close if Useful band
+   is documented honestly.
+4. **E2E:** One staging ChatRAG ask path (`chat-ask` mode and/or H3) — no silent 504; record
+   latency separately from Modal restore percentiles.
+5. **SLO bands (unchanged honesty):**
+   - **Green:** restore p50 &lt; 1s and p95 &lt; 3s (direct Modal `/generate`).
+   - **Useful:** publish measured frontier (expect ~1–2s p50 / ~3–10s p95 until Green); keep
+     snapshots on; close #311 with ADR frontier table filled from session evidence.
+   - **Red:** restore worse than Useful planning band or DO 504 returns → do **not** close #311;
+     disable/investigate `VECINITA_LLM_GPU_SNAPSHOT` before claiming success.
+6. **Docs:** Fill frontier numbers in this amendment + staging-runbook §EV-311 + session research
+   note under pack session `reports/`. Point `infra/modal/README.md` at the close procedure.
+7. **Defer:** #315 / #317 / #319 remain open backlog; do not block #311 close.
+
+**Tests / AC:** TC-311-01 · TC-311-02 · AC-311-01–04.
+
+**Frontier table (fill after Build evidence):**
+
+| Metric | Target (Green) | Measured (staging) | Band |
+|--------|----------------|--------------------|------|
+| Restore p50 (`snapshot_restore`) | &lt; 1s | **~44s** (n=5 timed `/generate` after force-cold; 2026-09-04; snapshots re-enabled) | **Red** |
+| Restore p95 | &lt; 3s | **~72s** max in same n=5 (not publishable p95; N&lt;100) | **Red** |
+| E2E cold ask (ChatRAG) | p50 &lt; 2s when restore hot; never silent 504 | FAQ path p50 **~226ms** (n=5); RAG-after-cold TBD (post-stop InternalFailure common) | FAQ Useful; restore E2E incomplete |
+| Warm ask | no regression | ~1s Modal `/generate` when container hot | OK |
+| N / date / commit | — | n=5 restore curls + FAQ bench; 2026-09-04; harness force-cold fix on `evolve/EV-311-cold-start-latency` | — |
+
+**Umbrella close:** **blocked** (Red restore). Keep #311 open; ship harness CLI fix; pursue #315/#317 + snapshot efficacy.
 ## References
 
 - S001 plan: `docs/sessions/S001-modal-cold-start-snapshot/cold-start-spike-plan.md`
@@ -257,8 +296,9 @@ High-confidence **reviewed** FAQs can skip T4 entirely for a subset of asks.
 - ADR-004 (cost/sovereignty), ADR-009 (vLLM on T4), ADR-037 (prod pin / playground),
   ADR-053 (LoRA promote)
 - BUG-2026-05-22 (cold-start UX), `docs/sessions/S000-internal-docs-archive/reference.md#cost-monitoring-baseline-adr-004`
-- Parent latency system: GitHub #311; slices: #313, #316, #314, #318, #315, #317, #319
+- Parent latency system: GitHub #311; slices: #313, #316, #314, #318, #315, #317, #319, #320
 - Session: `EV-313-prod-gpu-snapshots`; `EV-316-lora-post-restore`;
   `EV-314-cold-start-latency-harness`; `EV-318-async-gpu-prewarm`;
-  `EV-315-seed-gpu-snapshots`; `EV-317-thin-cpu-ingress`; `EV-319-scaledown-window`
+  `EV-315-seed-gpu-snapshots`; `EV-317-thin-cpu-ingress`; `EV-319-scaledown-window`;
+  `EV-311-infra-sub-second-chatrag-latency-on-cheap-server` (umbrella close)
   (pack session store)

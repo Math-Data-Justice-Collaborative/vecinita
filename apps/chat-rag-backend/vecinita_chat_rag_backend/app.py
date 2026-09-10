@@ -25,6 +25,7 @@ from vecinita_shared_schemas.chat_rag import (
     DocumentBrowsePage,
     EnergyEstimate,
     FeedbackCreateResponse,
+    FeedbackRequest,
     HealthResponse,
     Source,
     TagListResponse,
@@ -58,6 +59,52 @@ async def parse_ask_body(request: Request) -> AskRequest:
         return validate_ask_request(payload)
     except ValidationError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.errors()) from exc
+
+
+def _ask_request_openapi_extra() -> dict[str, object]:
+    """Publish AskRequest body in OpenAPI (Request-only handlers omit it otherwise).
+
+    [Corpus: api] EV-ux-backlog-polish UX-9 / TC-332
+    """
+    return {
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": AskRequest.model_json_schema(
+                        ref_template="#/components/schemas/{model}"
+                    ),
+                },
+            },
+        },
+    }
+
+
+def _feedback_request_openapi_extra() -> dict[str, object]:
+    """Publish FeedbackRequest body + 400/503 in OpenAPI (Request-only handlers).
+
+    [Corpus: api] EV-staging-api-adversarial / TC-333 / F68
+    """
+    return {
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": FeedbackRequest.model_json_schema(
+                        ref_template="#/components/schemas/{model}"
+                    ),
+                },
+            },
+        },
+        "responses": {
+            "400": {
+                "description": "Invalid JSON, identity fields, or validation error",
+            },
+            "503": {
+                "description": "Feedback write path unavailable",
+            },
+        },
+    }
 
 
 def _check_dependency(url: str | None, path: str = "/health") -> str:
@@ -259,7 +306,11 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
             ),
         )
 
-    @app.post("/api/v1/ask", response_model=AskResponse)
+    @app.post(
+        "/api/v1/ask",
+        response_model=AskResponse,
+        openapi_extra=_ask_request_openapi_extra(),
+    )
     async def ask(request: Request) -> AskResponse:  # pyright: ignore[reportUnusedFunction]
         body = await parse_ask_body(request)
         cfg = get_settings()
@@ -291,7 +342,10 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         )
         return result.model_copy(update={"energy_estimate": estimate})
 
-    @app.post("/api/v1/ask/stream")
+    @app.post(
+        "/api/v1/ask/stream",
+        openapi_extra=_ask_request_openapi_extra(),
+    )
     async def ask_stream(request: Request) -> StreamingResponse:  # pyright: ignore[reportUnusedFunction]
         body = await parse_ask_body(request)
         cfg = get_settings()
@@ -367,6 +421,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         "/api/v1/feedback",
         response_model=FeedbackCreateResponse,
         status_code=status.HTTP_201_CREATED,
+        openapi_extra=_feedback_request_openapi_extra(),
     )
     async def submit_feedback(request: Request) -> FeedbackCreateResponse:  # pyright: ignore[reportUnusedFunction]
         try:

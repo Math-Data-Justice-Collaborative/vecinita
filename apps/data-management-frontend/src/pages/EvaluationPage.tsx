@@ -14,7 +14,8 @@ import {
   fetchEvalRuns,
   subscribeEvalRunEvents,
 } from "@/api/admin";
-import { requireCorpusConfig } from "@/config";
+import { useAuth } from "@/auth/auth-context";
+import { requireInternalWriteReadConfig } from "@/config";
 import { AuthContext } from "@/auth/auth-context";
 import { useAdminT } from "@/hooks/useAdminT";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,7 @@ export function EvaluationPage() {
   const tr = useAdminT();
   const authCtx = useContext(AuthContext);
   const isSuperAdmin = authCtx?.role === "super-admin";
+  const { loading: authLoading, accessToken } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "runs";
   const [runs, setRuns] = useState<EvalRunListItemApi[]>([]);
@@ -78,7 +80,7 @@ export function EvaluationPage() {
       setLoading(true);
       setError(null);
       try {
-        const client = requireCorpusConfig();
+        const client = requireInternalWriteReadConfig();
         const data = await fetchEvalRuns(client);
         if (!isActive()) return;
         setRuns(data.items);
@@ -104,18 +106,21 @@ export function EvaluationPage() {
   );
 
   const handleSelectRun = useCallback(async (runId: string) => {
-    const client = requireCorpusConfig();
+    const client = requireInternalWriteReadConfig();
     const detail = await fetchEvalRunDetail(client, runId);
     setSelectedRun(detail);
   }, []);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     let active = true;
     void loadHistory(() => active);
     return () => {
       active = false;
     };
-  }, [loadHistory]);
+  }, [authLoading, accessToken, loadHistory]);
 
   const runFromQuery = searchParams.get("run");
 
@@ -129,7 +134,7 @@ export function EvaluationPage() {
 
   const pollRun = useCallback(
     async (runId: string) => {
-      const client = requireCorpusConfig();
+      const client = requireInternalWriteReadConfig();
       const POLL_MS = 4000;
       const SSE_RETRY_BASE_MS = 2000;
       const SSE_RETRY_MAX_MS = 30000;
@@ -267,7 +272,7 @@ export function EvaluationPage() {
       return;
     }
     let active = true;
-    const client = requireCorpusConfig();
+    const client = requireInternalWriteReadConfig();
     void Promise.all([
       fetchEvalRunDetail(client, compareRunAId),
       fetchEvalRunDetail(client, compareRunBId),

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from vecinita_internal_write_api.eval_run_crud import (
     create_eval_run,
+    fail_eval_run_dispatch,
     get_eval_run,
     get_eval_timeseries,
     list_eval_runs,
@@ -27,6 +28,7 @@ __all__ = [
     "LoadedEvalRun",
     "create_eval_run",
     "execute_eval_run",
+    "fail_eval_run_dispatch",
     "get_eval_run",
     "get_eval_timeseries",
     "list_eval_runs",

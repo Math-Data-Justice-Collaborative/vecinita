@@ -2,8 +2,8 @@
 
 > **Purpose:** Executive summary for stakeholders evaluating a **hosting switch** (e.g. Brown University / OSCAR vs current DigitalOcean + Modal)  
 > **Issues:** [#55](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/55) · [#56](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/56) · [#92](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/92)  
-> **Last updated:** 2026-07-03  
-> **Detail:** [architecture.md](architecture.md) · [oscar-hosting-feasibility.md](oscar-hosting-feasibility.md)
+> **Last updated:** 2026-09-04 (EV-323 cost baseline)  
+> **Detail:** [architecture.md](architecture.md) · [oscar-hosting-feasibility.md](oscar-hosting-feasibility.md) · [#323](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/323)
 
 ---
 
@@ -25,8 +25,17 @@ Full migration (Postgres + all APIs to Brown) is **high effort** and should foll
 | 4× DO App Platform services | Chat API, write API, 2× static frontends | ~$20–27 |
 | Modal GPU (vLLM T4, scale-to-zero) | US workspace `vecinita` | ~$5–20 |
 | Modal CPU (embed, ingest, ASGI) | Same workspace | ~$2–8 |
-| Supabase Pro (admin auth) | Cloud | ~$25 |
-| **Total** | Hybrid cloud | **~$67–75/mo** (post EV-005); pilot target was ≤$50 (ADR-004) |
+| Supabase Pro (admin auth) | Cloud | Pro org confirmed; exact current invoice unresolved |
+| **Total (doc estimate)** | Hybrid cloud | **~$67–75/mo** (post EV-005); pilot target was ≤$50 (ADR-004) |
+
+**EV-323 live check (2026-09-04):** DigitalOcean **team** August invoice was **$187.90**, dominated by **non-Vecinita** resources on the same account (metar-iwxxm DOKS ×2, empiric). Cost caps and #323 cuts use **Vecinita-attributable** spend only (App Platform ×8 incl. staging, Vecinita DBs/obs droplet, Modal, Supabase) — not the whole team bill. Modal workspace showed metered burn with **$0 billed** after credits; embedding `min_containers=1` (main + staging) is a primary idle lever. Session baseline: `~/.cursor/workflow/.../EV-323-infra-cost-reduce-full-stack/reports/cost-baseline.md`.
+
+**EV-latency-cost-efficiency follow-up (2026-09-07):** Supabase MCP confirms organization
+`mdjc-vecinita` is on the **Pro** plan with two active projects (`vecinita`,
+`vecinita-staging`). Public Supabase pricing confirms org-based billing plus per-project
+compute. Exact invoice / compute-size details were not exposed by the MCP and were explicitly
+waived for the recommendation artifact, so `#323` remains a **plan-level** cost posture, not a
+verified `< $30/mo` claim.
 
 **Live staging:** [deploy-state.md](sessions/S000-internal-docs-archive/deploy-state.md) (URLs verified 2026-06-26).
 
@@ -186,10 +195,11 @@ flowchart LR
 ## Recommended next steps
 
 1. **Review** this summary + [oscar-hosting-feasibility.md](oscar-hosting-feasibility.md) with Carlos/CCV
-2. **Answer** open questions in [#55](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/55) checklist
-3. **Prototype** one OSCAR Slurm job: embed fixture batch → POST to staging internal write API
-4. **Decide** Scenario A vs B vs C; record ADR
-5. **Plan cutover** only after H1–H6 smokes pass on target environment
+2. **Resolve** exact Supabase invoice / compute sizing if a future cycle needs a tighter whole-stack claim
+3. **Answer** open questions in [#55](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/55) checklist
+4. **Prototype** one OSCAR Slurm job: embed fixture batch → POST to staging internal write API
+5. **Decide** Scenario A vs B vs C; record ADR
+6. **Plan cutover** only after H1–H6 smokes pass on target environment
 
 ---
 
