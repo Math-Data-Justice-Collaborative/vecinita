@@ -90,6 +90,12 @@ def test_llm_secret_sync_preserves_live_adapter_pins() -> None:
     """
     workflow = _read(".github", "workflows", "deploy-modal.yml")
     assert "bash scripts/deploy/sync_llm_secret.sh --merge --apply" in workflow
+    # Gate like data-management sync — do not fail CD when LLM env is incomplete.
+    assert "ci_materialize_env.sh --check modal" in workflow
+    llm_step_idx = workflow.index("Sync Modal vecinita-llm secret")
+    llm_slice = workflow[llm_step_idx : llm_step_idx + 500]
+    assert "ci_materialize_env.sh --check modal" in llm_slice
+    assert "skipping LLM secret sync" in llm_slice
 
     sync_llm = _read("scripts", "deploy", "sync_llm_secret.sh")
     assert "--merge" in sync_llm

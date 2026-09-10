@@ -168,7 +168,6 @@ function NavItems({ onClick }: { onClick?: () => void }) {
         <NavLink
           key={to}
           to={to}
-          end
           onClick={onClick}
           className={({ isActive }) =>
             cn(

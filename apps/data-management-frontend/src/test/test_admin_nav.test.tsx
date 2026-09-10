@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderAppRoutesReady, useMediaQueryMock } from "./renderAppHelpers";
@@ -90,6 +90,52 @@ describe("Admin navigation", () => {
     expect(
       screen.getByRole("link", { name: /audit log/i }),
     ).toBeInTheDocument();
+  });
+
+  it("keeps Jobs nav active on /jobs/:jobId (prefix match)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = fetchInputUrl(input);
+        if (url.includes("/internal/v1/stats")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => STATS_BODY,
+          });
+        }
+        if (url.includes("/jobs/events")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ events: [] }),
+          });
+        }
+        if (url.includes("/jobs/")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              job_id: "job-nav-1",
+              status: "completed",
+              job_type: "ingest",
+              urls: ["https://example.com/nav"],
+              document_id: null,
+              error_code: null,
+              error_message: null,
+              modal_call_id: "fc-nav",
+              dashboard_url: null,
+              created_at: "2026-01-01T00:00:00Z",
+              updated_at: "2026-01-01T00:00:00Z",
+            }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }),
+    );
+    await renderApp("/jobs/job-nav-1");
+    await waitFor(() => {
+      const nav = screen.getByTestId("admin-nav");
+      const jobsLink = within(nav).getByRole("link", { name: /^jobs$/i });
+      expect(jobsLink).toHaveAttribute("aria-current", "page");
+    });
   });
 
   it("navigates to automations page (UJ-080)", async () => {

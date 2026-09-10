@@ -149,7 +149,13 @@ jobs:
           fi
 
       - name: Sync Modal vecinita-llm secret
-        run: bash scripts/deploy/sync_llm_secret.sh --merge --apply
+        run: |
+          set -euo pipefail
+          if bash scripts/deploy/ci_materialize_env.sh --check modal; then
+            bash scripts/deploy/sync_llm_secret.sh --merge --apply
+          else
+            echo "::warning::Modal LLM deploy env incomplete — skipping LLM secret sync. Push secrets via sync_github_secrets.sh --apply"
+          fi
 
       - name: Sync Modal vecinita-llm-finetune secret
         run: |
