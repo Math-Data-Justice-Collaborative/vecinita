@@ -6,7 +6,12 @@ from typing import cast
 
 import pytest
 import yaml
-from deploy.do_apps import STAGING_APP_NAMES, app_names_for_env, specs_for_env
+from deploy.do_apps import (
+    STAGING_APP_NAMES,
+    app_names_for_env,
+    specs_for_env,
+    validate_prod_cors_origins,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -52,3 +57,60 @@ def test_staging_spec_names_match_yaml() -> None:
         assert isinstance(name, str)
         found.add(name)
     assert found == expected
+
+
+def test_validate_prod_cors_origins_rejects_staging_only() -> None:
+    """BUG-2026-09-10: sync must refuse staging-only CORS on prod backends."""
+    with pytest.raises(SystemExit, match="staging frontend"):
+        validate_prod_cors_origins(
+            "vecinita-chat-rag-backend",
+            "https://vecinita-staging-chat-fe-epvwo.ondigitalocean.app",
+        )
+
+
+def test_validate_prod_cors_origins_rejects_prod_plus_staging() -> None:
+    """Prod+staging combo must fail (ADR-054 isolation; security review)."""
+    cors = (
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,"
+        + "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app,"
+        + "https://vecinita-staging-chat-fe-epvwo.ondigitalocean.app"
+    )
+    with pytest.raises(SystemExit, match="staging frontend"):
+        validate_prod_cors_origins("vecinita-chat-rag-backend", cors)
+
+
+def test_validate_prod_cors_origins_ignores_shell_staging_fe_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Shell FE URLs must not redefine the required prod hosts (Bugbot)."""
+    monkeypatch.setenv(
+        "VECINITA_CHAT_FRONTEND_URL",
+        "https://vecinita-staging-chat-fe-epvwo.ondigitalocean.app",
+    )
+    monkeypatch.setenv(
+        "VECINITA_ADMIN_FRONTEND_URL",
+        "https://vecinita-staging-admin-fe-4tj2p.ondigitalocean.app",
+    )
+    # Canonical prod pair still passes even when shell FE aliases are staging.
+    validate_prod_cors_origins(
+        "vecinita-internal-write-api",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,"
+        + "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app",
+    )
+
+
+def test_validate_prod_cors_origins_accepts_prod_pair() -> None:
+    """Prod chat+admin FE origins are accepted for prod API sync."""
+    validate_prod_cors_origins(
+        "vecinita-internal-write-api",
+        "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app,"
+        + "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app",
+    )
+
+
+def test_validate_prod_cors_origins_skips_staging_apps() -> None:
+    """Staging write-api may keep staging FE origins."""
+    validate_prod_cors_origins(
+        "vecinita-staging-write-api",
+        "https://vecinita-staging-chat-fe-epvwo.ondigitalocean.app",
+    )

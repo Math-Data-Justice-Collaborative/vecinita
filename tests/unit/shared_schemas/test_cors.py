@@ -10,8 +10,10 @@ from fastapi.testclient import TestClient
 from vecinita_shared_schemas.cors import (
     configure_cors,
     cors_headers_for_request,
+    cors_origins_contain_staging_hosts,
     install_cors_exception_handlers,
     parse_cors_origins,
+    prod_cors_origins_cover_frontends,
 )
 
 if TYPE_CHECKING:
@@ -94,3 +96,44 @@ def test_install_cors_exception_handlers_noop_when_no_origins() -> None:
     before = len(app.exception_handlers)
     install_cors_exception_handlers(app, [])
     assert len(app.exception_handlers) == before
+
+
+def test_prod_cors_origins_cover_frontends_false_when_required_empty() -> None:
+    """Empty required frontend list fails closed."""
+    assert prod_cors_origins_cover_frontends(["https://a.test"], frontend_origins=()) is False
+    assert (
+        prod_cors_origins_cover_frontends(
+            ["https://a.test"],
+            frontend_origins=("  ",),
+        )
+        is False
+    )
+
+
+def test_prod_cors_origins_cover_frontends_true_when_all_present() -> None:
+    """All required frontends present → True."""
+    assert (
+        prod_cors_origins_cover_frontends(
+            [ADMIN_ORIGIN, "https://other.test"],
+            frontend_origins=(ADMIN_ORIGIN,),
+        )
+        is True
+    )
+    assert (
+        prod_cors_origins_cover_frontends(
+            ["https://other.test"],
+            frontend_origins=(ADMIN_ORIGIN,),
+        )
+        is False
+    )
+
+
+def test_cors_origins_contain_staging_hosts_http_scheme() -> None:
+    """http:// staging hosts are detected the same as https."""
+    assert (
+        cors_origins_contain_staging_hosts(
+            ["http://vecinita-staging-chat-fe-epvwo.ondigitalocean.app"]
+        )
+        is True
+    )
+    assert cors_origins_contain_staging_hosts([ADMIN_ORIGIN]) is False
