@@ -61,6 +61,10 @@ _CHAT_FE_NAMES = frozenset({"vecinita-chat-rag-frontend", "vecinita-staging-chat
 _ADMIN_FE_NAMES = frozenset({"vecinita-admin-frontend", "vecinita-staging-admin-fe"})
 _PROD_SUPABASE_PROJECT_REF = "cfuvghdsuwactfeamtym"
 _RETIRED_STAGING_SUPABASE_PROJECT_REF = "camkatfbjguwvymfgdme"
+_PROD_CORS_FRONTEND_DEFAULTS = (
+    "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app",
+    "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app",
+)
 
 
 def specs_for_env(env: str) -> list[Path]:
@@ -395,6 +399,45 @@ def validate_supabase_url_for_target(
         )
 
 
+def validate_prod_cors_origins(name: str, cors_raw: str) -> None:
+    """Refuse syncing prod API CORS that omits prod FEs or includes staging FEs.
+
+    Always requires the canonical prod frontend hosts (not shell
+    ``VECINITA_*_FRONTEND_URL``, which CI may materialize as staging aliases).
+    Also rejects any ``vecinita-staging-*`` origin on prod backends
+    (BUG-2026-09-10 / ADR-054).
+    """
+    if name.startswith("vecinita-staging-"):
+        return
+    if name not in {"vecinita-chat-rag-backend", "vecinita-internal-write-api"}:
+        return
+    if not (cors_raw or "").strip():
+        return
+    # Lazy import: keep list/create usable if shared-schemas is not on path yet.
+    from vecinita_shared_schemas.cors import (
+        cors_origins_contain_staging_hosts,
+        parse_cors_origins,
+        prod_cors_origins_cover_frontends,
+    )
+
+    chat_fe, admin_fe = _PROD_CORS_FRONTEND_DEFAULTS
+    origins = parse_cors_origins(cors_raw)
+    if cors_origins_contain_staging_hosts(origins):
+        raise SystemExit(
+            f"{name}: VECINITA_CORS_ORIGINS must not include staging frontend hosts "
+            + f"(got {cors_raw!r}). Refusing ADR-054 cross-env CORS on prod."
+        )
+    if not prod_cors_origins_cover_frontends(
+        origins,
+        frontend_origins=(chat_fe, admin_fe),
+    ):
+        raise SystemExit(
+            f"{name}: VECINITA_CORS_ORIGINS must include prod frontends "
+            + f"{chat_fe!r} and {admin_fe!r} (got {cors_raw!r}). "
+            + "Refusing to reintroduce BUG-2026-09-10 staging-origin drift."
+        )
+
+
 def cmd_sync_secrets(client, name: str) -> int:
     """Push env vars from shell into the live app spec via apps.update.
 
@@ -419,6 +462,7 @@ def cmd_sync_secrets(client, name: str) -> int:
             os.environ.get("VITE_SUPABASE_URL", ""),
             env_key="VITE_SUPABASE_URL",
         )
+    validate_prod_cors_origins(name, os.environ.get("VECINITA_CORS_ORIGINS", ""))
     if name in _CHAT_BACKEND_NAMES:
         _apply_env_from_os(
             spec,
