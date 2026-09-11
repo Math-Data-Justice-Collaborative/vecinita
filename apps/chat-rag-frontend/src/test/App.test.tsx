@@ -72,4 +72,20 @@ describe("App navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: /toggle menu/i }));
     expect(container.querySelector(".sidebar-scrim")).not.toBeNull();
   });
+
+  it("closes the drawer sidebar after navigating to Corpus on a narrow viewport", async () => {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 390,
+    });
+    const { container } = render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /toggle menu/i }));
+    expect(container.querySelector(".sidebar-scrim")).not.toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /^corpus$/i }));
+    expect(
+      await screen.findByLabelText(/search title or url/i),
+    ).toBeInTheDocument();
+    expect(container.querySelector(".sidebar-scrim")).toBeNull();
+  });
 });

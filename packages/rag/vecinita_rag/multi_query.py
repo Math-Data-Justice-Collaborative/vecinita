@@ -50,6 +50,32 @@ def _content_echo_es(question: str) -> str | None:
     return stripped
 
 
+def _with_location_en(question: str) -> str | None:
+    """Append Providence RI when missing (mirror ES skip-when-present)."""
+    if "providence" in question.lower():
+        return None
+    if "?" not in question:
+        return None
+    return question.rstrip("?") + " in Providence RI?"
+
+
+def _food_assistance_synonym_en(question: str) -> str | None:
+    """Map 'food assistance' to pantry/bank lexicon used in the corpus (BUG-2026-09-09)."""
+    lower = question.lower()
+    if "food assistance" not in lower:
+        return None
+    if "food pantry" in lower or "food bank" in lower:
+        return None
+    # Prefer pantry (common in local RI sources); keep casing light via replace.
+    return re.sub(
+        r"food assistance",
+        "food pantry",
+        question,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+
 def heuristic_rewrites(question: str, *, locale: str) -> list[str]:
     """Return up to 3 cheap query variants; Spanish-aware when ``locale == "es"``.
 
@@ -68,8 +94,12 @@ def heuristic_rewrites(question: str, *, locale: str) -> list[str]:
     else:
         if "how" in q.lower():
             variants.append(q.replace("How", "What").replace("how", "what"))
-        if "?" in q:
-            variants.append(q.rstrip("?") + " in Providence RI?")
+        synonym = _food_assistance_synonym_en(q)
+        if synonym is not None:
+            variants.append(synonym)
+        loc = _with_location_en(q)
+        if loc is not None:
+            variants.append(loc)
 
     seen: set[str] = set()
     out: list[str] = []

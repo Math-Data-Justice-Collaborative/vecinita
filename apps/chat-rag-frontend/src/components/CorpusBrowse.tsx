@@ -176,6 +176,9 @@ export function CorpusBrowse({ onNavigateHome }: CorpusBrowseProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-testid="corpus-source-link"
+                  aria-label={t(locale, "chat.openSourceAria", {
+                    title: item.title ?? t(locale, "chat.untitledDocument"),
+                  })}
                 >
                   {t(locale, "chat.openSource")}
                 </a>
