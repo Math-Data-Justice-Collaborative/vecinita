@@ -26,25 +26,26 @@ First attempt also timed out at 120s (cold start); retry after `/api/v1/warm` re
 ## Investigation
 
 1. #368 empty exact-cache: **PASS** on this phrasing.
-2. **Root cause (EV-stage-prod-ux-validation):** H7 EN `heuristic_rewrites` wasted the
-   rewrite slot appending `in Providence RI?` when Providence was already present, and
-   did not map `food assistance` → corpus lexicon `food pantry` / `food bank`.
-3. XSS-prefixed pantry asks previously returned sources — phrasing sensitivity.
+2. **H7 rewrite gap (partial):** EN wasted rewrite slot on duplicate Providence; lacked
+   `food assistance` → pantry lexicon. Fixed in #385 (`multi_query.py`).
+3. **CE wipe (root cause after #385 deploy):** Staging has CE rerank on. Multi-query
+   recovered pantry chunks, but CE scored them against the raw “food assistance”
+   question below `min_retrieval_score` → empty set. Direct ask of the pantry synonym
+   returned 8 sources. Fix: fail-open to pre-CE candidates when CE empties a non-empty
+   set; short `food pantry Providence` synonym for Providence phrasings.
 
 ## Repro / regression test
 
 - `tests/bugs/test_bug_2026_09_09_food_assistance_zero_sources.py`
 - `tests/unit/rag/test_multi_query.py`
-  (`test_heuristic_rewrites_en_skips_location_when_providence_present`,
-  `test_heuristic_rewrites_en_food_assistance_adds_pantry_synonym`,
-  `test_multi_query_retrieve_food_assistance_providence_uses_synonym_hits`)
+- `tests/unit/rag/test_chat_retrieve.py::test_retrieve_chat_chunks_ce_failopen_when_threshold_empties_candidates`
 
 ## Fix
 
-**Fixed** in `packages/rag/vecinita_rag/multi_query.py`: EN location append skips when
-Providence is present; `food assistance` adds a pantry synonym variant. Empty-corpus UX
-copy unchanged; Chat FE adds Browse corpus CTA when sources are empty.
+1. H7 EN synonyms + skip duplicate Providence (#385)
+2. CE fail-open in `retrieve_chat_chunks` when threshold empties candidates
+3. Short `food pantry Providence` synonym for Providence + food assistance
 
 ## Status
 
-**fixed** — pending stage deploy validation after merge
+**fixed** — pending stage redeploy + live re-smoke

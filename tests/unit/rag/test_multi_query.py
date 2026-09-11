@@ -284,6 +284,16 @@ def test_heuristic_rewrites_en_food_assistance_adds_pantry_synonym() -> None:
     assert len(variants) <= _MAX_REWRITE_VARIANTS
 
 
+def test_heuristic_rewrites_en_food_assistance_providence_uses_short_pantry() -> None:
+    """Long Providence RI phrasings map to short pantry+Providence dense query."""
+    variants = heuristic_rewrites(
+        "Where can I get food assistance in Providence Rhode Island?",
+        locale="en",
+    )
+    assert "food pantry Providence" in variants
+    assert len(variants) <= _MAX_REWRITE_VARIANTS
+
+
 def test_multi_query_retrieve_food_assistance_providence_uses_synonym_hits() -> None:
     """When original retrieve is empty, synonym variant must still surface pantry hits."""
     pantry = _chunk(score=0.88, text="Providence food pantry hours", language="en")

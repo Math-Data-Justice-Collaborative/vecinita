@@ -126,11 +126,17 @@ def retrieve_chat_chunks(  # noqa: PLR0913 — ChatRAG fan-out mirrors service r
         groups.append(sub_chunks)
     chunks = merge_multi_query_hits(groups, top_k=retrieve_k)
     if ce_enabled and ce_scorer is not None:
-        return rerank_with_scorer(
+        reranked = rerank_with_scorer(
             rerank_question,
             chunks,
             top_k=top_k,
             scorer=ce_scorer,
             score_threshold=min_retrieval_score,
         )
+        # Fail open: CE against the raw question can score synonym-fanout hits
+        # (e.g. food pantry ← food assistance) below min_retrieval_score and
+        # wipe an otherwise non-empty candidate set (BUG-2026-09-09).
+        if not reranked and chunks:
+            return chunks[:top_k]
+        return reranked
     return chunks
