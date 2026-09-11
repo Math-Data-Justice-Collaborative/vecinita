@@ -494,6 +494,30 @@ describe("ChatPanel", () => {
     });
   });
 
+  it("shows a browse-corpus CTA when the assistant reply has no sources", async () => {
+    const sse =
+      'data: {"token":"No matching sources were found."}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+    vi.stubGlobal(
+      "fetch",
+      mockFetchRouter({
+        stream: sseResponse(sse),
+      }),
+    );
+
+    renderWithLocale(<ChatPanel />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Where can I get food assistance in Providence?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+
+    const cta = await screen.findByTestId("browse-corpus-cta");
+    expect(cta).toHaveTextContent(/browse corpus/i);
+    fireEvent.click(cta);
+    expect(window.location.pathname).toBe("/corpus");
+  });
+
   it("shows the welcome heading and suggested questions on the empty state", () => {
     vi.stubGlobal("fetch", mockFetchRouter({}));
 
