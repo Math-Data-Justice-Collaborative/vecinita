@@ -26,18 +26,25 @@ First attempt also timed out at 120s (cold start); retry after `/api/v1/warm` re
 ## Investigation
 
 1. #368 empty exact-cache: **PASS** on this phrasing.
-2. Retrieval / embedding / min-score / packer for this query class still fails.
+2. **Root cause (EV-stage-prod-ux-validation):** H7 EN `heuristic_rewrites` wasted the
+   rewrite slot appending `in Providence RI?` when Providence was already present, and
+   did not map `food assistance` → corpus lexicon `food pantry` / `food bank`.
 3. XSS-prefixed pantry asks previously returned sources — phrasing sensitivity.
 
 ## Repro / regression test
 
-Pending dedicated retrieval unit once root cause isolated; live matrix in
-`EV-staging-responsive-plunge` `evidence/api/` + `reports/findings.md`.
+- `tests/bugs/test_bug_2026_09_09_food_assistance_zero_sources.py`
+- `tests/unit/rag/test_multi_query.py`
+  (`test_heuristic_rewrites_en_skips_location_when_providence_present`,
+  `test_heuristic_rewrites_en_food_assistance_adds_pantry_synonym`,
+  `test_multi_query_retrieve_food_assistance_providence_uses_synonym_hits`)
 
 ## Fix
 
-Open — retrieval quality (not FE). Do not weaken empty-corpus UX.
+**Fixed** in `packages/rag/vecinita_rag/multi_query.py`: EN location append skips when
+Providence is present; `food assistance` adds a pantry synonym variant. Empty-corpus UX
+copy unchanged; Chat FE adds Browse corpus CTA when sources are empty.
 
 ## Status
 
-**open** — tracked for follow-on RAG evolve; not blocked by this UX PR
+**fixed** — pending stage deploy validation after merge
