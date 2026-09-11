@@ -39,6 +39,19 @@ def prod_cors_origins_cover_frontends(
     return all(origin in allowed for origin in required)
 
 
+def cors_origins_contain_staging_hosts(origins: list[str]) -> bool:
+    """Return True when any origin host looks like a staging Vecinita frontend.
+
+    Prod API CORS must not include staging FE hosts (ADR-054 isolation;
+    BUG-2026-09-10 follow-up).
+    """
+    for origin in origins:
+        host = origin.rstrip("/").removeprefix("https://").removeprefix("http://").split("/")[0]
+        if "vecinita-staging-" in host.lower():
+            return True
+    return False
+
+
 def cors_headers_for_request(request: Request, origins: list[str]) -> dict[str, str]:
     """Return Access-Control-* headers when the request Origin is allowed."""
     origin = request.headers.get("origin")

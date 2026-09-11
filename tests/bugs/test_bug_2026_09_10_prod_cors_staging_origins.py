@@ -5,7 +5,11 @@
 
 from __future__ import annotations
 
-from vecinita_shared_schemas.cors import parse_cors_origins, prod_cors_origins_cover_frontends
+from vecinita_shared_schemas.cors import (
+    cors_origins_contain_staging_hosts,
+    parse_cors_origins,
+    prod_cors_origins_cover_frontends,
+)
 
 _PROD_CHAT_FE = "https://vecinita-chat-rag-frontend-jnt8o.ondigitalocean.app"
 _PROD_ADMIN_FE = "https://vecinita-admin-frontend-ef4ob.ondigitalocean.app"
@@ -58,3 +62,10 @@ def test_prod_cors_coverage_empty_fails() -> None:
         )
         is False
     )
+
+
+def test_cors_origins_contain_staging_hosts_detects_staging() -> None:
+    """Staging FE hosts are flagged for prod CORS exclusion."""
+    assert cors_origins_contain_staging_hosts([_STAGING_CHAT_FE]) is True
+    assert cors_origins_contain_staging_hosts([_PROD_CHAT_FE, _PROD_ADMIN_FE]) is False
+    assert cors_origins_contain_staging_hosts([_PROD_CHAT_FE, _STAGING_CHAT_FE]) is True

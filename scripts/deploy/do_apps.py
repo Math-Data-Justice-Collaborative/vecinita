@@ -400,7 +400,13 @@ def validate_supabase_url_for_target(
 
 
 def validate_prod_cors_origins(name: str, cors_raw: str) -> None:
-    """Refuse syncing prod API CORS that omits prod frontend origins (BUG-2026-09-10)."""
+    """Refuse syncing prod API CORS that omits prod FEs or includes staging FEs.
+
+    Always requires the canonical prod frontend hosts (not shell
+    ``VECINITA_*_FRONTEND_URL``, which CI may materialize as staging aliases).
+    Also rejects any ``vecinita-staging-*`` origin on prod backends
+    (BUG-2026-09-10 / ADR-054).
+    """
     if name.startswith("vecinita-staging-"):
         return
     if name not in {"vecinita-chat-rag-backend", "vecinita-internal-write-api"}:
@@ -409,17 +415,18 @@ def validate_prod_cors_origins(name: str, cors_raw: str) -> None:
         return
     # Lazy import: keep list/create usable if shared-schemas is not on path yet.
     from vecinita_shared_schemas.cors import (
+        cors_origins_contain_staging_hosts,
         parse_cors_origins,
         prod_cors_origins_cover_frontends,
     )
 
-    chat_fe = (
-        os.environ.get("VECINITA_CHAT_FRONTEND_URL", "").strip() or _PROD_CORS_FRONTEND_DEFAULTS[0]
-    )
-    admin_fe = (
-        os.environ.get("VECINITA_ADMIN_FRONTEND_URL", "").strip() or _PROD_CORS_FRONTEND_DEFAULTS[1]
-    )
+    chat_fe, admin_fe = _PROD_CORS_FRONTEND_DEFAULTS
     origins = parse_cors_origins(cors_raw)
+    if cors_origins_contain_staging_hosts(origins):
+        raise SystemExit(
+            f"{name}: VECINITA_CORS_ORIGINS must not include staging frontend hosts "
+            + f"(got {cors_raw!r}). Refusing ADR-054 cross-env CORS on prod."
+        )
     if not prod_cors_origins_cover_frontends(
         origins,
         frontend_origins=(chat_fe, admin_fe),
