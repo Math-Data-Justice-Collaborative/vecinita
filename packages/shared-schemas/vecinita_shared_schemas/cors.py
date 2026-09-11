@@ -22,6 +22,23 @@ def parse_cors_origins(env_value: str | None = None) -> list[str]:
     return [part.strip() for part in raw.split(",") if part.strip()]
 
 
+def prod_cors_origins_cover_frontends(
+    origins: list[str],
+    *,
+    frontend_origins: tuple[str, ...] | list[str],
+) -> bool:
+    """Return True when every frontend origin is present in the CORS allow-list.
+
+    Used to catch ADR-054 drift where staging FE origins were synced onto prod
+    APIs (BUG-2026-09-10).
+    """
+    allowed = {origin.rstrip("/") for origin in origins}
+    required = [origin.rstrip("/") for origin in frontend_origins if origin.strip()]
+    if not required:
+        return False
+    return all(origin in allowed for origin in required)
+
+
 def cors_headers_for_request(request: Request, origins: list[str]) -> dict[str, str]:
     """Return Access-Control-* headers when the request Origin is allowed."""
     origin = request.headers.get("origin")
