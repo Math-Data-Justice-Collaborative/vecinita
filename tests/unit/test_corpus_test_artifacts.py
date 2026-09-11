@@ -20,6 +20,9 @@ _SHOULD_MATCH = (
     "https://test.example.com/uj017-deadbeef",
     "https://e2e-rebuild-92a16ff83c.example.com",
     "https://tree.example.com/guides/a.html",
+    "https://browse-housing.vecinita.test/",
+    "https://browse-legal.vecinita.test/",
+    "https://chat-rag-browse-abc123.vecinita.test/",
     "fixture://corpus/en/community-resources.md",
     "http://localhost:8080/doc",
     "http://127.0.0.1:5432/x",
@@ -37,7 +40,7 @@ _SHOULD_NOT_MATCH = (
 
 @pytest.mark.parametrize("url", _SHOULD_MATCH)
 def test_is_corpus_test_artifact_url_matches_synthetic_hosts(url: str) -> None:
-    """Classifier flags example.com / fixture:// / localhost URLs."""
+    """Classifier flags example.com / vecinita.test / fixture:// / localhost URLs."""
     assert is_corpus_test_artifact_url(url) is True
 
 
@@ -47,10 +50,11 @@ def test_is_corpus_test_artifact_url_keeps_community_hosts(url: str) -> None:
     assert is_corpus_test_artifact_url(url) is False
 
 
-def test_sql_predicate_mentions_example_fixture_and_localhost() -> None:
-    """SQL fragment used by cleanup/audit must cover all three artifact classes."""
+def test_sql_predicate_mentions_example_fixture_localhost_and_vecinita_test() -> None:
+    """SQL fragment used by cleanup/audit must cover all artifact classes."""
     predicate = TEST_ARTIFACT_URL_SQL_PREDICATE.lower()
     assert "example.com" in predicate
     assert "fixture://" in predicate
     assert "localhost" in predicate
     assert "127.0.0.1" in predicate
+    assert "vecinita.test" in predicate
