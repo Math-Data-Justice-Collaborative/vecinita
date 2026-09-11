@@ -66,7 +66,10 @@ def _food_assistance_synonym_en(question: str) -> str | None:
         return None
     if "food pantry" in lower or "food bank" in lower:
         return None
-    # Prefer pantry (common in local RI sources); keep casing light via replace.
+    # Short pantry+Providence form: long "…Providence Rhode Island?" dense retrieve
+    # also misses even with pantry wording (live stage evidence 2026-09-11).
+    if "providence" in lower:
+        return "food pantry Providence"
     return re.sub(
         r"food assistance",
         "food pantry",

@@ -17,7 +17,7 @@ def test_bug_2026_09_09_en_providence_food_assistance_gets_pantry_synonym() -> N
     variants = heuristic_rewrites(question, locale="en")
     joined = " ".join(variants).lower()
     assert "in providence ri?" not in joined
-    assert any("food pantry" in v.lower() or "food bank" in v.lower() for v in variants)
+    assert "food pantry providence" in joined
 
 
 def test_bug_2026_09_09_synonym_retrieve_recovers_pantry_hits() -> None:
