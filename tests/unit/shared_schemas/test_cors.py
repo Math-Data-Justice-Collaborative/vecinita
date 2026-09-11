@@ -101,6 +101,31 @@ def test_install_cors_exception_handlers_noop_when_no_origins() -> None:
 def test_prod_cors_origins_cover_frontends_false_when_required_empty() -> None:
     """Empty required frontend list fails closed."""
     assert prod_cors_origins_cover_frontends(["https://a.test"], frontend_origins=()) is False
+    assert (
+        prod_cors_origins_cover_frontends(
+            ["https://a.test"],
+            frontend_origins=("  ",),
+        )
+        is False
+    )
+
+
+def test_prod_cors_origins_cover_frontends_true_when_all_present() -> None:
+    """All required frontends present → True."""
+    assert (
+        prod_cors_origins_cover_frontends(
+            [ADMIN_ORIGIN, "https://other.test"],
+            frontend_origins=(ADMIN_ORIGIN,),
+        )
+        is True
+    )
+    assert (
+        prod_cors_origins_cover_frontends(
+            ["https://other.test"],
+            frontend_origins=(ADMIN_ORIGIN,),
+        )
+        is False
+    )
 
 
 def test_cors_origins_contain_staging_hosts_http_scheme() -> None:
