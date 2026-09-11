@@ -96,7 +96,7 @@ def test_list_documents_prefers_display_title_for_public_rows(engine: Engine) ->
                 INSERT INTO documents (id, url, title, display_title, language)
                 VALUES (
                     :id,
-                    'https://browse-display-title.example.com/',
+                    'https://browse-display-title.vecinita.test/',
                     'Noisy scraped title',
                     'Clean operator title',
                     'en'

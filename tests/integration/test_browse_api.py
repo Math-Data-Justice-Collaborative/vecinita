@@ -34,8 +34,8 @@ def _seed_public_browse_docs() -> None:
     engine = create_engine(_database_url())
     with engine.begin() as conn:
         for url, title, slug in (
-            ("https://browse-housing.example.com/", "Housing help center", "housing"),
-            ("https://browse-legal.example.com/", "Legal Aid clinic", "legal"),
+            ("https://browse-housing.vecinita.test/", "Housing help center", "housing"),
+            ("https://browse-legal.vecinita.test/", "Legal Aid clinic", "legal"),
         ):
             doc_id = scalar_uuid(
                 sqlalchemy_scalar_one(

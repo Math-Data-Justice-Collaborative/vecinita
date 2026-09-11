@@ -34,7 +34,9 @@ Apply (managed hosts): set `VECINITA_ALLOW_CORPUS_RESET=1` and
 - Tear down fixture documents in the same test (or session-scoped cleanup).
 - After any accidental insert into a managed DB: dry-run the cleanup script, then `--apply`
   with the corpus-reset override (AskQuestion for live prod).
-- Prefer fixture hosts under `example.com` so the classifier can find leftovers.
+# Prefer fixture hosts under `example.com` for non-browse seeds so the classifier
+# can find leftovers. Public browse seeds may use `*.vecinita.test` (visible in
+# local browse tests; classifier + operator cleanup remove them from managed DBs).
 
 ## Do not
 
