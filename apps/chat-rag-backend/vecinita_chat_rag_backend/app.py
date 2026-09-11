@@ -387,7 +387,15 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
                 metrics_enabled=cfg.metrics_enabled,
             )
 
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
+        return StreamingResponse(
+            event_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
 
     @app.get("/api/v1/documents", response_model=DocumentBrowsePage)
     def list_documents_public(  # pyright: ignore[reportUnusedFunction]

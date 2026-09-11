@@ -58,7 +58,7 @@ def engine(chat_settings: ChatRagSettings) -> Engine:
 @pytest.fixture
 def browse_document(engine: Engine) -> Iterator[tuple[UUID, str]]:
     """Insert a tagged browse document; delete after test."""
-    doc_url = f"https://chat-rag-browse-{uuid.uuid4().hex[:10]}.vecinita.test/"
+    doc_url = f"https://chat-rag-browse-{uuid.uuid4().hex[:10]}.example.com/"
     with engine.begin() as conn:
         doc_id_raw = sqlalchemy_scalar_one(
             conn.execute(

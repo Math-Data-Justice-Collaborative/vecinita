@@ -19,6 +19,7 @@ polluted the live corpus (HF-prod-corpus-test-artifacts, 2026-09-03).
 | Pattern | Examples |
 |---------|----------|
 | `*.example.com` | `https://batch-upsert-….example.com/`, `https://test.example.com/uj017-…` |
+| `*.vecinita.test` | `https://browse-housing.vecinita.test/` (legacy browse fixtures) |
 | `fixture://` | `fixture://corpus/en/community-resources.md` |
 | localhost | `http://localhost:…`, `http://127.0.0.1:…` |
 
