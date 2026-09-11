@@ -56,7 +56,9 @@ run_h2() {
     return 0
   fi
   echo "$h2_out"
-  if echo "$h2_out" | grep -Eqi 'connection refused|could not connect|timeout expired|Network is unreachable|No route to host'; then
+  # Include libpq "Operation timed out" (macOS/DO allowlist) — not only
+  # "timeout expired" / connection refused (EV-stage-prod-ux-validation).
+  if echo "$h2_out" | grep -Eqi 'connection refused|could not connect|timeout expired|Operation timed out|Network is unreachable|No route to host'; then
     echo "H2: SKIP — local DATABASE_URL unreachable (network allowlist)."
     echo "H2: continuing remaining tiers; rely on ChatRAG /health dependencies.postgres."
     return 0
