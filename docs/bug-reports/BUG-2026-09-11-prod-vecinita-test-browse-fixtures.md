@@ -1,6 +1,6 @@
 # BUG-2026-09-11 — Prod corpus browse shows `*.vecinita.test` fixtures
 
-> **Status:** classifier fixed in working tree; **prod delete pending AskQuestion**  
+> **Status:** fixed (classifier in PR #384; prod cleanup applied 2026-09-11)  
 > **Date:** 2026-09-11  
 > **Component:** ChatRAG browse (`GET /api/v1/documents`); corpus cleanup classifier  
 > **Session:** EV-stage-prod-validation-e2e  
