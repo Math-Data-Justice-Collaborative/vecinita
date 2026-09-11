@@ -10,8 +10,10 @@ from fastapi.testclient import TestClient
 from vecinita_shared_schemas.cors import (
     configure_cors,
     cors_headers_for_request,
+    cors_origins_contain_staging_hosts,
     install_cors_exception_handlers,
     parse_cors_origins,
+    prod_cors_origins_cover_frontends,
 )
 
 if TYPE_CHECKING:
