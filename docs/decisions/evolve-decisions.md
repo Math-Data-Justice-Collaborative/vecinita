@@ -1946,3 +1946,25 @@ Extend `do_apps.py` GitHub source sync to App Platform `services[]` (parity with
 | EV-do-apps-D4 | Safety | Github keys only — preserve encrypted live envs |
 
 **Cites:** [Corpus: staging] [Corpus: feature-list.md §F83] [Spec: docs/staging-runbook.md §DigitalOcean CD]
+
+## EV-038 — Automation / Modal job hardening (2026-09-11)
+
+Hardening pass on F78 catch-up and F79 freshness Modal DM jobs to reduce failure rates.
+No new Fn; extend ADR-052. Staging-first; no live prod corpus mutate without AskQuestion.
+No UI redesign this cycle.
+
+| ID | Topic | Choice |
+|----|-------|--------|
+| EV-038-D1 | Scope | F78/F79 + Modal DM runner (retries, timeouts, idempotency, residual cron, observability) |
+| EV-038-D2 | Out | F77/F80 promote; live prod enable flips without AskQuestion; Grafana widgets; admin UI redesign |
+| EV-038-D3 | Slices | A residual cron scan; B enqueue-time gates; C freshness cap + WAF quarantine; D visible enqueue/history failures; E bounded transient auto-retry |
+| EV-038-D4 | Success | Staging before/after `automation_runs` + job failure rates (≥7d when available); WAF quarantined counted separately |
+| EV-038-D5 | Docs | ADR-052 amendment + config-spec knobs + AC-AU8–12 / AC-FR8–9 + TC-341–346 + F78/F79 limitations |
+| EV-038-D6 | UI | N/A — API/worker only |
+| EV-038-D7 | Scale | standard (full evolve angles) |
+| EV-038-D8 | Defaults | `VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK=25`; `VECINITA_AUTOMATION_JOB_MAX_RETRIES=2`; `VECINITA_FRESHNESS_WAF_QUARANTINE=true` |
+
+**Session:** `~/.cursor/workflow/Math-Data-Justice-Collaborative/vecinita/sessions/EV-038-automation-modal-hardening`  
+**Context:** `docs/context/ev-038-automation-modal-hardening.md`
+
+**Cites:** [Corpus: feature-list.md §F78–F79] [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] [Corpus: config] [Corpus: tests] [Corpus: acceptance]

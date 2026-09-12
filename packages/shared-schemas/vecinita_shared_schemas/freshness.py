@@ -18,9 +18,13 @@ from uuid import UUID
 
 FRESHNESS_ENABLED_ENV = "VECINITA_FRESHNESS_ENABLED"
 FRESHNESS_STALE_DAYS_ENV = "VECINITA_FRESHNESS_STALE_DAYS"
+FRESHNESS_MAX_ENQUEUE_PER_TICK_ENV = "VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK"
+FRESHNESS_WAF_QUARANTINE_ENV = "VECINITA_FRESHNESS_WAF_QUARANTINE"
 
 DEFAULT_FRESHNESS_ENABLED = False
 DEFAULT_FRESHNESS_STALE_DAYS = 30
+DEFAULT_FRESHNESS_MAX_ENQUEUE_PER_TICK = 25
+DEFAULT_FRESHNESS_WAF_QUARANTINE = True
 
 FreshnessEnqueueDecision = Literal[
     "enqueue",
@@ -77,6 +81,41 @@ def parse_freshness_stale_days() -> int:
     if value < 1:
         return DEFAULT_FRESHNESS_STALE_DAYS
     return value
+
+
+def _parse_int_clamped(
+    env_name: str,
+    *,
+    default: int,
+    minimum: int,
+    maximum: int,
+) -> int:
+    raw = os.environ.get(env_name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        value = int(raw.strip(), 10)
+    except ValueError:
+        return default
+    return min(max(value, minimum), maximum)
+
+
+def parse_freshness_max_enqueue_per_tick() -> int:
+    """Parse daily freshness enqueue cap (default 25, clamped 1..500)."""
+    return _parse_int_clamped(
+        FRESHNESS_MAX_ENQUEUE_PER_TICK_ENV,
+        default=DEFAULT_FRESHNESS_MAX_ENQUEUE_PER_TICK,
+        minimum=1,
+        maximum=500,
+    )
+
+
+def is_freshness_waf_quarantine_enabled() -> bool:
+    """Return whether host WAF blocks complete as quarantined skips (default true)."""
+    return _env_bool(
+        FRESHNESS_WAF_QUARANTINE_ENV,
+        default=DEFAULT_FRESHNESS_WAF_QUARANTINE,
+    )
 
 
 def is_document_stale(

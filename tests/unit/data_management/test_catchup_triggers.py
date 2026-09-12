@@ -77,6 +77,53 @@ def test_enqueue_automation_catchup_posts_job() -> None:
     assert isinstance(job_id, UUID)
 
 
+def test_data_management_jobs_client_fetches_catchup_gates() -> None:
+    """TC-342: CRUD hook can fetch pending/running catch-up gate state from /jobs."""
+    other_doc = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/jobs"
+        return httpx.Response(
+            200,
+            json={
+                "jobs": [
+                    {
+                        "job_id": str(uuid4()),
+                        "status": "running",
+                        "job_type": "automation_catchup",
+                        "urls": [],
+                        "document_id": str(DOC_ID),
+                        "created_at": "2026-09-11T12:00:00+00:00",
+                        "updated_at": "2026-09-11T12:00:00+00:00",
+                        "options": {"document_id": str(DOC_ID), "revision": "rev-1"},
+                    },
+                    {
+                        "job_id": str(uuid4()),
+                        "status": "pending",
+                        "job_type": "automation_catchup",
+                        "urls": [],
+                        "document_id": str(other_doc),
+                        "created_at": "2026-09-11T12:00:00+00:00",
+                        "updated_at": "2026-09-11T12:00:00+00:00",
+                        "options": {"document_id": str(other_doc), "revision": "rev-2"},
+                    },
+                ]
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = DataManagementJobsClient(
+        base_url="https://dm.example",
+        proxy_key="proxy",
+        http_client=httpx.Client(transport=transport, base_url="https://dm.example"),
+    )
+    running_count, seen_keys = client.fetch_catchup_enqueue_gates()
+
+    assert running_count == 1
+    assert seen_keys == frozenset({f"{DOC_ID}:rev-1", f"{other_doc}:rev-2"})
+
+
 def test_enqueue_catchup_targets_respects_kill_switch(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -340,7 +387,7 @@ def test_targets_from_completed_job_requires_document_ids() -> None:
 def test_maybe_enqueue_after_job_none_client_and_exceptions(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """None client is a no-op; enqueue exceptions are swallowed."""
+    """None client is a no-op; enqueue exceptions surface as enqueue_failed."""
     store = InMemoryJobStore()
     record = store.create_job(
         urls=[],
@@ -360,7 +407,7 @@ def test_maybe_enqueue_after_job_none_client_and_exceptions(
             msg = "modal down"
             raise RuntimeError(msg)
 
-    assert maybe_enqueue_after_job(final, jobs_client=_BoomClient()) == []
+    assert maybe_enqueue_after_job(final, jobs_client=_BoomClient()) == [("enqueue_failed", None)]
 
     healthy = store.create_job(
         urls=[],
@@ -371,3 +418,73 @@ def test_maybe_enqueue_after_job_none_client_and_exceptions(
     healthy_final = store.get_job(healthy.job_id)
     assert healthy_final is not None
     assert maybe_enqueue_after_job(healthy_final, jobs_client=_BoomClient()) == []
+
+
+def test_maybe_enqueue_after_job_uses_real_gate_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-342 / AC-AU9: pending/running catch-up jobs provide seen keys and capacity."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_MAX_CONCURRENT", "1")
+    store = InMemoryJobStore()
+    parent = store.create_job(
+        urls=[],
+        job_type="retag",
+        options={"document_id": str(DOC_ID), "revision": "rev-1"},
+    )
+    _ = store.update_job(parent.job_id, status="failed")
+    existing = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options={"document_id": str(DOC_ID), "revision": "rev-1"},
+    )
+    _ = store.update_job(existing.job_id, status="pending")
+    running = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options={"document_id": str(uuid4()), "revision": "other"},
+    )
+    _ = store.update_job(running.job_id, status="running")
+    final = store.get_job(parent.job_id)
+    assert final is not None
+
+    class _Client:
+        def enqueue_automation_catchup(self, *_args: object, **_kwargs: object) -> UUID:
+            return uuid4()
+
+    result = maybe_enqueue_after_job(final, jobs_client=_Client(), store=store)
+    assert result == [("skip_duplicate", None)]
+
+    _ = store.delete_job(existing.job_id)
+    result_at_capacity = maybe_enqueue_after_job(final, jobs_client=_Client(), store=store)
+    assert result_at_capacity == [("skip_at_capacity", None)]
+
+
+def test_maybe_enqueue_after_job_surfaces_enqueue_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-343 / AC-AU10: enqueue failure is visible on result and parent metrics."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    parent = store.create_job(
+        urls=[],
+        job_type="retag",
+        options={"document_id": str(DOC_ID), "revision": "rev-fail"},
+    )
+    _ = store.update_job(parent.job_id, status="failed", metrics={"existing": 1})
+    final = store.get_job(parent.job_id)
+    assert final is not None
+
+    class _BoomClient:
+        def enqueue_automation_catchup(self, *_args: object, **_kwargs: object) -> UUID:
+            msg = "modal down"
+            raise RuntimeError(msg)
+
+    result = maybe_enqueue_after_job(final, jobs_client=_BoomClient(), store=store)
+
+    updated = store.get_job(parent.job_id)
+    assert updated is not None
+    assert result == [("enqueue_failed", None)]
+    assert updated.metrics == {"existing": 1, "catchup_enqueue_failed": True}

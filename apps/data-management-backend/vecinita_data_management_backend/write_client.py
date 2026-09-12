@@ -16,6 +16,7 @@ from vecinita_shared_schemas.automations import (
     AutomationRun,
     AutomationRunCreateRequest,
     AutomationRunStatus,
+    CatchupResidualListResponse,
 )
 from vecinita_shared_schemas.internal_write import (
     AuditEventRequest,
@@ -353,3 +354,14 @@ class InternalWriteClient:
             msg = f"record_automation_run failed: {response.status_code} {response.text}"
             raise InternalWriteClientError(msg)
         return AutomationRun.model_validate(response.json())
+
+    def list_catchup_residuals(self) -> CatchupResidualListResponse:
+        """GET documents needing F78 residual catch-up (EV-038 / TC-341)."""
+        response = self._client.get(
+            "/internal/v1/automations/residuals",
+            headers=self._headers(),
+        )
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"list_catchup_residuals failed: {response.status_code} {response.text}"
+            raise InternalWriteClientError(msg)
+        return CatchupResidualListResponse.model_validate(response.json())

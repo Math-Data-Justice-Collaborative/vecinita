@@ -17,6 +17,7 @@ from uuid import UUID
 import pytest
 from vecinita_shared_schemas.automations import is_automations_kill_switch_on
 from vecinita_shared_schemas.freshness import (
+    DEFAULT_FRESHNESS_MAX_ENQUEUE_PER_TICK,
     DEFAULT_FRESHNESS_STALE_DAYS,
     FreshnessEnqueueDecision,
     FreshnessEnqueueRequest,
@@ -25,12 +26,16 @@ from vecinita_shared_schemas.freshness import (
     freshness_enqueues_catchup,
     is_document_stale,
     is_freshness_enabled,
+    is_freshness_waf_quarantine_enabled,
+    parse_freshness_max_enqueue_per_tick,
     parse_freshness_stale_days,
     should_bump_last_checked_after_refresh,
 )
 
 DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 _NOW = datetime(2026, 8, 12, 12, 0, 0, tzinfo=UTC)
+_EXPECTED_MAX_ENQUEUE_DEFAULT = 25
+_MAX_ENQUEUE_CLAMP = 500
 
 _BASE_REQUEST = FreshnessEnqueueRequest(
     freshness_enabled=True,
@@ -190,3 +195,38 @@ def test_freshness_does_not_enqueue_catchup_side_effect() -> None:
     assert freshness_enqueues_catchup() is False
     decision: FreshnessEnqueueDecision = decide_freshness_enqueue(_BASE_REQUEST)
     assert decision == "enqueue"
+
+
+def test_freshness_max_enqueue_per_tick_default_and_clamp(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-345 / AC-FR8: scheduled freshness enqueue cap defaults to 25 and clamps 1..500."""
+    monkeypatch.delenv("VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK", raising=False)
+    assert DEFAULT_FRESHNESS_MAX_ENQUEUE_PER_TICK == _EXPECTED_MAX_ENQUEUE_DEFAULT
+    assert parse_freshness_max_enqueue_per_tick() == _EXPECTED_MAX_ENQUEUE_DEFAULT
+
+    monkeypatch.setenv("VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK", "1")
+    assert parse_freshness_max_enqueue_per_tick() == 1
+
+    monkeypatch.setenv("VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK", "750")
+    assert parse_freshness_max_enqueue_per_tick() == _MAX_ENQUEUE_CLAMP
+
+    monkeypatch.setenv("VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK", "0")
+    assert parse_freshness_max_enqueue_per_tick() == 1
+
+    monkeypatch.setenv("VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK", "bad")
+    assert parse_freshness_max_enqueue_per_tick() == _EXPECTED_MAX_ENQUEUE_DEFAULT
+
+
+def test_waf_quarantine_default_true_and_env_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-346 / AC-FR9: WAF quarantine is enabled by default and can be disabled."""
+    monkeypatch.delenv("VECINITA_FRESHNESS_WAF_QUARANTINE", raising=False)
+    assert is_freshness_waf_quarantine_enabled() is True
+
+    monkeypatch.setenv("VECINITA_FRESHNESS_WAF_QUARANTINE", "false")
+    assert is_freshness_waf_quarantine_enabled() is False
+
+    monkeypatch.setenv("VECINITA_FRESHNESS_WAF_QUARANTINE", "garbage")
+    assert is_freshness_waf_quarantine_enabled() is True

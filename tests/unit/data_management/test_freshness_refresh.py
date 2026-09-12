@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from vecinita_data_management_backend.freshness_refresh import (
@@ -21,6 +21,7 @@ from vecinita_data_management_backend.freshness_refresh import (
 )
 from vecinita_data_management_backend.jobs import run_job
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_ingest.scrape import ScrapeFetchError
 from vecinita_shared_schemas.data_management import CreateJobRequest
 from vecinita_shared_schemas.internal_write import DocumentSummary
 
@@ -693,3 +694,86 @@ def test_create_job_request_stores_freshness_option_flags() -> None:
     assert body.options is not None
     assert body.options.refresh_enabled is False
     assert body.options.is_stale is True
+
+
+def test_scheduled_freshness_tick_caps_and_defers_remaining(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-345 / AC-FR8: daily freshness enqueue stops at the per-tick cap."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    monkeypatch.setenv("VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK", "1")
+    enqueued: list[UUID] = []
+
+    docs = [
+        DocumentSummary(document_id=DOC_ID, url="https://example.com/a", refresh_enabled=True),
+        DocumentSummary(document_id=DOC_ID_2, url="https://example.com/b", refresh_enabled=True),
+    ]
+
+    def enqueue(document_id: UUID, *, force: bool = False) -> UUID:
+        _ = force
+        enqueued.append(document_id)
+        return uuid4()
+
+    result = run_scheduled_freshness_tick(
+        list_stale_documents=lambda: docs,
+        enqueue_freshness=enqueue,
+    )
+
+    assert enqueued == [DOC_ID]
+    assert result == {
+        "job_type": "freshness_refresh",
+        "enqueued": 1,
+        "skipped": 0,
+        "deferred": 1,
+        "outcome": "enqueued_capped",
+    }
+
+
+def test_freshness_worker_quarantines_waf_fetch_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-346 / AC-FR9: host_waf_blocked completes as quarantined skip with no retry."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    monkeypatch.setenv("VECINITA_FRESHNESS_WAF_QUARANTINE", "true")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(),
+    )
+    recorded: list[dict[str, object]] = []
+
+    class _RecordingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            recorded.append(dict(kwargs))
+
+    def _waf(_document_id: UUID) -> None:
+        msg = "blocked by WAF"
+        raise ScrapeFetchError(msg, error_code="host_waf_blocked")
+
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_RecordingWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=_waf,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.error_code is None
+    assert final.metrics == {
+        "freshness_outcome": "skipped_quarantined_waf",
+        "documents_processed": 0,
+    }
+    assert recorded == [
+        {
+            "job_type": "freshness_refresh",
+            "status": "skipped",
+            "document_id": DOC_ID,
+            "revision": None,
+            "error": "blocked by WAF",
+        }
+    ]

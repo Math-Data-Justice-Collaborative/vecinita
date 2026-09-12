@@ -5,6 +5,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from vecinita_shared_schemas.automations import (
+    is_transient_automation_failure,
+    parse_automation_job_max_retries,
+)
 from vecinita_shared_schemas.internal_write import AuditEventRequest
 
 from vecinita_data_management_backend.automation_catchup import run_automation_catchup_job
@@ -90,8 +94,8 @@ def _emit_job_terminal_audit(
         _logger.warning("audit emit failed for %s", event_type, exc_info=True)
 
 
-def _maybe_trigger_catchup(record: JobRecord) -> None:
-    _ = maybe_enqueue_after_job(record, jobs_client=_catchup_jobs_client())
+def _maybe_trigger_catchup(record: JobRecord, *, store: JobStore) -> None:
+    _ = maybe_enqueue_after_job(record, jobs_client=_catchup_jobs_client(), store=store)
 
 
 def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
@@ -157,6 +161,48 @@ def _dispatch_known_job(  # noqa: PLR0913  # mirrors run_job dependency surface
     handler()
 
 
+def _dispatch_with_automation_retries(  # noqa: PLR0913  # mirrors _dispatch_known_job deps
+    record: JobRecord,
+    *,
+    store: JobStore,
+    embed_client: EmbeddingClient,
+    write_client: InternalWriteClient,
+    fetch_document: DocumentFetcher | None,
+    tag_client: LlmTagClient | None,
+    translate_client: ChunkTranslator | None,
+) -> None:
+    max_retries = (
+        parse_automation_job_max_retries()
+        if record.job_type in {"automation_catchup", "freshness_refresh"}
+        else 0
+    )
+    attempts = 0
+    while True:
+        try:
+            _dispatch_known_job(
+                record,
+                store=store,
+                embed_client=embed_client,
+                write_client=write_client,
+                fetch_document=fetch_document,
+                tag_client=tag_client,
+                translate_client=translate_client,
+            )
+        except Exception as exc:
+            if attempts >= max_retries or not is_transient_automation_failure(exc):
+                raise
+            attempts += 1
+            _logger.info(
+                "retrying transient %s job %s attempt=%s max_retries=%s",
+                record.job_type,
+                record.job_id,
+                attempts,
+                max_retries,
+            )
+        else:
+            return
+
+
 def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surface
     job_id: UUID,
     *,
@@ -184,7 +230,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
                 fetch_document=fetch_document,
             )
         else:
-            _dispatch_known_job(
+            _dispatch_with_automation_retries(
                 record,
                 store=store,
                 embed_client=embed_client,
@@ -197,7 +243,7 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
         final = store.get_job(job_id)
         if final is not None and final.status == "failed":
             _emit_job_terminal_audit(scoped_write, final, "job.failed")
-            _maybe_trigger_catchup(final)
+            _maybe_trigger_catchup(final, store=store)
         if final is not None and final.status not in ("completed", "failed"):
             _ = store.update_job(
                 job_id,
@@ -208,10 +254,10 @@ def run_job(  # noqa: PLR0913  # job dispatch mirrors pipeline dependency surfac
             failed = store.get_job(job_id)
             if failed is not None:
                 _emit_job_terminal_audit(scoped_write, failed, "job.failed")
-                _maybe_trigger_catchup(failed)
+                _maybe_trigger_catchup(failed, store=store)
         raise
 
     final = store.get_job(job_id)
     if final is not None and final.status == "completed":
         _emit_job_terminal_audit(scoped_write, final, "job.completed")
-        _maybe_trigger_catchup(final)
+        _maybe_trigger_catchup(final, store=store)

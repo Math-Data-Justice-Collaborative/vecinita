@@ -1455,6 +1455,22 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /automations/residuals:
+    get:
+      operationId: listCatchupResiduals
+      summary: Documents with missing/partial embeddings for F78 residual catch-up (EV-038 / TC-341)
+      security:
+        - bearerAuth: []
+        - internalApiKey: []
+      responses:
+        "200":
+          description: Residual catch-up targets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatchupResidualListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /finetune/runs/{run_id}/eval:
     get:
       operationId: getFinetuneEvalReport
@@ -1893,6 +1909,36 @@ components:
       properties:
         enabled:
           type: boolean
+    CatchupResidualTarget:
+      type: object
+      additionalProperties: false
+      required:
+        - document_id
+        - revision
+        - embed_status
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        revision:
+          type: string
+        embed_status:
+          type: string
+          enum: [complete, missing, partial, failed]
+    CatchupResidualListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatchupResidualTarget"
+        total:
+          type: integer
+          minimum: 0
     AutomationRun:
       type: object
       additionalProperties: false

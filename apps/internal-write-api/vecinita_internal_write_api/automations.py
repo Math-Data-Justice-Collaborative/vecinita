@@ -18,6 +18,9 @@ from vecinita_shared_schemas.automations import (
     AutomationRunListResponse,
     AutomationRunStatus,
     AutomationsConfigResponse,
+    CatchupResidualListResponse,
+    CatchupResidualTarget,
+    EmbedStatus,
     is_automations_kill_switch_on,
     parse_automations_max_concurrent,
 )
@@ -121,6 +124,54 @@ def list_automation_runs(
         page_size=page_size,
         total_count=total,
     )
+
+
+def list_catchup_residuals(engine: Engine) -> CatchupResidualListResponse:
+    """List documents with missing/partial embeddings for residual catch-up (TC-341)."""
+    with engine.connect() as conn:
+        rows = (
+            conn.execute(
+                text(
+                    """
+                    WITH chunk_counts AS (
+                        SELECT
+                            d.id AS document_id,
+                            COALESCE(d.content_hash, '0') AS revision,
+                            COUNT(c.id) AS chunk_count,
+                            COUNT(e.chunk_id) AS embedding_count
+                        FROM documents d
+                        LEFT JOIN chunks c ON c.document_id = d.id
+                        LEFT JOIN embeddings e ON e.chunk_id = c.id
+                        GROUP BY d.id, d.content_hash
+                    )
+                    SELECT
+                        document_id,
+                        revision,
+                        CASE
+                            WHEN chunk_count = 0 THEN 'missing'
+                            WHEN embedding_count < chunk_count THEN 'partial'
+                            ELSE 'complete'
+                        END AS embed_status
+                    FROM chunk_counts
+                    WHERE chunk_count = 0 OR embedding_count < chunk_count
+                    ORDER BY document_id
+                    """
+                )
+            )
+            .mappings()
+            .all()
+        )
+    items: list[CatchupResidualTarget] = []
+    for row in rows:
+        mapped = mapping_row(row)
+        items.append(
+            CatchupResidualTarget(
+                document_id=row_uuid(mapped, "document_id"),
+                revision=row_str(mapped, "revision"),
+                embed_status=cast("EmbedStatus", row_str(mapped, "embed_status")),
+            )
+        )
+    return CatchupResidualListResponse(items=items, total=len(items))
 
 
 _TERMINAL_RUN_STATUSES: frozenset[str] = frozenset({"completed", "failed", "skipped", "blocked"})

@@ -11,9 +11,10 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
+from sqlalchemy import text
 from vecinita_internal_write_api.automations import (
     _run_from_row,  # pyright: ignore[reportPrivateUsage]
 )
@@ -24,14 +25,20 @@ from vecinita_shared_schemas.automations import (
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
+    CatchupResidualListResponse,
 )
-from vecinita_shared_schemas.db_mapping import row_datetime, row_datetime_optional
+from vecinita_shared_schemas.db_mapping import (
+    row_datetime,
+    row_datetime_optional,
+    sqlalchemy_scalar_one,
+)
 
 from tests.helpers.json_response import response_json_object
 from tests.unit.internal_write_api.conftest import auth_headers
 
 if TYPE_CHECKING:
     from fastapi.testclient import TestClient
+    from sqlalchemy.engine import Engine
 
 _PAGE_SIZE = 20
 
@@ -155,3 +162,73 @@ def test_automation_row_datetime_helpers_cover_type_branches() -> None:
     assert run.id == run_id
     assert run.finished_at is None
     assert run.started_at == now
+
+
+def test_list_automation_residuals_returns_missing_and_partial(
+    write_client: TestClient,
+    engine: Engine,
+) -> None:
+    """TC-341 / AC-AU8: residual endpoint finds no-chunk and missing-embedding docs."""
+    missing_url = f"https://residual-missing-{uuid4().hex[:10]}.example.com"
+    partial_url = f"https://residual-partial-{uuid4().hex[:10]}.example.com"
+    with engine.begin() as conn:
+        missing_id = UUID(
+            str(
+                sqlalchemy_scalar_one(
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO documents (url, title, language, content_hash)
+                            VALUES (:url, 'Missing residual', 'en', 'hash-missing')
+                            RETURNING id
+                            """
+                        ),
+                        {"url": missing_url},
+                    )
+                )
+            )
+        )
+        partial_id = UUID(
+            str(
+                sqlalchemy_scalar_one(
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO documents (url, title, language, content_hash)
+                            VALUES (:url, 'Partial residual', 'en', NULL)
+                            RETURNING id
+                            """
+                        ),
+                        {"url": partial_url},
+                    )
+                )
+            )
+        )
+        _ = conn.execute(
+            text(
+                """
+                INSERT INTO chunks (document_id, chunk_index, text)
+                VALUES (:document_id, 0, 'Partial residual chunk')
+                """
+            ),
+            {"document_id": partial_id},
+        )
+
+    try:
+        response = write_client.get(
+            "/internal/v1/automations/residuals",
+            headers=auth_headers(),
+        )
+        assert response.status_code == HTTPStatus.OK
+        body = CatchupResidualListResponse.model_validate(response_json_object(response))
+        residuals = {item.document_id: item for item in body.items}
+        assert residuals[missing_id].revision == "hash-missing"
+        assert residuals[missing_id].embed_status == "missing"
+        assert residuals[partial_id].revision == "0"
+        assert residuals[partial_id].embed_status == "partial"
+    finally:
+        with engine.begin() as conn:
+            _ = conn.execute(
+                text("DELETE FROM documents WHERE id IN (:missing_id, :partial_id)"),
+                {"missing_id": missing_id, "partial_id": partial_id},
+            )

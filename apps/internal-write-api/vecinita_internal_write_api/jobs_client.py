@@ -7,6 +7,7 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING, Final, cast
 
 import httpx
+from vecinita_shared_schemas.automations import catchup_idempotency_key
 from vecinita_shared_schemas.data_management import (
     CreateJobRequest,
     CreateJobResponse,
@@ -137,6 +138,50 @@ class DataManagementJobsClient:
             operation="enqueue_freshness_refresh",
         )
 
+    def _headers(self, authorization: str | None) -> dict[str, str]:
+        headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
+        if authorization:
+            headers["Authorization"] = authorization
+        return headers
+
+    def fetch_catchup_enqueue_gates(
+        self,
+        *,
+        authorization: str | None = None,
+    ) -> tuple[int, frozenset[str]]:
+        """Fetch pending/running automation_catchup gates from GET /jobs (EV-038)."""
+        response = self._client.get("/jobs", headers=self._headers(authorization))
+        if response.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"fetch_catchup_enqueue_gates failed: {response.status_code} {response.text}"
+            raise DataManagementJobsClientError(msg)
+        payload = cast("dict[str, object]", response.json())
+        raw_jobs = payload.get("jobs")
+        if not isinstance(raw_jobs, list):
+            return 0, frozenset()
+        running_count = 0
+        seen: set[str] = set()
+        for raw_job in cast("list[object]", raw_jobs):
+            if not isinstance(raw_job, dict):
+                continue
+            job = cast("dict[str, object]", raw_job)
+            if job.get("job_type") != "automation_catchup":
+                continue
+            status = job.get("status")
+            if status not in {"pending", "running"}:
+                continue
+            if status == "running":
+                running_count += 1
+            options_raw = job.get("options")
+            options = (
+                cast("dict[str, object]", options_raw) if isinstance(options_raw, dict) else {}
+            )
+            document_id = options.get("document_id") or job.get("document_id")
+            revision = options.get("revision")
+            if document_id is None or revision is None:
+                continue
+            seen.add(catchup_idempotency_key(document_id=str(document_id), revision=str(revision)))
+        return running_count, frozenset(seen)
+
     def _post_job(
         self,
         body: CreateJobRequest,
@@ -144,13 +189,10 @@ class DataManagementJobsClient:
         authorization: str | None,
         operation: str = "enqueue_retag",
     ) -> UUID:
-        headers: dict[str, str] = {"X-Vecinita-Proxy-Key": self._proxy_key}
-        if authorization:
-            headers["Authorization"] = authorization
         response = self._client.post(
             "/jobs",
             json=body.model_dump(mode="json"),
-            headers=headers,
+            headers=self._headers(authorization),
         )
         if response.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"{operation} failed: {response.status_code} {response.text}"
