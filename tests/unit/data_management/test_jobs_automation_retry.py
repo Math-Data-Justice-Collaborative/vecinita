@@ -123,3 +123,136 @@ def test_run_job_does_not_retry_waf_quarantine_error(
         )
 
     assert attempts == [record.job_id]
+
+
+def test_run_job_raises_key_error_for_missing_job() -> None:
+    """Unknown job_id fails closed before dispatch."""
+    store = InMemoryJobStore()
+    missing = DOC_ID
+
+    with pytest.raises(KeyError, match=str(missing)):
+        run_job(
+            missing,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        )
+
+
+def test_run_job_survives_audit_emit_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Audit emit failure must not block terminal job completion."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options={"document_id": str(DOC_ID), "refresh_enabled": True, "is_stale": True},
+    )
+
+    class _AuditFailWriteClient(_StubWriteClient):
+        def post_audit_event(self, event: object) -> None:
+            _ = event
+            msg = "audit down"
+            raise RuntimeError(msg)
+
+    def _complete(job_id: UUID, **kwargs: object) -> None:
+        store_obj = kwargs["store"]
+        assert isinstance(store_obj, InMemoryJobStore)
+        _ = store_obj.update_job(
+            job_id,
+            status="completed",
+            metrics={"freshness_outcome": "refreshed", "documents_processed": 1},
+        )
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_freshness_refresh_job",
+        _complete,
+    )
+
+    run_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_AuditFailWriteClient(),  # type: ignore[arg-type]
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+
+
+def test_run_job_catchup_client_unavailable_still_completes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Modal jobs client unavailable must not fail terminal ingest completion."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=["https://example.com/doc"],
+        job_type="ingest",
+        options={"document_id": str(DOC_ID)},
+    )
+
+    def _complete(job_id: UUID, **kwargs: object) -> None:
+        store_obj = kwargs["store"]
+        assert isinstance(store_obj, InMemoryJobStore)
+        _ = store_obj.update_job(job_id, status="completed", metrics={"urls_failed_embed": 0})
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_ingest_job",
+        _complete,
+    )
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs._catchup_jobs_client",
+        lambda: None,
+    )
+
+    run_job(
+        record.job_id,
+        store=store,
+        embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+        write_client=_StubWriteClient(),  # type: ignore[arg-type]
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+
+
+def test_run_job_marks_failed_when_handler_leaves_non_terminal_status(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Handler exceptions with non-terminal status mark job failed and re-raise."""
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="finetune_train",
+        options={},
+    )
+
+    def _boom(job_id: UUID, **kwargs: object) -> None:
+        _ = (job_id, kwargs)
+        msg = "train exploded"
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.jobs.run_finetune_train_job",
+        _boom,
+    )
+
+    with pytest.raises(RuntimeError, match="train exploded"):
+        run_job(
+            record.job_id,
+            store=store,
+            embed_client=_StubEmbedClient(),  # type: ignore[arg-type]
+            write_client=_StubWriteClient(),  # type: ignore[arg-type]
+        )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "failed"
+    assert final.error_code == "RuntimeError"
+    assert final.error_message == "train exploded"

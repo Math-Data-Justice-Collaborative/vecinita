@@ -17,6 +17,7 @@ import pytest
 from sqlalchemy import text
 from vecinita_internal_write_api.automations import (
     _run_from_row,  # pyright: ignore[reportPrivateUsage]
+    create_automation_run,
 )
 from vecinita_shared_schemas.automations import (
     DEFAULT_AUTOMATIONS_MAX_CONCURRENT,
@@ -162,6 +163,47 @@ def test_automation_row_datetime_helpers_cover_type_branches() -> None:
     assert run.id == run_id
     assert run.finished_at is None
     assert run.started_at == now
+
+
+def test_create_automation_run_non_terminal_leaves_finished_at_none(
+    engine: Engine,
+) -> None:
+    """Non-terminal status without finished_at stays open (create_automation_run branch)."""
+    created = create_automation_run(
+        engine,
+        AutomationRunCreateRequest(
+            job_type="automation_catchup",
+            status="running",
+            document_id=uuid4(),
+            revision="rev-open",
+            error=None,
+        ),
+    )
+    assert created.status == "running"
+    assert created.finished_at is None
+    assert created.started_at is not None
+
+
+def test_create_automation_run_preserves_explicit_finished_at(
+    engine: Engine,
+) -> None:
+    """Explicit finished_at is not overwritten for terminal statuses."""
+    started = datetime(2026, 9, 1, 12, 0, 0, tzinfo=UTC)
+    finished = datetime(2026, 9, 1, 12, 5, 0, tzinfo=UTC)
+    created = create_automation_run(
+        engine,
+        AutomationRunCreateRequest(
+            job_type="freshness_refresh",
+            status="completed",
+            started_at=started,
+            finished_at=finished,
+            document_id=uuid4(),
+            revision=None,
+            error=None,
+        ),
+    )
+    assert created.started_at == started
+    assert created.finished_at == finished
 
 
 def test_list_automation_residuals_returns_missing_and_partial(

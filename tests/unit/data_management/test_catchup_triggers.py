@@ -14,6 +14,7 @@ from uuid import UUID, uuid4
 import httpx
 import pytest
 from vecinita_data_management_backend.catchup_triggers import (
+    catchup_gate_state,
     maybe_enqueue_after_job,
     targets_from_completed_job,
 )
@@ -459,6 +460,30 @@ def test_maybe_enqueue_after_job_uses_real_gate_state(
     _ = store.delete_job(existing.job_id)
     result_at_capacity = maybe_enqueue_after_job(final, jobs_client=_Client(), store=store)
     assert result_at_capacity == [("skip_at_capacity", None)]
+
+
+def test_catchup_gate_state_none_store_returns_empty() -> None:
+    """None store → zero running count and empty seen keys."""
+    assert catchup_gate_state(None) == (0, frozenset())
+
+
+def test_catchup_gate_state_skips_jobs_missing_idempotency_fields() -> None:
+    """Pending/running catch-up jobs without document_id/revision do not pollute seen keys."""
+    store = InMemoryJobStore()
+    incomplete = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options={"revision": "rev-only"},
+    )
+    _ = store.update_job(incomplete.job_id, status="pending")
+    running = store.create_job(
+        urls=[],
+        job_type="automation_catchup",
+        options={"document_id": str(DOC_ID)},
+    )
+    _ = store.update_job(running.job_id, status="running")
+
+    assert catchup_gate_state(store) == (1, frozenset())
 
 
 def test_maybe_enqueue_after_job_surfaces_enqueue_failure(

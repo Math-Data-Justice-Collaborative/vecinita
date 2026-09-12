@@ -136,3 +136,155 @@ def _return_document_id(
 ) -> UUID:
     _ = (revision, embed_status)
     return document_id
+
+
+def test_scheduled_catchup_tick_skips_on_kill_switch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Kill-switch → blocked tick with zero enqueue (TC-253)."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "true")
+    write = _RecordingWriteClient()
+
+    result = run_scheduled_catchup_tick(
+        write_client=write,
+        list_residuals=lambda: [(DOC_ID, "rev-1", "missing")],
+        enqueue_catchup=_return_document_id,
+        running_count=0,
+        seen_keys=frozenset(),
+    )
+
+    assert result == {
+        "job_type": "automation_catchup",
+        "enqueued": 0,
+        "skipped": 0,
+        "outcome": "skipped_kill_switch",
+    }
+    assert write.calls == [
+        {
+            "job_type": "automation_catchup",
+            "status": "blocked",
+            "document_id": None,
+            "revision": None,
+            "error": None,
+        }
+    ]
+
+
+def test_scheduled_catchup_tick_kill_switch_history_persist_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-343: kill-switch tick surfaces history_persist_failed when write API fails."""
+
+    class _FailingWriteClient:
+        def record_automation_run(self, **kwargs: object) -> UUID:
+            _ = kwargs
+            msg = "write api down"
+            raise RuntimeError(msg)
+
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "true")
+    result = run_scheduled_catchup_tick(
+        write_client=_FailingWriteClient(),
+        list_residuals=list,
+        enqueue_catchup=_return_document_id,
+        running_count=0,
+        seen_keys=frozenset(),
+    )
+
+    assert result == {
+        "job_type": "automation_catchup",
+        "enqueued": 0,
+        "skipped": 0,
+        "outcome": "skipped_kill_switch",
+        "history_persist_failed": True,
+    }
+
+
+def test_scheduled_catchup_tick_skips_when_automations_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Master automations disabled → skipped tick without enqueue."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "false")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    write = _RecordingWriteClient()
+
+    def _fail_if_called(_document_id: UUID, *, revision: str, embed_status: str) -> UUID:
+        _ = (revision, embed_status)
+        msg = "enqueue should not run when automations disabled"
+        raise AssertionError(msg)
+
+    result = run_scheduled_catchup_tick(
+        write_client=write,
+        list_residuals=lambda: [(DOC_ID, "rev-1", "missing")],
+        enqueue_catchup=_fail_if_called,
+        running_count=0,
+        seen_keys=frozenset(),
+    )
+    assert result == {
+        "job_type": "automation_catchup",
+        "enqueued": 0,
+        "skipped": 0,
+        "outcome": "skipped_disabled",
+    }
+    assert write.calls == [
+        {
+            "job_type": "automation_catchup",
+            "status": "skipped",
+            "document_id": None,
+            "revision": None,
+            "error": None,
+        }
+    ]
+
+
+def test_scheduled_catchup_tick_disabled_history_persist_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Disabled tick surfaces history_persist_failed when write API fails."""
+
+    class _FailingWriteClient:
+        def record_automation_run(self, **kwargs: object) -> UUID:
+            _ = kwargs
+            msg = "write api down"
+            raise RuntimeError(msg)
+
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "false")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    result = run_scheduled_catchup_tick(
+        write_client=_FailingWriteClient(),
+        list_residuals=list,
+        enqueue_catchup=_return_document_id,
+        running_count=0,
+        seen_keys=frozenset(),
+    )
+
+    assert result == {
+        "job_type": "automation_catchup",
+        "enqueued": 0,
+        "skipped": 0,
+        "outcome": "skipped_disabled",
+        "history_persist_failed": True,
+    }
+
+
+def test_scheduled_catchup_tick_noop_when_nothing_enqueued(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """All residuals deduped/skipped → outcome=noop."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    write = _RecordingWriteClient()
+
+    result = run_scheduled_catchup_tick(
+        write_client=write,
+        list_residuals=lambda: [(DOC_ID, "rev-1", "missing")],
+        enqueue_catchup=_return_document_id,
+        running_count=0,
+        seen_keys=frozenset({f"{DOC_ID}:rev-1"}),
+    )
+
+    assert result == {
+        "job_type": "automation_catchup",
+        "enqueued": 0,
+        "skipped": 1,
+        "outcome": "noop",
+    }

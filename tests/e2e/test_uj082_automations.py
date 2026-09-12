@@ -24,6 +24,7 @@ from vecinita_shared_schemas.automations import (
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
+    CatchupResidualListResponse,
 )
 from vecinita_shared_schemas.db_mapping import sqlalchemy_scalar_one
 
@@ -202,8 +203,6 @@ def test_uj082_post_automation_run_then_list(write_client: TestClient) -> None:
 
 def test_uj082_list_catchup_residuals_ok(write_client: TestClient) -> None:
     """TC-341 / AC-AU8: residuals list endpoint is readable for residual catch-up scan."""
-    from vecinita_shared_schemas.automations import CatchupResidualListResponse
-
     response = write_client.get("/internal/v1/automations/residuals", headers=_auth())
     assert response.status_code == HTTPStatus.OK
     body = CatchupResidualListResponse.model_validate(response_json_object(response))

@@ -730,6 +730,160 @@ def test_scheduled_freshness_tick_caps_and_defers_remaining(
     }
 
 
+def test_freshness_worker_skip_history_persist_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-343: skip path marks history_persist_failed when write API fails."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "true")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(),
+    )
+
+    class _FailingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            _ = kwargs
+            msg = "write api down"
+            raise RuntimeError(msg)
+
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_FailingWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=lambda _doc: None,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "freshness_outcome": "skipped_kill_switch",
+        "documents_processed": 0,
+        "history_persist_failed": True,
+    }
+
+
+def test_freshness_worker_success_history_persist_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-343: completed refresh marks history_persist_failed when write API fails."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(),
+    )
+
+    class _FailingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            _ = kwargs
+            msg = "write api down"
+            raise RuntimeError(msg)
+
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_FailingWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=lambda _doc: None,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "freshness_outcome": "refreshed",
+        "documents_processed": 1,
+        "history_persist_failed": True,
+    }
+
+
+def test_freshness_worker_failure_history_persist_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-343: failed refresh marks history_persist_failed when write API fails."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(),
+    )
+
+    class _FailingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            _ = kwargs
+            msg = "write api down"
+            raise RuntimeError(msg)
+
+    def _boom(_document_id: UUID) -> None:
+        msg = "fetch failed"
+        raise RuntimeError(msg)
+
+    with pytest.raises(RuntimeError, match="fetch failed"):
+        run_freshness_refresh_job(
+            record.job_id,
+            store=store,
+            write_client=_FailingWriteClient(),  # type: ignore[arg-type]
+            perform_refresh=_boom,
+        )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "failed"
+    assert final.metrics == {
+        "freshness_outcome": "failed",
+        "documents_processed": 0,
+        "history_persist_failed": True,
+    }
+
+
+def test_freshness_worker_waf_history_persist_failed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-343: WAF quarantine marks history_persist_failed when write API fails."""
+    monkeypatch.setenv("VECINITA_FRESHNESS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    monkeypatch.setenv("VECINITA_FRESHNESS_WAF_QUARANTINE", "true")
+    store = InMemoryJobStore()
+    record = store.create_job(
+        urls=[],
+        job_type="freshness_refresh",
+        options=_freshness_options(),
+    )
+
+    class _FailingWriteClient(_StubWriteClient):
+        def record_automation_run(self, **kwargs: object) -> None:
+            _ = kwargs
+            msg = "write api down"
+            raise RuntimeError(msg)
+
+    def _waf(_document_id: UUID) -> None:
+        msg = "blocked by WAF"
+        raise ScrapeFetchError(msg, error_code="host_waf_blocked")
+
+    run_freshness_refresh_job(
+        record.job_id,
+        store=store,
+        write_client=_FailingWriteClient(),  # type: ignore[arg-type]
+        perform_refresh=_waf,
+    )
+
+    final = store.get_job(record.job_id)
+    assert final is not None
+    assert final.status == "completed"
+    assert final.metrics == {
+        "freshness_outcome": "skipped_quarantined_waf",
+        "documents_processed": 0,
+        "history_persist_failed": True,
+    }
+
+
 def test_freshness_worker_quarantines_waf_fetch_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

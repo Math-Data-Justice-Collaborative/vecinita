@@ -20,6 +20,7 @@ from vecinita_data_management_backend.freshness_refresh import (
     run_freshness_refresh_job,
 )
 from vecinita_data_management_backend.store import InMemoryJobStore
+from vecinita_ingest.freshness import UrlRefetchResult
 from vecinita_ingest.models import ScrapedDocument
 from vecinita_shared_schemas.internal_write import BatchUpsertRequest, DocumentDetail
 
@@ -223,6 +224,45 @@ def test_freshness_job_default_path_reports_rechunked(
     assert write.bumped == [DOC_ID]
     assert len(write.upserts) == 1
     assert embed.calls
+
+
+def test_hash_aware_refresh_uses_default_fetch_when_no_fetch_document(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Default refetch path runs when fetch_document is omitted."""
+    write = _StubWriteClient(stored_hash=_DIGEST)
+    embed = _StubEmbedClient()
+    scraped = ScrapedDocument(url=DOC_URL, title="Doc", text=_BODY)
+    called: list[str] = []
+
+    def _fake_refetch(
+        url: str,
+        *,
+        fetch: DocumentFetcher | None = None,
+    ) -> UrlRefetchResult:
+        called.append(url)
+        assert fetch is None
+        return UrlRefetchResult(
+            url=url,
+            content_hash=_DIGEST,
+            scraped=scraped,
+        )
+
+    monkeypatch.setattr(
+        "vecinita_data_management_backend.freshness_refresh.refetch_url_source",
+        _fake_refetch,
+    )
+
+    outcome = perform_hash_aware_url_refresh(
+        DOC_ID,
+        write_client=write,  # type: ignore[arg-type]
+        embed_client=embed,  # type: ignore[arg-type]
+    )
+
+    assert outcome == "verified_unchanged"
+    assert called == [DOC_URL]
+    assert write.bumped == [DOC_ID]
+    assert write.upserts == []
 
 
 def test_refresh_now_force_still_hash_skips_when_unchanged() -> None:

@@ -173,3 +173,15 @@ def test_crud_hook_returns_enqueue_failed_on_post_error(
         embed_status="missing",
     )
     assert decision == "enqueue_failed"
+
+
+def test_crud_hook_skips_when_jobs_client_none() -> None:
+    """None jobs client → skip_disabled without touching Modal."""
+    decision = maybe_enqueue_catchup_after_document_change(
+        engine=object(),  # type: ignore[arg-type]
+        jobs_client=None,
+        document_id=DOC_ID,
+        revision="abc",
+        embed_status="missing",
+    )
+    assert decision == "skip_disabled"
