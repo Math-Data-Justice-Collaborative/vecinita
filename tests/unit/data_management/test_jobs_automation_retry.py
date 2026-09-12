@@ -85,6 +85,8 @@ def test_run_job_retries_transient_automation_catchup(
     assert final is not None
     assert len(attempts) == _EXPECTED_RETRY_ATTEMPTS
     assert final.status == "completed"
+    assert final.error_code is None
+    assert final.error_message is None
     assert final.metrics == {"catchup_outcome": "reembedded", "documents_processed": 1}
 
 

@@ -114,6 +114,26 @@ class JobStore:
         raise NotImplementedError
 
 
+def _apply_status_and_errors(
+    record: JobRecord,
+    *,
+    status: str | None,
+    error_code: str | None,
+    error_message: str | None,
+) -> None:
+    if status is not None:
+        record.status = status
+        # Completed/running must not keep stale failure fields from a prior attempt.
+        if status in {"completed", "running"}:
+            record.error_code = error_code
+            record.error_message = error_message
+            return
+    if error_code is not None:
+        record.error_code = error_code
+    if error_message is not None:
+        record.error_message = error_message
+
+
 def _apply_updates(  # noqa: PLR0913  # mirrors update_job keyword surface
     record: JobRecord,
     *,
@@ -127,12 +147,12 @@ def _apply_updates(  # noqa: PLR0913  # mirrors update_job keyword surface
     urls: list[str] | None = None,
     options_patch: dict[str, object] | None = None,
 ) -> None:
-    if status is not None:
-        record.status = status
-    if error_code is not None:
-        record.error_code = error_code
-    if error_message is not None:
-        record.error_message = error_message
+    _apply_status_and_errors(
+        record,
+        status=status,
+        error_code=error_code,
+        error_message=error_message,
+    )
     if modal_call_id is not None:
         record.modal_call_id = modal_call_id
     if dashboard_url is not None:

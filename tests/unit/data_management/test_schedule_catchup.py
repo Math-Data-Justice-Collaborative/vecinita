@@ -207,8 +207,8 @@ def test_scheduled_catchup_tick_skips_when_automations_disabled(
     monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
     write = _RecordingWriteClient()
 
-    def _fail_if_called(_document_id: UUID, *, revision: str, embed_status: str) -> UUID:
-        _ = (revision, embed_status)
+    def _fail_if_called(document_id: UUID, *, revision: str, embed_status: str) -> UUID:
+        _ = (document_id, revision, embed_status)
         msg = "enqueue should not run when automations disabled"
         raise AssertionError(msg)
 
