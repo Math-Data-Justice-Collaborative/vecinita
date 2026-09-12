@@ -70,6 +70,16 @@ def _record_tick(
     )
 
 
+def _db_automations_enabled(write_client: object) -> bool:
+    """Honor DM UI ``automation_settings.enabled`` (AC-AU1), fail closed if unread."""
+    getter = getattr(write_client, "get_automations_config", None)
+    if not callable(getter):
+        return False
+    config = getter()
+    enabled = getattr(config, "enabled", None)
+    return enabled is True
+
+
 def run_scheduled_catchup_tick(
     *,
     write_client: object,
@@ -91,7 +101,7 @@ def run_scheduled_catchup_tick(
         if not persisted:
             result["history_persist_failed"] = True
         return result
-    if not is_automations_enabled():
+    if not is_automations_enabled() or not _db_automations_enabled(write_client):
         persisted = _record_tick(write_client, status="skipped")
         result = {
             "job_type": "automation_catchup",

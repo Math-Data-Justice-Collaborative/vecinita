@@ -88,4 +88,65 @@ describe("App navigation", () => {
     ).toBeInTheDocument();
     expect(container.querySelector(".sidebar-scrim")).toBeNull();
   });
+
+  it("browse-corpus CTA switches the shell to corpus browse", async () => {
+    const sse =
+      'data: {"token":"No matching sources were found."}\n\n' +
+      'data: {"sources":[]}\n\n' +
+      'data: {"done":true}\n\n';
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (url.includes("/api/v1/ask/stream")) {
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode(sse));
+              controller.close();
+            },
+          });
+          return Promise.resolve(
+            new Response(stream, {
+              status: 200,
+              headers: { "Content-Type": "text/event-stream" },
+            }),
+          );
+        }
+        if (url.includes("/api/v1/warm")) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ status: "warming" }), {
+              status: 200,
+            }),
+          );
+        }
+        if (url.includes("/api/v1/documents")) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                items: [],
+                page: 1,
+                page_size: 20,
+                total: 0,
+              }),
+              { status: 200 },
+            ),
+          );
+        }
+        return Promise.resolve(
+          new Response(JSON.stringify({ tags: [] }), { status: 200 }),
+        );
+      }),
+    );
+
+    render(<App />);
+    fireEvent.change(screen.getByLabelText(/your question/i), {
+      target: { value: "Where can I get food assistance?" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^ask$/i }));
+    fireEvent.click(await screen.findByTestId("browse-corpus-cta"));
+    expect(window.location.pathname).toBe("/corpus");
+    expect(
+      await screen.findByLabelText(/search title or url/i),
+    ).toBeInTheDocument();
+  });
 });

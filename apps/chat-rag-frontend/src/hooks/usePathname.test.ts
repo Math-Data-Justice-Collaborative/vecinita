@@ -36,4 +36,15 @@ describe("usePathname", () => {
     expect(result.current.pathname).toBe("/corpus");
     window.history.replaceState({}, "", "/");
   });
+
+  it("syncs a second hook instance when another navigates", () => {
+    const first = renderHook(() => usePathname());
+    const second = renderHook(() => usePathname());
+    act(() => {
+      first.result.current.navigate("/corpus");
+    });
+    expect(second.result.current.pathname).toBe("/corpus");
+    expect(window.location.pathname).toBe("/corpus");
+    window.history.replaceState({}, "", "/");
+  });
 });
