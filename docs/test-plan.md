@@ -50,8 +50,8 @@ Covers Vecinita ChatRAG (bilingual Q&A, streaming, stateless), Data Management (
 | UJ-080 Ingest bilingual translation | `tests/e2e/test_ev030_ingest_bilingual.py` + Vitest JobForm | TC-252, TC-253, TC-254 | opt |
 | UJ-009 Corpus parity visibility | `tests/e2e/test_ev031_corpus_language_parity.py` + Vitest | TC-255, TC-256 | opt |
 | UJ-081 Suggested question chips (empty state) | Vitest `messages` + `ChatPanel` | TC-259 | opt |
-| UJ-082 Automations enable + history | `tests/e2e/test_uj082_automations.py` + Vitest | TC-266, TC-267, TC-268, TC-269, TC-270 | `tests/ui/admin/uj082-automations.spec.ts` |
-| UJ-083 Freshness refresh / stale | `tests/e2e/test_uj083_freshness.py` | TC-271, TC-272, TC-273, TC-274, TC-270 | `tests/ui/admin/uj083-freshness.spec.ts` |
+| UJ-082 Automations enable + history | `tests/e2e/test_uj082_automations.py` + Vitest | TC-266, TC-267, TC-268, TC-269, TC-270, TC-341, TC-342, TC-343, TC-344 | `tests/ui/admin/uj082-automations.spec.ts` |
+| UJ-083 Freshness refresh / stale | `tests/e2e/test_uj083_freshness.py` | TC-271, TC-272, TC-273, TC-274, TC-270, TC-345, TC-346 | `tests/ui/admin/uj083-freshness.spec.ts` |
 | UJ-084 FT approve + human promote | `tests/e2e/test_uj084_finetune.py` + unit | TC-275, TC-276, TC-277, TC-278, TC-279 | `tests/ui/admin/uj084-finetune.spec.ts` |
 | UJ-003 Delete document | `tests/e2e/test_uj003_corpus_delete.py` | TC-012 |
 | UJ-004 Local bootstrap | `tests/e2e/test_uj004_local_bootstrap.py` | TC-020 |
@@ -2298,4 +2298,46 @@ Measured by `scripts/test/print_unit_coverage_summary.py` after `make test-unit-
 - **Input**: README assertion (string/grep in test or manual checklist in verify-impl); `gh api repos/...` description check in verify-impl.
 - **Expected**: Both surfaces name Fine-tune and Playground as Beta and include the issue URL (or `issues/new` label link).
 - **Refs**: [Corpus: feature-list.md §F86] AC-BETA4
+
+### TC-341: Daily catch-up tick scans residuals (UJ-082, F78, EV-038, AC-AU8)
+
+- **Objective**: Scheduled `automation_catchup` tick enqueues residual missing/partial/failed embeds (subject to caps), not history-only.
+- **Input**: Unit/e2e: residual documents present; kill-switch off; automations enabled; daily tick runner.
+- **Expected**: At least one catch-up enqueue (or capacity skip recorded); `automation_runs` shows work outcome ≠ empty history-only tick.
+- **Refs**: [Corpus: feature-list.md §F78] [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md] AC-AU8
+
+### TC-342: Enqueue-time idempotency and concurrency (UJ-082, F78, EV-038, AC-AU9)
+
+- **Objective**: Catch-up enqueue after job/CRUD uses real `seen_keys` and `running_count`.
+- **Input**: Duplicate idempotency key already in flight; or running count at max concurrent.
+- **Expected**: `skip_duplicate` / capacity skip — no second job when key seen; no enqueue above `VECINITA_AUTOMATIONS_MAX_CONCURRENT`.
+- **Refs**: AC-AU9
+
+### TC-343: Enqueue or history persist failure is observable (UJ-082, F78, EV-038, AC-AU10)
+
+- **Objective**: Failed Modal self-enqueue or `automation_runs` persist does not look like success.
+- **Input**: Forced write-API/history failure or enqueue HTTP error in unit test.
+- **Expected**: Job or run status/metrics reflect failure/error; not completed-with-silent-warn only.
+- **Refs**: AC-AU10
+
+### TC-344: Transient auto-retry vs hard quarantine (UJ-082/083, F78–F79, EV-038, AC-AU11)
+
+- **Objective**: Bounded auto-retry for transient embed/transport; never for WAF quarantine / kill-switch.
+- **Input**: Mock transient 5xx on embed vs `host_waf_blocked`; `VECINITA_AUTOMATION_JOB_MAX_RETRIES=2`.
+- **Expected**: Transient retried ≤2 then fail or succeed; WAF quarantined/skipped without auto-retry loop.
+- **Refs**: AC-AU11
+
+### TC-345: Freshness per-tick enqueue cap (UJ-083, F79, EV-038, AC-FR8)
+
+- **Objective**: Daily freshness tick enqueues at most `VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK`.
+- **Input**: More stale refresh-enabled docs than cap (e.g. 40 docs, cap 25).
+- **Expected**: ≤25 enqueued; remainder deferred (not failed as storm).
+- **Refs**: AC-FR8
+
+### TC-346: WAF quarantine skip (UJ-083, F79, EV-038, AC-FR9)
+
+- **Objective**: Persistent WAF/403 does not retry-storm when quarantine enabled.
+- **Input**: Scrape returns `host_waf_blocked`; `VECINITA_FRESHNESS_WAF_QUARANTINE=true`.
+- **Expected**: Outcome skip/quarantine recorded; no unbounded re-enqueue in same tick.
+- **Refs**: AC-FR9
 

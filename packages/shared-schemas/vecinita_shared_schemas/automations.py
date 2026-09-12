@@ -20,14 +20,19 @@ from pydantic import BaseModel, ConfigDict, Field
 AUTOMATIONS_ENABLED_ENV = "VECINITA_AUTOMATIONS_ENABLED"
 AUTOMATIONS_KILL_SWITCH_ENV = "VECINITA_AUTOMATIONS_KILL_SWITCH"
 AUTOMATIONS_MAX_CONCURRENT_ENV = "VECINITA_AUTOMATIONS_MAX_CONCURRENT"
+AUTOMATION_JOB_MAX_RETRIES_ENV = "VECINITA_AUTOMATION_JOB_MAX_RETRIES"
 
 DEFAULT_AUTOMATIONS_ENABLED = False
 DEFAULT_AUTOMATIONS_KILL_SWITCH = False
 DEFAULT_AUTOMATIONS_MAX_CONCURRENT = 2
+DEFAULT_AUTOMATION_JOB_MAX_RETRIES = 2
+_HTTP_5XX_MIN = 500
+_HTTP_5XX_MAX_EXCLUSIVE = 600
 
 EmbedStatus = Literal["complete", "missing", "partial", "failed"]
 CatchupEnqueueDecision = Literal[
     "enqueue",
+    "enqueue_failed",
     "skip_disabled",
     "skip_kill_switch",
     "skip_complete",
@@ -89,6 +94,33 @@ def parse_automations_max_concurrent() -> int:
     if value < 1:
         return DEFAULT_AUTOMATIONS_MAX_CONCURRENT
     return value
+
+
+def _parse_int_clamped(
+    env_name: str,
+    *,
+    default: int,
+    minimum: int,
+    maximum: int,
+) -> int:
+    raw = os.environ.get(env_name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        value = int(raw.strip(), 10)
+    except ValueError:
+        return default
+    return min(max(value, minimum), maximum)
+
+
+def parse_automation_job_max_retries() -> int:
+    """Parse bounded transient retry count for automation jobs (EV-038 / TC-344)."""
+    return _parse_int_clamped(
+        AUTOMATION_JOB_MAX_RETRIES_ENV,
+        default=DEFAULT_AUTOMATION_JOB_MAX_RETRIES,
+        minimum=0,
+        maximum=5,
+    )
 
 
 def catchup_idempotency_key(*, document_id: UUID | str, revision: int | str) -> str:
@@ -174,6 +206,29 @@ def enqueue_catchup_targets(  # noqa: PLR0913  # gate inputs mirror CatchupEnque
     return results
 
 
+def is_transient_automation_failure(exc: BaseException) -> bool:
+    """Return True for bounded-retry automation failures (EV-038 / TC-344)."""
+    class_name = exc.__class__.__name__
+    module_name = exc.__class__.__module__
+    message = str(exc).lower()
+    if class_name == "ScrapeFetchError" and getattr(exc, "error_code", None) == "host_waf_blocked":
+        return False
+    if class_name == "ValueError" and "kill_switch" in message:
+        return False
+    if class_name == "EmbeddingClientError":
+        return any(token in message for token in ("transport", "5xx", "502", "503", "504"))
+    if module_name.startswith("httpx"):
+        response = getattr(exc, "response", None)
+        status_code = getattr(response, "status_code", None)
+        if isinstance(status_code, int):
+            return (
+                status_code in {502, 503, 504}
+                or _HTTP_5XX_MIN <= status_code < _HTTP_5XX_MAX_EXCLUSIVE
+            )
+        return any(token in class_name.lower() for token in ("transport", "connect", "timeout"))
+    return False
+
+
 AutomationJobType = Literal["automation_catchup", "freshness_refresh"]
 AutomationRunStatus = Literal[
     "pending",
@@ -203,6 +258,25 @@ class AutomationsConfigPatchRequest(BaseModel):
     enabled: bool
 
 
+class CatchupResidualTarget(BaseModel):
+    """One document revision requiring F78 residual catch-up (EV-038 / TC-341)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: UUID
+    revision: str
+    embed_status: EmbedStatus
+
+
+class CatchupResidualListResponse(BaseModel):
+    """GET /internal/v1/automations/residuals response."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[CatchupResidualTarget]
+    total: int = Field(..., ge=0)
+
+
 _CATCHUP_OUTCOME_TO_STATUS: dict[str, AutomationRunStatus] = {
     "reembedded": "completed",
     "skipped_complete": "skipped",
@@ -221,6 +295,7 @@ _FRESHNESS_OUTCOME_TO_STATUS: dict[str, AutomationRunStatus] = {
     "skipped_disabled": "skipped",
     "skipped_refresh_disabled": "skipped",
     "skipped_kill_switch": "blocked",
+    "skipped_quarantined_waf": "skipped",
     "failed": "failed",
 }
 

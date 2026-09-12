@@ -12,20 +12,30 @@ from __future__ import annotations
 from dataclasses import replace
 from uuid import UUID
 
+import httpx
 import pytest
+from vecinita_embedding_client import EmbeddingClientError
+from vecinita_ingest.scrape import ScrapeFetchError
 from vecinita_shared_schemas.automations import (
+    DEFAULT_AUTOMATION_JOB_MAX_RETRIES,
     DEFAULT_AUTOMATIONS_MAX_CONCURRENT,
     CatchupEnqueueDecision,
     CatchupEnqueueRequest,
+    CatchupResidualListResponse,
+    CatchupResidualTarget,
     EmbedStatus,
     catchup_idempotency_key,
     decide_catchup_enqueue,
     is_automations_enabled,
     is_automations_kill_switch_on,
+    is_transient_automation_failure,
+    parse_automation_job_max_retries,
     parse_automations_max_concurrent,
 )
 
 DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+_EXPECTED_MAX_RETRIES_DEFAULT = 2
+_MAX_RETRIES_CLAMP = 5
 
 _BASE_REQUEST = CatchupEnqueueRequest(
     enabled=True,
@@ -155,3 +165,60 @@ def test_kill_switch_default_false_when_unset(
     monkeypatch.delenv("VECINITA_AUTOMATIONS_ENABLED", raising=False)
     assert is_automations_kill_switch_on() is False
     assert is_automations_enabled() is False
+
+
+def test_automation_job_max_retries_default_and_clamp(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """TC-344 / AC-AU11: retries default to 2 and clamp to the documented 0..5 range."""
+    monkeypatch.delenv("VECINITA_AUTOMATION_JOB_MAX_RETRIES", raising=False)
+    assert DEFAULT_AUTOMATION_JOB_MAX_RETRIES == _EXPECTED_MAX_RETRIES_DEFAULT
+    assert parse_automation_job_max_retries() == DEFAULT_AUTOMATION_JOB_MAX_RETRIES
+
+    monkeypatch.setenv("VECINITA_AUTOMATION_JOB_MAX_RETRIES", "0")
+    assert parse_automation_job_max_retries() == 0
+
+    monkeypatch.setenv("VECINITA_AUTOMATION_JOB_MAX_RETRIES", "9")
+    assert parse_automation_job_max_retries() == _MAX_RETRIES_CLAMP
+
+    monkeypatch.setenv("VECINITA_AUTOMATION_JOB_MAX_RETRIES", "bad")
+    assert parse_automation_job_max_retries() == DEFAULT_AUTOMATION_JOB_MAX_RETRIES
+
+
+def test_transient_automation_failure_classifier() -> None:
+    """TC-344: transient embed/transport errors retry; WAF and kill-switch blocks do not."""
+    assert is_transient_automation_failure(EmbeddingClientError("/embed transport error: boom"))
+    assert is_transient_automation_failure(EmbeddingClientError("/embed failed: 503 busy"))
+    assert is_transient_automation_failure(httpx.ConnectError("network down"))
+    assert is_transient_automation_failure(
+        httpx.HTTPStatusError(
+            "bad gateway",
+            request=httpx.Request("GET", "https://embed.example"),
+            response=httpx.Response(502),
+        )
+    )
+    assert not is_transient_automation_failure(EmbeddingClientError("dimension mismatch"))
+    assert not is_transient_automation_failure(
+        ScrapeFetchError("blocked", error_code="host_waf_blocked")
+    )
+    assert not is_transient_automation_failure(ValueError("kill_switch enabled"))
+
+
+def test_catchup_residual_list_response_schema() -> None:
+    """TC-341: write-API residual scan returns document/revision/embed_status targets."""
+    target = CatchupResidualTarget(
+        document_id=DOC_ID,
+        revision="hash-1",
+        embed_status="partial",
+    )
+    response = CatchupResidualListResponse(items=[target], total=1)
+    assert response.model_dump(mode="json") == {
+        "items": [
+            {
+                "document_id": str(DOC_ID),
+                "revision": "hash-1",
+                "embed_status": "partial",
+            }
+        ],
+        "total": 1,
+    }

@@ -68,6 +68,7 @@ describe("CorpusBrowse", () => {
     expect(link).toHaveAttribute("href", "https://example.org/housing-rights");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAccessibleName(/open source: housing rights overview/i);
   });
 
   it("renders browse tag chips", async () => {

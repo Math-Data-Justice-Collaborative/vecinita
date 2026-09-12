@@ -234,6 +234,14 @@ class JobMetrics(BaseModel):
         ge=0,
         description="Documents processed by F78 catch-up or F79 freshness (0 when skipped).",
     )
+    catchup_enqueue_failed: bool = Field(
+        default=False,
+        description="F78 post-job catch-up enqueue failure was observed (EV-038).",
+    )
+    history_persist_failed: bool = Field(
+        default=False,
+        description="Automation run history persistence failed (EV-038).",
+    )
     finetune_outcome: str | None = Field(
         default=None,
         description="F80 finetune_train worker outcome (approve gate / stub / train).",

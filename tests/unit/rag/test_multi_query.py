@@ -261,3 +261,54 @@ def test_multi_query_retrieve_none_language_does_not_get_locale_boost() -> None:
 def test_heuristic_rewrites_skips_blank_after_normalize() -> None:
     """Whitespace-only input yields no variants."""
     assert heuristic_rewrites("   ", locale="en") == []
+
+
+def test_heuristic_rewrites_en_skips_location_when_providence_present() -> None:
+    """BUG-2026-09-09: EN must not waste the rewrite slot on duplicate Providence."""
+    question = "Where can I get food assistance in Providence?"
+    variants = heuristic_rewrites(question, locale="en")
+
+    assert variants[0] == question
+    joined = " ".join(variants).lower()
+    assert "in providence ri?" not in joined
+    assert any("food pantry" in v.lower() or "food bank" in v.lower() for v in variants[1:])
+
+
+def test_heuristic_rewrites_en_food_assistance_adds_pantry_synonym() -> None:
+    """BUG-2026-09-09: food assistance → food pantry/bank lexicon for corpus match."""
+    variants = heuristic_rewrites(
+        "Where can I get food assistance in Rhode Island?",
+        locale="en",
+    )
+    assert any("food pantry" in v.lower() or "food bank" in v.lower() for v in variants)
+    assert len(variants) <= _MAX_REWRITE_VARIANTS
+
+
+def test_heuristic_rewrites_en_food_assistance_providence_uses_short_pantry() -> None:
+    """Long Providence RI phrasings map to short pantry+Providence dense query."""
+    variants = heuristic_rewrites(
+        "Where can I get food assistance in Providence Rhode Island?",
+        locale="en",
+    )
+    assert "food pantry Providence" in variants
+    assert len(variants) <= _MAX_REWRITE_VARIANTS
+
+
+def test_multi_query_retrieve_food_assistance_providence_uses_synonym_hits() -> None:
+    """When original retrieve is empty, synonym variant must still surface pantry hits."""
+    pantry = _chunk(score=0.88, text="Providence food pantry hours", language="en")
+
+    def retrieve_fn(q: str) -> list[RetrievedChunk]:
+        if "food pantry" in q.lower() or "food bank" in q.lower():
+            return [pantry]
+        return []
+
+    hits = multi_query_retrieve(
+        "Where can I get food assistance in Providence?",
+        locale="en",
+        top_k=3,
+        retrieve_fn=retrieve_fn,
+        enabled=True,
+        count=3,
+    )
+    assert hits == [pantry]

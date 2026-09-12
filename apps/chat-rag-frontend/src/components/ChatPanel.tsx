@@ -23,6 +23,7 @@ import { requireChatApiConfig } from "../config";
 import { useLocale } from "../hooks/useLocale";
 import { useChatHistory, type ChatHistory } from "../hooks/useChatHistory";
 import { useConversationStore } from "../hooks/useConversationStore";
+import { usePathname } from "../hooks/usePathname";
 import { t } from "vecinita-frontend-i18n";
 import { ColdStartWait } from "./ColdStartWait";
 import { parseEnergyEstimate } from "../api/energyEstimate";
@@ -72,6 +73,7 @@ function ChatPanelView({
   const [waitUxActive, setWaitUxActive] = useState(false);
   const sawFirstTokenRef = useRef(false);
   const { locale } = useLocale();
+  const { navigate } = usePathname();
   const {
     messages,
     appendUserMessage,
@@ -207,13 +209,30 @@ function ChatPanelView({
               </p>
               {msg.role === "assistant" ? (
                 <MessageMarkdown
-                  content={msg.content || (loading ? "…" : "")}
+                  content={
+                    msg.content || (loading ? t(locale, "chat.answering") : "")
+                  }
                 />
               ) : (
                 <p className="message-content">{msg.content}</p>
               )}
               {msg.sources && msg.sources.length > 0 ? (
                 <SourceList sources={msg.sources} locale={locale} />
+              ) : null}
+              {msg.role === "assistant" &&
+              !loading &&
+              msg.content &&
+              (!msg.sources || msg.sources.length === 0) ? (
+                <button
+                  type="button"
+                  className="secondary browse-corpus-cta"
+                  data-testid="browse-corpus-cta"
+                  onClick={() => {
+                    navigate("/corpus");
+                  }}
+                >
+                  {t(locale, "chat.browseCorpusCta")}
+                </button>
               ) : null}
               {msg.role === "assistant" && msg.energyEstimate ? (
                 <EnergyEstimatePanel

@@ -563,6 +563,10 @@ button.secondary:hover:not(:disabled) {
   background: var(--surface-hover);
 }
 
+.browse-corpus-cta {
+  margin-top: 0.75rem;
+}
+
 .status-hint {
   color: var(--text-muted);
   margin: 0 0 0.5rem;

@@ -31,6 +31,8 @@ def test_ask_stream_emits_token_sources_done(chat_client: TestClient) -> None:
     )
     assert response.status_code == HTTPStatus.OK
     assert response.headers["content-type"].startswith("text/event-stream")
+    assert response.headers.get("cache-control") == "no-cache"
+    assert response.headers.get("x-accel-buffering") == "no"
     events = _parse_sse(response.text)
     assert any("token" in event for event in events)
     assert any("sources" in event for event in events)

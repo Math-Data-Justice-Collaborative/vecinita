@@ -28,11 +28,26 @@ def run_daily_dispatch(
     run_catchup: Callable[[], object],
     run_freshness: Callable[[], object],
 ) -> dict[str, object]:
-    """Invoke catch-up then freshness branches for one schedule tick."""
+    """Invoke catch-up then freshness branches for one schedule tick.
+
+    Branch failures are isolated so one job_type error cannot abort the other
+    (EV-038 / ADR-052 shared schedule).
+    """
     results: dict[str, object] = {}
     for job_type in plan_daily_dispatch():
         if job_type == "automation_catchup":
-            results[job_type] = run_catchup()
+            results[job_type] = _invoke_branch(run_catchup)
         elif job_type == "freshness_refresh":
-            results[job_type] = run_freshness()
+            results[job_type] = _invoke_branch(run_freshness)
     return results
+
+
+def _invoke_branch(runner: Callable[[], object]) -> object:
+    try:
+        return runner()
+    except Exception as exc:  # noqa: BLE001  # isolate schedule branches; never abort sibling
+        return {
+            "outcome": "branch_error",
+            "error": type(exc).__name__,
+            "message": str(exc)[:500],
+        }

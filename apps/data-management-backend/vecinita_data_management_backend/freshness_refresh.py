@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Literal, Protocol
 from uuid import UUID
 
 from vecinita_ingest.freshness import refetch_url_source
+from vecinita_ingest.scrape import ScrapeFetchError
 from vecinita_shared_schemas.automations import (
     freshness_outcome_to_run_status,
     is_automations_kill_switch_on,
@@ -28,6 +29,8 @@ from vecinita_shared_schemas.freshness import (
     decide_freshness_enqueue,
     decide_hash_aware_refresh,
     is_freshness_enabled,
+    is_freshness_waf_quarantine_enabled,
+    parse_freshness_max_enqueue_per_tick,
     should_bump_last_checked_after_refresh,
 )
 
@@ -58,6 +61,7 @@ FreshnessWorkerOutcome = Literal[
     "skipped_disabled",
     "skipped_refresh_disabled",
     "skipped_not_stale",
+    "skipped_quarantined_waf",
     "failed",
 ]
 
@@ -110,6 +114,18 @@ def _require_embed_client(embed_client: EmbeddingClient | None) -> EmbeddingClie
     return embed_client
 
 
+def _with_history_persist_failed(metrics: dict[str, object]) -> dict[str, object]:
+    return {**metrics, "history_persist_failed": True}
+
+
+def _is_quarantined_waf_error(exc: BaseException) -> bool:
+    return (
+        is_freshness_waf_quarantine_enabled()
+        and isinstance(exc, ScrapeFetchError)
+        and exc.error_code == "host_waf_blocked"
+    )
+
+
 def perform_hash_aware_url_refresh(
     document_id: UUID,
     *,
@@ -141,7 +157,7 @@ def perform_hash_aware_url_refresh(
     return "rechunked"
 
 
-def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' dependency surface
+def run_freshness_refresh_job(  # noqa: C901, PLR0913  # worker branches mirror documented gates
     job_id: UUID,
     *,
     store: JobStore,
@@ -175,13 +191,14 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
 
     if decision != "enqueue":
         outcome = _DECISION_TO_OUTCOME[decision]
+        skip_metrics: dict[str, object] = {
+            "freshness_outcome": outcome,
+            "documents_processed": 0,
+        }
         _ = store.update_job(
             job_id,
             status="completed",
-            metrics={
-                "freshness_outcome": outcome,
-                "documents_processed": 0,
-            },
+            metrics=skip_metrics,
         )
         _logger.info(
             "freshness_refresh %s skipped (%s) document_id=%s force=%s",
@@ -190,7 +207,7 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
             document_id,
             force,
         )
-        maybe_record_automation_run(
+        persisted = maybe_record_automation_run(
             write_client,
             job_type="freshness_refresh",
             status=freshness_outcome_to_run_status(outcome),
@@ -198,6 +215,8 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
             revision=None,
             error=None,
         )
+        if not persisted:
+            _ = store.update_job(job_id, metrics=_with_history_persist_failed(skip_metrics))
         return
 
     _ = store.update_job(job_id, status="running")
@@ -223,7 +242,7 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
         _ = store.update_job(job_id, status="completed", metrics=metrics)
         outcome_raw = metrics.get("freshness_outcome")
         outcome = str(outcome_raw) if outcome_raw is not None else "refreshed"
-        maybe_record_automation_run(
+        persisted = maybe_record_automation_run(
             write_client,
             job_type="freshness_refresh",
             status=freshness_outcome_to_run_status(outcome),
@@ -231,18 +250,42 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
             revision=None,
             error=None,
         )
+        if not persisted:
+            _ = store.update_job(job_id, metrics=_with_history_persist_failed(metrics))
     except Exception as exc:
+        if _is_quarantined_waf_error(exc):
+            metrics = {
+                "freshness_outcome": "skipped_quarantined_waf",
+                "documents_processed": 0,
+            }
+            _ = store.update_job(
+                job_id,
+                status="completed",
+                metrics=metrics,
+            )
+            persisted = maybe_record_automation_run(
+                write_client,
+                job_type="freshness_refresh",
+                status=freshness_outcome_to_run_status("skipped_quarantined_waf"),
+                document_id=document_id,
+                revision=None,
+                error=str(exc)[:500],
+            )
+            if not persisted:
+                _ = store.update_job(job_id, metrics=_with_history_persist_failed(metrics))
+            return
+        metrics = {
+            "freshness_outcome": "failed",
+            "documents_processed": 0,
+        }
         _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
             error_message=str(exc)[:500],
-            metrics={
-                "freshness_outcome": "failed",
-                "documents_processed": 0,
-            },
+            metrics=metrics,
         )
-        maybe_record_automation_run(
+        persisted = maybe_record_automation_run(
             write_client,
             job_type="freshness_refresh",
             status=freshness_outcome_to_run_status("failed"),
@@ -250,6 +293,8 @@ def run_freshness_refresh_job(  # noqa: PLR0913  # mirrors other job runners' de
             revision=None,
             error=str(exc)[:500],
         )
+        if not persisted:
+            _ = store.update_job(job_id, metrics=_with_history_persist_failed(metrics))
         raise
 
 
@@ -279,16 +324,24 @@ def run_scheduled_freshness_tick(
 
     enqueued = 0
     skipped = 0
+    deferred = 0
+    max_enqueue = parse_freshness_max_enqueue_per_tick()
     for doc in list_stale_documents():
         if not doc.refresh_enabled:
             skipped += 1
             continue
+        if enqueued >= max_enqueue:
+            deferred += 1
+            continue
         _ = enqueue_freshness(doc.document_id, force=False)
         enqueued += 1
 
-    return {
+    result: dict[str, object] = {
         "job_type": "freshness_refresh",
         "enqueued": enqueued,
         "skipped": skipped,
-        "outcome": "enqueued" if enqueued else "noop",
+        "outcome": "enqueued_capped" if deferred else ("enqueued" if enqueued else "noop"),
     }
+    if deferred:
+        result["deferred"] = deferred
+    return result

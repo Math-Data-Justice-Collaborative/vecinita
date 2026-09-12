@@ -95,21 +95,51 @@ image = (
 
 
 def _run_scheduled_catchup_tick() -> str:
-    """F75 daily catch-up branch (job/CRUD enqueue residual; cron records tick)."""
+    """F75 daily catch-up branch (residual scan + capped enqueue)."""
+    from uuid import UUID
+
+    from vecinita_data_management_backend.catchup_triggers import catchup_gate_state
+    from vecinita_data_management_backend.modal_jobs_client import ModalJobsEnqueueClient
     from vecinita_data_management_backend.schedule_catchup import (
-        record_scheduled_catchup_tick,
+        run_scheduled_catchup_tick,
     )
+    from vecinita_data_management_backend.store import DictJobStore
     from vecinita_data_management_backend.write_client import (
         InternalWriteClient,
         InternalWriteClientError,
     )
+    from vecinita_shared_schemas.automations import EmbedStatus
 
     try:
         write = InternalWriteClient()
     except InternalWriteClientError:
         logger.warning("catch-up tick: write client unavailable", exc_info=True)
         return "automation_catchup_tick"
-    return record_scheduled_catchup_tick(write)
+    jobs = ModalJobsEnqueueClient()
+    jobs_dict = modal.Dict.from_name("vecinita-data-management-jobs", create_if_missing=True)
+    store = DictJobStore(cast("MutableMapping[str, JobPayload]", jobs_dict))
+    running_count, seen_keys = catchup_gate_state(store)
+
+    def list_residuals() -> list[tuple[UUID, str, EmbedStatus]]:
+        return [
+            (item.document_id, item.revision, item.embed_status)
+            for item in write.list_catchup_residuals().items
+        ]
+
+    result = run_scheduled_catchup_tick(
+        write_client=write,
+        list_residuals=list_residuals,
+        enqueue_catchup=jobs.enqueue_automation_catchup,
+        running_count=running_count,
+        seen_keys=seen_keys,
+    )
+    logger.info(
+        "daily schedule tick: job_type=automation_catchup enqueued=%s skipped=%s outcome=%s",
+        result.get("enqueued"),
+        result.get("skipped"),
+        result.get("outcome"),
+    )
+    return "automation_catchup_tick"
 
 
 def _run_scheduled_freshness_tick() -> dict[str, object]:

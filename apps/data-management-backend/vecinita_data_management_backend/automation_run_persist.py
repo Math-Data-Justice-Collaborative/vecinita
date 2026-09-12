@@ -26,11 +26,11 @@ def maybe_record_automation_run(  # noqa: PLR0913  # mirrors write-client record
     document_id: UUID | None = None,
     revision: str | None = None,
     error: str | None = None,
-) -> None:
-    """POST run history when the write client supports it; never raise to callers."""
+) -> bool:
+    """POST run history when supported; return False when persistence fails."""
     record = getattr(write_client, "record_automation_run", None)
     if not callable(record):
-        return
+        return True
     try:
         _ = record(
             job_type=job_type,
@@ -46,3 +46,5 @@ def maybe_record_automation_run(  # noqa: PLR0913  # mirrors write-client record
             document_id,
             exc_info=True,
         )
+        return False
+    return True

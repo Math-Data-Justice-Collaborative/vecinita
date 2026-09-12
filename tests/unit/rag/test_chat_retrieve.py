@@ -130,3 +130,39 @@ def test_retrieve_chat_chunks_ce_rerank_when_enabled() -> None:
     )
     assert len(chunks) == _CE_TOP_K
     assert score_calls == ["clinic hours"]
+
+
+def test_retrieve_chat_chunks_ce_failopen_when_threshold_empties_candidates() -> None:
+    """BUG-2026-09-09: CE vs original query must not wipe multi-query pantry hits."""
+    pantry = _chunk(text="Providence food pantry hours", title="Pantry")
+
+    def retrieve_lang_fn(
+        question: str,
+        _lang: str | None,
+        _tags: list[str] | None,
+        _top_k: int,
+        _threshold: float,
+    ) -> list[RetrievedChunk]:
+        if "food pantry" in question.lower() or "food bank" in question.lower():
+            return [pantry]
+        return []
+
+    def _score(_query: str, passages: Sequence[str]) -> list[float]:
+        # All CE scores below min_retrieval_score (0.2) — mimics assistance≠pantry lexical gap.
+        return [0.05 for _ in passages]
+
+    knobs = normalize_rag_pipeline_knobs(multi_query=True, multi_query_count=3)
+    chunks = retrieve_chat_chunks(
+        ["Where can I get food assistance in Providence?"],
+        language="en",
+        tag_slugs=None,
+        top_k=3,
+        min_retrieval_score=0.2,
+        retrieve_lang_fn=retrieve_lang_fn,
+        knobs=knobs,
+        ce_enabled=True,
+        ce_scorer=CallableCrossEncoderScorer(_score),
+        ce_top_n=5,
+        rerank_question="Where can I get food assistance in Providence?",
+    )
+    assert chunks == [pantry]

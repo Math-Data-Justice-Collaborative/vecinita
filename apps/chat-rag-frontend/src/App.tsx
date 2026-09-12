@@ -12,7 +12,10 @@ import { useLocale } from "./hooks/useLocale";
 import { usePathname } from "./hooks/usePathname";
 import { useTagFilters } from "./hooks/useTagFilters";
 import { useTheme } from "./hooks/useTheme";
-import { initialSidebarOpen } from "./lib/sidebarInitial";
+import {
+  initialSidebarOpen,
+  SIDEBAR_DRAWER_MAX_WIDTH_PX,
+} from "./lib/sidebarInitial";
 import { t } from "vecinita-frontend-i18n";
 import { TooltipProvider } from "vecinita-frontend-ui";
 import "./App.css";
@@ -37,6 +40,17 @@ function AppContent() {
   const onCorpus = pathname === "/corpus" || pathname.endsWith("/corpus");
   const onFeedback = pathname === "/feedback" || pathname.endsWith("/feedback");
 
+  const navigateFromSidebar = (path: string) => {
+    navigate(path);
+    // Drawer mode: close after nav so the scrim does not cover Corpus/Chat.
+    if (
+      typeof window !== "undefined" &&
+      window.innerWidth <= SIDEBAR_DRAWER_MAX_WIDTH_PX
+    ) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="app-root">
       <EnvironmentBanner locale={locale} />
@@ -52,7 +66,7 @@ function AppContent() {
           selectedTags={tagFilters.selected}
           previousChats={chat.previousChats}
           previousSelectDisabled={chat.loading}
-          onNavigate={navigate}
+          onNavigate={navigateFromSidebar}
           onNewChat={chat.newChat}
           onToggleTag={tagFilters.toggle}
           onSelectConversation={chat.selectConversation}

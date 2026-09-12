@@ -1359,7 +1359,7 @@ Playwright optional if list↔detail cross-panel.
 3. Confirm run appears in history with status, timestamps, and error (if any).
 4. Disable or hit kill-switch — no new automation jobs enqueue.
 
-**Acceptance**: AC-AU1–AU6; TC-266–269, TC-270.
+**Acceptance**: AC-AU1–AU6, AC-AU8–AU12; TC-266–269, TC-270, TC-341–344.
 
 **Automated tests**: API e2e `tests/e2e/test_uj082_automations.py`; Vitest enable/history panel.
 **UI E2E**: Playwright if shell ↔ automations panel cross-nav.
@@ -1383,7 +1383,7 @@ Playwright optional if list↔detail cross-panel.
 3. Confirm scheduled refresh job type runs on cron without incorrectly duplicating F78 catch-up.
 4. Disable refresh for a source — schedule skips it.
 
-**Acceptance**: AC-FR1–FR6; TC-271–274, TC-270.
+**Acceptance**: AC-FR1–FR6, AC-FR8–FR9; TC-271–274, TC-270, TC-345–346.
 
 **Automated tests**: API e2e `tests/e2e/test_uj083_freshness.py`; unit hash/stale helpers.
 **UI E2E**: Playwright list ↔ refresh action if cross-panel.

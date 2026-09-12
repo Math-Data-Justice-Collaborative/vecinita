@@ -19,6 +19,7 @@ polluted the live corpus (HF-prod-corpus-test-artifacts, 2026-09-03).
 | Pattern | Examples |
 |---------|----------|
 | `*.example.com` | `https://batch-upsert-….example.com/`, `https://test.example.com/uj017-…` |
+| `*.vecinita.test` | `https://browse-housing.vecinita.test/` (legacy browse fixtures) |
 | `fixture://` | `fixture://corpus/en/community-resources.md` |
 | localhost | `http://localhost:…`, `http://127.0.0.1:…` |
 
@@ -33,7 +34,9 @@ Apply (managed hosts): set `VECINITA_ALLOW_CORPUS_RESET=1` and
 - Tear down fixture documents in the same test (or session-scoped cleanup).
 - After any accidental insert into a managed DB: dry-run the cleanup script, then `--apply`
   with the corpus-reset override (AskQuestion for live prod).
-- Prefer fixture hosts under `example.com` so the classifier can find leftovers.
+# Prefer fixture hosts under `example.com` for non-browse seeds so the classifier
+# can find leftovers. Public browse seeds may use `*.vecinita.test` (visible in
+# local browse tests; classifier + operator cleanup remove them from managed DBs).
 
 ## Do not
 

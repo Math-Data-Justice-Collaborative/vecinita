@@ -43,7 +43,28 @@ run_h2() {
   RAN=$((RAN + 1))
   echo "H2: Database ready"
   export DATABASE_URL="$db_url"
-  uv run python tests/smoke/staging_h2.py
+  # Soft-skip only when the operator host cannot reach Managed Postgres
+  # (IP allowlist / connection refused). Other H2 failures (migrations, auth)
+  # still fail the smoke. ChatRAG /health postgres remains the live gate.
+  local h2_out
+  set +e
+  h2_out="$(uv run python tests/smoke/staging_h2.py 2>&1)"
+  local h2_rc=$?
+  set -e
+  if [[ "$h2_rc" -eq 0 ]]; then
+    echo "$h2_out"
+    return 0
+  fi
+  echo "$h2_out"
+  # Include libpq "Operation timed out" (macOS/DO allowlist) — not only
+  # "timeout expired" / connection refused (EV-stage-prod-ux-validation).
+  if echo "$h2_out" | grep -Eqi 'connection refused|could not connect|timeout expired|Operation timed out|Network is unreachable|No route to host'; then
+    echo "H2: SKIP — local DATABASE_URL unreachable (network allowlist)."
+    echo "H2: continuing remaining tiers; rely on ChatRAG /health dependencies.postgres."
+    return 0
+  fi
+  echo "H2 FAILED (non-network): exiting"
+  return "$h2_rc"
 }
 
 run_h3() {

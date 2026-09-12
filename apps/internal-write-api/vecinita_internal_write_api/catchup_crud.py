@@ -47,6 +47,9 @@ def maybe_enqueue_catchup_after_document_change(  # noqa: PLR0913  # CRUD hook s
     try:
         config = get_automations_config(engine)
         kill_switch = is_automations_kill_switch_on() or config.kill_switch
+        running_count, seen_keys = jobs_client.fetch_catchup_enqueue_gates(
+            authorization=authorization
+        )
         decision = decide_catchup_enqueue(
             CatchupEnqueueRequest(
                 enabled=config.enabled,
@@ -56,8 +59,8 @@ def maybe_enqueue_catchup_after_document_change(  # noqa: PLR0913  # CRUD hook s
                     document_id=document_id,
                     revision=revision,
                 ),
-                seen_keys=frozenset(),
-                running_count=0,
+                seen_keys=seen_keys,
+                running_count=running_count,
                 max_concurrent=parse_automations_max_concurrent(),
             )
         )
@@ -75,6 +78,6 @@ def maybe_enqueue_catchup_after_document_change(  # noqa: PLR0913  # CRUD hook s
             document_id,
             exc_info=True,
         )
-        return "skip_disabled"
+        return "enqueue_failed"
     else:
         return "enqueue"

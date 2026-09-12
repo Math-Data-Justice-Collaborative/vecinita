@@ -1485,15 +1485,21 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   CRUD hooks that enqueue async Modal jobs (`document_id`+`revision` idempotent key). Shares
   **one** Modal schedule with F79 (two job types). Kill-switch + cost/concurrency caps;
   run history in Postgres via write-API; DM UI enable/disable + history (ADR-052).
-- **Inputs**: Job completion events; cron ticks; document CRUD; config flags/caps.
+  **EV-038 hardening:** daily tick must **scan residuals** (not history-only); enqueue-time
+  idempotency/`running_count`; surface enqueue/history persist failures; bounded auto-retry
+  for transient embed/transport only.
+- **Inputs**: Job completion events; cron ticks; document CRUD; config flags/caps
+  (`VECINITA_AUTOMATIONS_*`, `VECINITA_AUTOMATION_JOB_MAX_RETRIES`).
 - **Outputs**: Automation jobs; `automation_runs` history (status, last run, errors).
 - **Protected surfaces**: `infra/modal/data_management_app.py`; DM backend/FE; write-API
   + schema for run history.
-- **Journeys / tests**: UJ-082; TC-266–269, TC-270; AC-AU1–AU6.
+- **Journeys / tests**: UJ-082; TC-266–269, TC-270, TC-341–344; AC-AU1–AU6, AC-AU8–AU12.
 - **Out of scope**: #192 dashboard widgets; fine-tune train (→ F80); source refresh (→ F79);
-  auto F41 on every change.
-- **Status**: Live enabled (EV-031 M133/M135). Run history via `POST /automations/runs` + worker persist (PR #266).
-- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23, D64; ADR-052; S031; EV-031.
+  auto F41 on every change; admin UI redesign (EV-038).
+- **Limitations**: Best-effort enqueue must not look successful when persist/enqueue fails
+  (EV-038-D). Residual work still respects kill-switch and concurrency caps.
+- **Status**: Live enabled (EV-031 M133/M135). Hardening in EV-038 (spec band).
+- **Source**: S030 / EV-027; GitHub #73; S030-D2–D8, D16–D19, D23, D64; ADR-052; S031; EV-031; EV-038.
 
 ### F79: Corpus freshness automation (#219)
 
@@ -1501,14 +1507,21 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
   re-fetch/re-crawl; stale detection (default **30 days**); change-aware ingest
   (`content_hash` skip + last_checked bump); operator enable/disable per source and
   “Refresh now”. Shares Modal schedule with F78 (ADR-052).
-- **Inputs**: Registered source URLs; schedule config; operator refresh actions.
-- **Outputs**: Refreshed or verified documents; stale/last_checked visible in Admin.
+  **EV-038 hardening:** per-tick enqueue **batch/cap**; WAF/hard-403 **quarantine** (skip +
+  record; no retry storm); share F78 transient auto-retry policy where applicable.
+- **Inputs**: Registered source URLs; schedule config; operator refresh actions;
+  `VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK`, `VECINITA_FRESHNESS_WAF_QUARANTINE`.
+- **Outputs**: Refreshed or verified documents; stale/last_checked visible in Admin;
+  quarantine/skip outcomes in job metrics / `automation_runs`.
 - **Protected surfaces**: Modal schedule (shared with F78); packages/ingest; DM FE;
   write API / schema as needed.
-- **Journeys / tests**: UJ-083; TC-271–274, TC-270; AC-FR1–FR6.
-- **Out of scope**: Fine-tune (#72/F80); guaranteeing third-party uptime.
-- **Status**: Live enabled (EV-031 M133). TC-291 PASS — stale/`last_checked_at` visible on live admin list.
-- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19, D64; ADR-052; S031; EV-031.
+- **Journeys / tests**: UJ-083; TC-271–274, TC-270, TC-345–346; AC-FR1–FR6, AC-FR8–FR9.
+- **Out of scope**: Fine-tune (#72/F80); guaranteeing third-party uptime; auto-retry of
+  quarantined WAF hosts (EV-038).
+- **Limitations**: Quarantined hosts remain stale until operator disables quarantine /
+  unblocks source; third-party WAF is not “fixed” by retries.
+- **Status**: Live enabled (EV-031 M133). Hardening in EV-038 (spec band).
+- **Source**: S030 / EV-027; GitHub #219; S030-D7, D18–D19, D64; ADR-052; S031; EV-031; EV-038.
 
 ### F80: Modal LoRA fine-tune + human promote (#72)
 

@@ -17,6 +17,7 @@ TEST_ARTIFACT_URL_SQL_PREDICATE = """(
   OR url LIKE 'fixture://%'
   OR url ILIKE '%localhost%'
   OR url ILIKE '%127.0.0.1%'
+  OR url ILIKE '%vecinita.test%'
 )"""
 
 # Full SELECT used by the operator cleanup script (fixed constant, not user input).
@@ -28,6 +29,7 @@ WHERE (
   OR url LIKE 'fixture://%'
   OR url ILIKE '%localhost%'
   OR url ILIKE '%127.0.0.1%'
+  OR url ILIKE '%vecinita.test%'
 )
 ORDER BY url
 """
@@ -40,6 +42,7 @@ def is_corpus_test_artifact_url(url: str) -> bool:
 
     True for:
     - any host under ``example.com`` (incl. subdomains used by e2e)
+    - any host under ``vecinita.test`` (legacy browse/integration fixtures)
     - ``fixture://`` seed paths
     - ``localhost`` / ``127.0.0.1`` hosts
 
@@ -54,7 +57,14 @@ def is_corpus_test_artifact_url(url: str) -> bool:
     parsed = urlparse(stripped)
     host = (parsed.hostname or "").lower()
     if not host:
-        return "example.com" in lowered or "localhost" in lowered or "127.0.0.1" in lowered
+        return (
+            "example.com" in lowered
+            or "vecinita.test" in lowered
+            or "localhost" in lowered
+            or "127.0.0.1" in lowered
+        )
     if host == "example.com" or host.endswith(".example.com"):
+        return True
+    if host == "vecinita.test" or host.endswith(".vecinita.test"):
         return True
     return host in _LOCAL_HOSTS
