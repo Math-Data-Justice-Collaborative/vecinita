@@ -15,6 +15,7 @@ from vecinita_data_management_backend.schedule_catchup import (
     record_scheduled_catchup_tick,
     run_scheduled_catchup_tick,
 )
+from vecinita_shared_schemas.automations import AutomationsConfigResponse
 
 if TYPE_CHECKING:
     import pytest
@@ -23,12 +24,20 @@ DOC_ID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 
 
 class _RecordingWriteClient:
-    def __init__(self) -> None:
+    def __init__(self, *, db_enabled: bool = True) -> None:
         self.calls: list[dict[str, object]] = []
+        self.db_enabled = db_enabled
 
     def record_automation_run(self, **kwargs: object) -> UUID:
         self.calls.append(dict(kwargs))
         return uuid4()
+
+    def get_automations_config(self) -> AutomationsConfigResponse:
+        return AutomationsConfigResponse(
+            enabled=self.db_enabled,
+            kill_switch=False,
+            max_concurrent=2,
+        )
 
 
 def test_scheduled_catchup_tick_records_completed_run() -> None:
@@ -110,6 +119,13 @@ def test_scheduled_catchup_tick_records_failed_when_history_persist_fails(
             _ = kwargs
             msg = "write api down"
             raise RuntimeError(msg)
+
+        def get_automations_config(self) -> AutomationsConfigResponse:
+            return AutomationsConfigResponse(
+                enabled=True,
+                kill_switch=False,
+                max_concurrent=2,
+            )
 
     result = run_scheduled_catchup_tick(
         write_client=_FailingWriteClient(),
@@ -210,6 +226,43 @@ def test_scheduled_catchup_tick_skips_when_automations_disabled(
     def _fail_if_called(document_id: UUID, *, revision: str, embed_status: str) -> UUID:
         _ = (document_id, revision, embed_status)
         msg = "enqueue should not run when automations disabled"
+        raise AssertionError(msg)
+
+    result = run_scheduled_catchup_tick(
+        write_client=write,
+        list_residuals=lambda: [(DOC_ID, "rev-1", "missing")],
+        enqueue_catchup=_fail_if_called,
+        running_count=0,
+        seen_keys=frozenset(),
+    )
+    assert result == {
+        "job_type": "automation_catchup",
+        "enqueued": 0,
+        "skipped": 0,
+        "outcome": "skipped_disabled",
+    }
+    assert write.calls == [
+        {
+            "job_type": "automation_catchup",
+            "status": "skipped",
+            "document_id": None,
+            "revision": None,
+            "error": None,
+        }
+    ]
+
+
+def test_scheduled_catchup_tick_skips_when_db_automations_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """AC-AU1: DM UI disable (DB) blocks scheduled residual enqueue even if env on."""
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_ENABLED", "true")
+    monkeypatch.setenv("VECINITA_AUTOMATIONS_KILL_SWITCH", "false")
+    write = _RecordingWriteClient(db_enabled=False)
+
+    def _fail_if_called(document_id: UUID, *, revision: str, embed_status: str) -> UUID:
+        _ = (document_id, revision, embed_status)
+        msg = "enqueue should not run when DB automations disabled"
         raise AssertionError(msg)
 
     result = run_scheduled_catchup_tick(
