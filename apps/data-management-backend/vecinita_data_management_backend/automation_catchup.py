@@ -61,6 +61,10 @@ _DECISION_TO_OUTCOME: dict[str, CatchupWorkerOutcome] = {
 _VALID_EMBED_STATUS: frozenset[str] = frozenset({"complete", "missing", "partial", "failed"})
 
 
+def _with_history_persist_failed(metrics: dict[str, object]) -> dict[str, object]:
+    return {**metrics, "history_persist_failed": True}
+
+
 def count_running_automation_catchup(
     store: JobStore,
     *,
@@ -162,13 +166,14 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
 
     if decision != "enqueue":
         outcome = _DECISION_TO_OUTCOME[decision]
+        metrics: dict[str, object] = {
+            "catchup_outcome": outcome,
+            "documents_processed": 0,
+        }
         _ = store.update_job(
             job_id,
             status="completed",
-            metrics={
-                "catchup_outcome": outcome,
-                "documents_processed": 0,
-            },
+            metrics=metrics,
         )
         _logger.info(
             "automation_catchup %s skipped (%s) document_id=%s revision=%s",
@@ -177,7 +182,7 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
             document_id,
             revision,
         )
-        maybe_record_automation_run(
+        persisted = maybe_record_automation_run(
             write_client,
             job_type="automation_catchup",
             status=catchup_outcome_to_run_status(outcome),
@@ -185,6 +190,8 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
             revision=revision,
             error=None,
         )
+        if not persisted:
+            _ = store.update_job(job_id, metrics=_with_history_persist_failed(metrics))
         return
 
     _ = store.update_job(job_id, status="running")
@@ -198,15 +205,16 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
                 write_client=write_client,
                 fetch_document=fetch_document,
             )
+        metrics = {
+            "catchup_outcome": "reembedded",
+            "documents_processed": 1,
+        }
         _ = store.update_job(
             job_id,
             status="completed",
-            metrics={
-                "catchup_outcome": "reembedded",
-                "documents_processed": 1,
-            },
+            metrics=metrics,
         )
-        maybe_record_automation_run(
+        persisted = maybe_record_automation_run(
             write_client,
             job_type="automation_catchup",
             status=catchup_outcome_to_run_status("reembedded"),
@@ -214,18 +222,21 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
             revision=revision,
             error=None,
         )
+        if not persisted:
+            _ = store.update_job(job_id, metrics=_with_history_persist_failed(metrics))
     except Exception as exc:
+        metrics = {
+            "catchup_outcome": "failed",
+            "documents_processed": 0,
+        }
         _ = store.update_job(
             job_id,
             status="failed",
             error_code=type(exc).__name__,
             error_message=str(exc)[:500],
-            metrics={
-                "catchup_outcome": "failed",
-                "documents_processed": 0,
-            },
+            metrics=metrics,
         )
-        maybe_record_automation_run(
+        persisted = maybe_record_automation_run(
             write_client,
             job_type="automation_catchup",
             status=catchup_outcome_to_run_status("failed"),
@@ -233,4 +244,6 @@ def run_automation_catchup_job(  # noqa: PLR0913  # mirrors run_job dependency s
             revision=revision,
             error=str(exc)[:500],
         )
+        if not persisted:
+            _ = store.update_job(job_id, metrics=_with_history_persist_failed(metrics))
         raise

@@ -1,7 +1,7 @@
 # Configuration Specification
 
 > **Project**: Vecinita  
-> **Last updated**: 2026-08-07 (S030/EV-027 F75–F77 automations/freshness/FT env; prior S028 F72–F74)
+> **Last updated**: 2026-09-11 (EV-038 F78/F79 hardening knobs; prior S030/EV-027 automations/freshness/FT env; S028 F72–F74)
 
 ## Precedence
 
@@ -54,11 +54,14 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_FEEDBACK_RETENTION_DAYS` | int | `90` | No | F68 purge horizon for `feedback` rows |
 | `VECINITA_FEEDBACK_NOTIFY_WEBHOOK` | string | — | No | Optional operator webhook URL on new feedback (#214) |
 | `VECINITA_FEEDBACK_NOTIFY_EMAIL` | string | — | No | Optional operator inbox for Resend notify on new feedback (#214); requires `RESEND_API_KEY` + `RESEND_SENDER_EMAIL` on internal-write (see F35 Resend rows). **Per-environment** Resend values (EV-305 / #305) — staging must not reuse the prod API key. |
-| `VECINITA_AUTOMATIONS_ENABLED` | string | `false` | No | F75 master enable (`true`/`false`) |
-| `VECINITA_AUTOMATIONS_KILL_SWITCH` | string | `false` | No | F75/F77 hard stop — no new automation/FT train enqueue when `true` |
-| `VECINITA_AUTOMATIONS_MAX_CONCURRENT` | int | `2` | No | F75 concurrency cap for automation jobs |
-| `VECINITA_FRESHNESS_STALE_DAYS` | int | `30` | No | F76 default stale threshold (days) |
-| `VECINITA_FRESHNESS_ENABLED` | string | `false` | No | F76 schedule refresh enable |
+| `VECINITA_AUTOMATIONS_ENABLED` | string | `false` | No | F78 master enable (`true`/`false`) |
+| `VECINITA_AUTOMATIONS_KILL_SWITCH` | string | `false` | No | F78/F80 hard stop — no new automation/FT train enqueue when `true` |
+| `VECINITA_AUTOMATIONS_MAX_CONCURRENT` | int | `2` | No | F78 concurrency cap for automation jobs (enqueue-time + worker) |
+| `VECINITA_AUTOMATION_JOB_MAX_RETRIES` | int | `2` | No | EV-038 / ADR-052: max automatic retries for **transient** F78/F79 job failures (embed/transport). `0` = manual retry only. Hard WAF/quarantine never auto-retried. |
+| `VECINITA_FRESHNESS_STALE_DAYS` | int | `30` | No | F79 default stale threshold (days) |
+| `VECINITA_FRESHNESS_ENABLED` | string | `false` | No | F79 schedule refresh enable |
+| `VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK` | int | `25` | No | EV-038 / ADR-052: max freshness jobs enqueued per daily schedule tick (batch/cap). |
+| `VECINITA_FRESHNESS_WAF_QUARANTINE` | string | `true` | No | EV-038: when `true`, persistent `host_waf_blocked`/hard 403 → skip+record quarantine (no retry storm). |
 | `VECINITA_FINETUNE_ENABLED` | string | `false` | No | F77 feature flag |
 | `VECINITA_FINETUNE_ADAPTER_ID` | string | — | No | Promoted LoRA adapter id for prod `vecinita-llm` (empty = base; clear to rollback) |
 | `VECINITA_FINETUNE_ADAPTER_HASH` | string | — | No | Lowercase hex **SHA-256** of promoted adapter dir (canonical digest; ADR-022 EV-316 / #316). Empty when base-only. Set with promote; restore compares with `hmac.compare_digest`. |
@@ -378,6 +381,11 @@ Operator: `modal app stop vecinita-ollama` if it still exists.
 | `VECINITA_EMBED_BATCH_SIZE` ≥ 1 and ≤ 256 | Config / embed client (F48) |
 | `VECINITA_EMBED_MAX_RETRIES` ≥ 0 and ≤ 10 | Config / embed client (F48) |
 | `VECINITA_EMBED_RETRY_BACKOFF_S` ≥ 0 and ≤ 30 | Config / embed client (F48) |
+| `VECINITA_AUTOMATIONS_MAX_CONCURRENT` ≥ 1 and ≤ 20 | Automations config (F78 / ADR-052) |
+| `VECINITA_AUTOMATION_JOB_MAX_RETRIES` ≥ 0 and ≤ 5 | EV-038 job-level transient retry |
+| `VECINITA_FRESHNESS_STALE_DAYS` ≥ 1 and ≤ 365 | Freshness config (F79) |
+| `VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK` ≥ 1 and ≤ 500 | EV-038 freshness batch cap |
+| `VECINITA_FRESHNESS_WAF_QUARANTINE` in `true`, `false` | EV-038 WAF quarantine |
 | `VECINITA_MAX_TAGS_PER_DOCUMENT` ≥ 1 and ≤ 20 | Config module |
 | `VECINITA_MAX_TAGS_PER_CHUNK` ≥ 1 and ≤ 10 | Config module |
 | `VECINITA_BROWSE_PAGE_SIZE` ≥ 1 and ≤ 100 | Config module |

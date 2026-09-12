@@ -11,12 +11,14 @@ from vecinita_shared_schemas.automations import (
     AutomationRunListResponse,
     AutomationsConfigPatchRequest,
     AutomationsConfigResponse,
+    CatchupResidualListResponse,
 )
 
 from vecinita_internal_write_api.automations import (
     create_automation_run,
     get_automations_config,
     list_automation_runs,
+    list_catchup_residuals,
     set_automations_enabled,
 )
 from vecinita_internal_write_api.deps import WriteActorDep
@@ -57,6 +59,15 @@ def register_automations_routes(app: FastAPI, *, engine: Engine) -> None:
         page_size: Annotated[int, Query(ge=1, le=100)] = 20,
     ) -> AutomationRunListResponse:
         return list_automation_runs(engine, page=page, page_size=page_size)
+
+    @app.get(
+        "/internal/v1/automations/residuals",
+        response_model=CatchupResidualListResponse,
+    )
+    def list_automation_residuals_route(  # pyright: ignore[reportUnusedFunction]
+        _actor: WriteActorDep,
+    ) -> CatchupResidualListResponse:
+        return list_catchup_residuals(engine)
 
     @app.post(
         "/internal/v1/automations/runs",

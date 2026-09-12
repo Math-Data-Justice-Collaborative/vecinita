@@ -520,6 +520,21 @@ v1 is acceptable when all **AC-*** checkboxes pass in **11-verify-impl** intervi
 
 - [x] **AC-FT10**: `vecinita-llm-finetune` deployed via CD; `VECINITA_FINETUNE_ENABLED=true`; prod adapter pin empty; playground eval path works (TC-292, TC-293). **Signed off M135 2026-08-25 (M134 evidence).**
 
+### EV-038 — Automation / Modal job hardening (F78–F79 / ADR-052)
+
+#### F78 hardening (AC-AU8–AU12)
+
+- [ ] **AC-AU8**: Daily `automation_catchup` tick scans residual embed states (`missing`/`partial`/`failed`) and enqueues catch-up subject to kill-switch + concurrency caps — not history-only (TC-341).
+- [ ] **AC-AU9**: Job-completion and CRUD enqueue paths apply real `seen_keys` + `running_count` at enqueue time (TC-342).
+- [ ] **AC-AU10**: Failed self-enqueue or `automation_runs` persist is observable (failed/skipped/error status or metrics) — not silent warn-only success (TC-343).
+- [ ] **AC-AU11**: Transient embed/transport failures on F78/F79 jobs auto-retry up to `VECINITA_AUTOMATION_JOB_MAX_RETRIES` (default 2); hard WAF/quarantine and kill-switch blocks do not auto-retry (TC-344).
+- [ ] **AC-AU12**: Staging before/after failure rates (or available window) recorded for `automation_catchup` / `freshness_refresh`; quarantined WAF counted separately (manual/ops evidence in verify-impl).
+
+#### F79 hardening (AC-FR8–FR9)
+
+- [ ] **AC-FR8**: Scheduled freshness enqueue respects `VECINITA_FRESHNESS_MAX_ENQUEUE_PER_TICK` (default 25) (TC-345).
+- [ ] **AC-FR9**: Persistent `host_waf_blocked` / hard 403 → quarantine skip+record when `VECINITA_FRESHNESS_WAF_QUARANTINE=true`; no retry storm (TC-346).
+
 ### EV-staging-do-supabase — Distinct staging (F83 / ADR-054)
 
 - [x] **AC-ST1**: `env_role` resolves to `staging` or `prod` (not `staging_as_live`) once staging H1–H5 pass (ADR-054). — runbook flipped 2026-08-28

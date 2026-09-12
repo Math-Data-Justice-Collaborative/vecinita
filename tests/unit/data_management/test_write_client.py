@@ -17,6 +17,7 @@ from vecinita_data_management_backend.write_client import (
 from vecinita_embedding_client import (
     EMBEDDING_DIMENSION,
 )
+from vecinita_shared_schemas.automations import CatchupResidualListResponse
 from vecinita_shared_schemas.internal_write import (
     AuditEventRequest,
     BatchUpsertRequest,
@@ -724,4 +725,41 @@ def test_record_automation_run_raises_on_http_error() -> None:
     )
     with pytest.raises(InternalWriteClientError, match="record_automation_run"):
         _ = client.record_automation_run(job_type="automation_catchup", status="completed")
+    client.close()
+
+
+def test_list_catchup_residuals_returns_targets() -> None:
+    """TC-341: InternalWriteClient fetches catch-up residual targets from write API."""
+    document_id = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/internal/v1/automations/residuals"
+        assert request.headers["Authorization"] == "Bearer test-key"
+        return httpx.Response(
+            HTTPStatus.OK,
+            json={
+                "items": [
+                    {
+                        "document_id": str(document_id),
+                        "revision": "hash-1",
+                        "embed_status": "missing",
+                    }
+                ],
+                "total": 1,
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = InternalWriteClient(
+        "http://write.test",
+        api_key="test-key",
+        http_client=httpx.Client(transport=transport, base_url="http://write.test"),
+    )
+    residuals = client.list_catchup_residuals()
+    assert isinstance(residuals, CatchupResidualListResponse)
+    assert residuals.total == 1
+    assert residuals.items[0].document_id == document_id
+    assert residuals.items[0].revision == "hash-1"
+    assert residuals.items[0].embed_status == "missing"
     client.close()

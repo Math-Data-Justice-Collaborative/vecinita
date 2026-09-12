@@ -163,3 +163,101 @@ def test_jobs_client_does_not_close_injected_client() -> None:
     client.close()
 
     assert closed == []
+
+
+def test_enqueue_freshness_refresh_posts_freshness_job() -> None:
+    """enqueue_freshness_refresh POSTs job_type=freshness_refresh with force flags."""
+    document_id = uuid4()
+    job_id = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/jobs"
+        body = request.read().decode()
+        assert '"job_type":"freshness_refresh"' in body or '"job_type": "freshness_refresh"' in body
+        assert str(document_id) in body
+        assert '"force":true' in body or '"force": true' in body
+        return httpx.Response(202, json={"job_id": str(job_id), "status": "pending"})
+
+    transport = httpx.MockTransport(handler)
+    client = DataManagementJobsClient(
+        base_url="http://data-mgmt.test",
+        proxy_key="proxy-key",
+        http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
+    )
+
+    result = client.enqueue_freshness_refresh(document_id, authorization="Bearer operator-jwt")
+
+    assert result == job_id
+    client.close()
+
+
+def test_fetch_catchup_enqueue_gates_raises_on_http_error() -> None:
+    """GET /jobs failure surfaces DataManagementJobsClientError (EV-038)."""
+    transport = httpx.MockTransport(lambda _request: httpx.Response(503, text="down"))
+    client = DataManagementJobsClient(
+        base_url="http://data-mgmt.test",
+        proxy_key="proxy-key",
+        http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
+    )
+
+    with pytest.raises(DataManagementJobsClientError, match="503"):
+        _ = client.fetch_catchup_enqueue_gates()
+    client.close()
+
+
+def test_fetch_catchup_enqueue_gates_empty_jobs_payload() -> None:
+    """Missing jobs list → zero gates without raising."""
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(200, json={"jobs": "not-a-list"}),
+    )
+    client = DataManagementJobsClient(
+        base_url="http://data-mgmt.test",
+        proxy_key="proxy-key",
+        http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
+    )
+
+    assert client.fetch_catchup_enqueue_gates() == (0, frozenset())
+    client.close()
+
+
+def test_fetch_catchup_enqueue_gates_skips_malformed_jobs() -> None:
+    """Malformed / non-catchup jobs are ignored when building gate state."""
+    document_id = uuid4()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/jobs"
+        return httpx.Response(
+            200,
+            json={
+                "jobs": [
+                    "not-a-job",
+                    {
+                        "job_type": "ingest",
+                        "status": "running",
+                        "options": {"document_id": str(document_id), "revision": "rev-x"},
+                    },
+                    {
+                        "job_type": "automation_catchup",
+                        "status": "completed",
+                        "options": {"document_id": str(document_id), "revision": "rev-done"},
+                    },
+                    {
+                        "job_type": "automation_catchup",
+                        "status": "pending",
+                        "options": {"document_id": str(document_id)},
+                    },
+                ]
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    client = DataManagementJobsClient(
+        base_url="http://data-mgmt.test",
+        proxy_key="proxy-key",
+        http_client=httpx.Client(transport=transport, base_url="http://data-mgmt.test"),
+    )
+
+    assert client.fetch_catchup_enqueue_gates() == (0, frozenset())
+    client.close()

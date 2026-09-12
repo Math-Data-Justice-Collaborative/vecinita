@@ -20,7 +20,6 @@ STALE_PATTERNS=(
   'docs/audits\.md'
   'docs/context-brief\.md'
   'docs/reference\.md'
-  'docs/context/'
 )
 
 # Relative links from docs/ root to moved filenames (must use sessions/S000-internal-docs-archive/)
@@ -29,7 +28,6 @@ RELATIVE_PATTERNS=(
   '\]\(deploy-state\.md\)'
   '\]\(context-brief\.md\)'
   '\]\(\.\./deploy-state\.md\)'
-  '\]\(\.\./\.\./context/'
   '\]\(\.\./\.\./context-brief\.md\)'
   '\]\(\.\./\.\./execution-plan\.md\)'
   '\]\(\.\./\.\./project-board\.md\)'

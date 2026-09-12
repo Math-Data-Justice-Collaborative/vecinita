@@ -60,14 +60,17 @@ The EV-037 waiver for a standing staff-maintainability runbook is **lifted** (EV
 ```
 [Corpus: product]          → feature-list.md (prefer + §Fn when known)
 [Corpus: feature-list.md §F70]
-[Corpus: feature-list.md §F75]   → corpus change automations (catch-up)
-[Corpus: feature-list.md §F76]   → freshness (stale threshold / Refresh now)
-[Corpus: feature-list.md §F77]   → LoRA fine-tune + human promote
+[Corpus: feature-list.md §F75]   → optional ingest bilingual translation (EV-030)
+[Corpus: feature-list.md §F76]   → corpus language parity metrics (EV-031)
+[Corpus: feature-list.md §F78]   → corpus change automations (catch-up)
+[Corpus: feature-list.md §F79]   → freshness (stale threshold / Refresh now)
+[Corpus: feature-list.md §F80]   → LoRA fine-tune + human promote
 [Corpus: feature-list.md §F84]   → admin Monitoring + staging Grafana/Loki (#114)
 [Corpus: feature-list.md §F85]   → FAQ fast-path canned answers (#79 / #320; Layer D)
 [Corpus: feature-list.md §F86]   → Beta feature labeling + admin feedback issue link
 [Spec: docs/adr/ADR-022-gpu-memory-snapshot-cold-start.md]
 [Spec: docs/adr/ADR-052-corpus-automation-orchestration.md]
+[Spec: docs/context/ev-038-automation-modal-hardening.md]
 [Spec: docs/adr/ADR-053-modal-lora-finetune.md]
 [Spec: docs/adr/ADR-055-operational-monitoring-grafana-loki.md]
 [Corpus: api]

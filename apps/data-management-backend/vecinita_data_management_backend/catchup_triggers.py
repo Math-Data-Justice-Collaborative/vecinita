@@ -15,6 +15,7 @@ from vecinita_shared_schemas.automations import (
     CatchupEnqueueDecision,
     CatchupJobsClient,
     EmbedStatus,
+    catchup_idempotency_key,
     enqueue_catchup_targets,
     is_automations_enabled,
     is_automations_kill_switch_on,
@@ -22,7 +23,7 @@ from vecinita_shared_schemas.automations import (
 )
 
 if TYPE_CHECKING:
-    from vecinita_data_management_backend.store import JobRecord
+    from vecinita_data_management_backend.store import JobRecord, JobStore
 
 _logger = logging.getLogger(__name__)
 
@@ -82,10 +83,35 @@ def targets_from_completed_job(
     return [(doc_id, revision, residual) for doc_id in document_ids]
 
 
+def catchup_gate_state(store: JobStore | None) -> tuple[int, frozenset[str]]:
+    """Return running count and seen idempotency keys for pending/running catch-up jobs."""
+    if store is None:
+        return 0, frozenset()
+    running_count = 0
+    seen: set[str] = set()
+    for job in store.list_jobs():
+        if job.job_type != "automation_catchup" or job.status not in {"pending", "running"}:
+            continue
+        if job.status == "running":
+            running_count += 1
+        raw_document_id = job.options.get("document_id")
+        raw_revision = job.options.get("revision")
+        if raw_document_id is None or raw_revision is None:
+            continue
+        seen.add(
+            catchup_idempotency_key(
+                document_id=str(raw_document_id),
+                revision=str(raw_revision),
+            )
+        )
+    return running_count, frozenset(seen)
+
+
 def maybe_enqueue_after_job(
     record: JobRecord,
     *,
     jobs_client: CatchupJobsClient | None,
+    store: JobStore | None = None,
 ) -> list[tuple[CatchupEnqueueDecision, UUID | None]]:
     """Best-effort async catch-up enqueue after a terminal DM job (never raises)."""
     if jobs_client is None:
@@ -93,15 +119,16 @@ def maybe_enqueue_after_job(
     targets = targets_from_completed_job(record)
     if not targets:
         return []
+    running_count, seen_keys = catchup_gate_state(store)
     try:
         return enqueue_catchup_targets(
             jobs_client,
             targets=targets,
             enabled=is_automations_enabled(),
             kill_switch=is_automations_kill_switch_on(),
-            running_count=0,
+            running_count=running_count,
             max_concurrent=parse_automations_max_concurrent(),
-            seen_keys=frozenset(),
+            seen_keys=seen_keys,
         )
     except Exception:  # noqa: BLE001  # catch-up enqueue must never fail the parent job
         _logger.warning(
@@ -109,4 +136,8 @@ def maybe_enqueue_after_job(
             record.job_id,
             exc_info=True,
         )
-        return []
+        if store is not None:
+            metrics = dict(record.metrics or {})
+            metrics["catchup_enqueue_failed"] = True
+            _ = store.update_job(record.job_id, metrics=metrics)
+        return [("enqueue_failed", None)]

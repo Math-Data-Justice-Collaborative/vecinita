@@ -47,6 +47,27 @@ def test_run_daily_dispatch_invokes_both_branches() -> None:
     }
 
 
+def test_run_daily_dispatch_continues_freshness_when_catchup_raises() -> None:
+    """EV-038: catch-up branch errors must not abort the freshness branch."""
+
+    def run_catchup() -> str:
+        msg = "residuals unavailable"
+        raise RuntimeError(msg)
+
+    def run_freshness() -> str:
+        return "freshness_ok"
+
+    results = run_daily_dispatch(run_catchup=run_catchup, run_freshness=run_freshness)
+    catchup = results["automation_catchup"]
+    assert isinstance(catchup, dict)
+    assert catchup == {
+        "outcome": "branch_error",
+        "error": "RuntimeError",
+        "message": "residuals unavailable",
+    }
+    assert results["freshness_refresh"] == "freshness_ok"
+
+
 def test_run_daily_dispatch_skips_unknown_planned_types(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -75,4 +96,5 @@ def test_data_management_app_has_period_days_1_schedule() -> None:
     assert "daily_corpus_automations" in source
     assert "automation_catchup" in source
     assert "freshness_refresh" in source
-    assert "record_scheduled_catchup_tick" in source
+    assert "run_scheduled_catchup_tick" in source
+    assert "list_catchup_residuals" in source
