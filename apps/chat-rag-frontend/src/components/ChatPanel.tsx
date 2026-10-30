@@ -9,12 +9,19 @@ import {
 import { ActionIcon } from "vecinita-frontend-ui";
 
 import {
+  AskStreamError,
   formatAskFailureMessage,
   isDoneEvent,
   isSourcesEvent,
   isTokenEvent,
   streamAsk,
 } from "../api/ask";
+import {
+  clearHumanPass,
+  fetchHumanConfig,
+  getHumanPass,
+  type HumanVerificationConfig,
+} from "../api/human";
 import { recordAskStarted } from "../api/prewarmPolicy";
 import { prewarmChatServices } from "../api/warm";
 import type { Source } from "../api/types";
@@ -28,6 +35,7 @@ import { t } from "vecinita-frontend-i18n";
 import { ColdStartWait } from "./ColdStartWait";
 import { parseEnergyEstimate } from "../api/energyEstimate";
 import { EnergyEstimatePanel } from "./EnergyEstimatePanel";
+import { HumanCheck } from "./HumanCheck";
 import { MessageMarkdown } from "./MessageMarkdown";
 import { SourceList } from "./SourceList";
 import { SuggestedQuestions } from "./SuggestedQuestions";
@@ -71,6 +79,9 @@ function ChatPanelView({
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [waitUxActive, setWaitUxActive] = useState(false);
+  const [humanConfig, setHumanConfig] =
+    useState<HumanVerificationConfig | null>(null);
+  const [showHumanCheck, setShowHumanCheck] = useState(false);
   const sawFirstTokenRef = useRef(false);
   const { locale } = useLocale();
   const { navigate } = usePathname();
@@ -90,6 +101,7 @@ function ChatPanelView({
     try {
       const { baseUrl } = requireChatApiConfig();
       prewarmChatServices(baseUrl);
+      void fetchHumanConfig(baseUrl).then(setHumanConfig);
     } catch {
       // Config missing in tests or misconfigured deploy; chat still works without pre-warm.
     }
@@ -106,6 +118,11 @@ function ChatPanelView({
   async function submitQuestion() {
     const trimmed = question.trim();
     if (!trimmed || loading) {
+      return;
+    }
+    // F-HUMAN: hold the question until the visitor passes the check.
+    if (humanConfig?.enabled && !getHumanPass()) {
+      setShowHumanCheck(true);
       return;
     }
 
@@ -131,6 +148,7 @@ function ChatPanelView({
       for await (const chunk of streamAsk(trimmed, baseUrl, {
         language: locale,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
+        humanPass: getHumanPass() ?? undefined,
         onRetry: () => {
           setWaitUxActive(true);
         },
@@ -152,7 +170,18 @@ function ChatPanelView({
 
       setAssistantSources(assistantId, sources);
     } catch (err) {
-      const message = formatAskFailureMessage(err, locale);
+      const humanPassRejected =
+        humanConfig?.enabled === true &&
+        err instanceof AskStreamError &&
+        err.status === 403;
+      if (humanPassRejected) {
+        clearHumanPass();
+        setShowHumanCheck(true);
+        setQuestion(trimmed);
+      }
+      const message = humanPassRejected
+        ? t(locale, "chat.humanCheck.prompt")
+        : formatAskFailureMessage(err, locale);
       setError(message);
       appendAssistantToken(assistantId, message);
     } finally {
@@ -251,6 +280,17 @@ function ChatPanelView({
         <p className="error" role="alert">
           {error}
         </p>
+      ) : null}
+
+      {showHumanCheck && humanConfig?.enabled ? (
+        <HumanCheck
+          baseUrl={requireChatApiConfig().baseUrl}
+          siteKey={humanConfig.site_key}
+          onVerified={() => {
+            setShowHumanCheck(false);
+            void submitQuestion();
+          }}
+        />
       ) : null}
 
       <form className="chat-form" onSubmit={(e) => void handleSubmit(e)}>

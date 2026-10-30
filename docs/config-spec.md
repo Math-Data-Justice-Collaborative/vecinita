@@ -97,6 +97,12 @@ CLI flags (where present) > Environment variables > Config file > Defaults
 | `VECINITA_TAG_SEED_PATH` | string | `data/fixtures/tags/seed_tags.json` | No | Starter tag vocabulary for LLM + browse facets |
 | `VECINITA_FAQ_FASTPATH_ENABLED` | string | `true` | No | F85 / EV-320: enable reviewed FAQ canned-answer bypass before retrieve/LLM. `false`/`0`/`off` forces `answer_path=rag_llm`. Not F43 cache. |
 | `VECINITA_FAQ_STORE_PATH` | string | (package/default FAQ YAML) | No | Path to versioned bilingual FAQ store (variants + answers). Hot-load editor deferred (#81). |
+| `VECINITA_HUMAN_VERIFICATION_ENABLED` | string | `false` | No | F-HUMAN: require a Turnstile human pass (`X-Human-Pass`) on `/api/v1/ask` and `/api/v1/ask/stream`. Fails closed (503) when `true` without a secret. See `docs/security/F-HUMAN-README.md`. |
+| `VECINITA_TURNSTILE_SITE_KEY` | string | — | When F-HUMAN on | Cloudflare Turnstile site key (public; served by `GET /api/v1/human/config`) |
+| `VECINITA_TURNSTILE_SECRET_KEY` | string | — | When F-HUMAN on | Cloudflare Turnstile secret (DO encrypted secret; never in repo) |
+| `VECINITA_HUMAN_PASS_SIGNING_KEY` | string | (Turnstile secret) | No | HMAC key for human passes; set a separate random value in prod |
+| `VECINITA_HUMAN_PASS_TTL_S` | int | `3600` | No | Human pass lifetime; must be 60–86400 |
+| `VECINITA_TURNSTILE_SEND_REMOTE_IP` | string | `false` | No | Privacy: send visitor IP to Cloudflare only when `true` |
 
 ### DO internal write API
 

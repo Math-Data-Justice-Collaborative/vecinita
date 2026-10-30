@@ -1,5 +1,6 @@
 import type { Locale } from "../hooks/useLocale.types";
 import { t } from "vecinita-frontend-i18n";
+import { HUMAN_PASS_HEADER } from "./human";
 import type { Source, StreamEvent } from "./types";
 
 /** Keep in sync with `vecinita_shared_schemas.transient_http`. */
@@ -46,7 +47,11 @@ function sleep(ms: number): Promise<void> {
 async function* streamAskOnce(
   question: string,
   baseUrl: string,
-  options?: { tags?: string[] | undefined; language?: Locale | undefined },
+  options?: {
+    tags?: string[] | undefined;
+    language?: Locale | undefined;
+    humanPass?: string | undefined;
+  },
 ): AsyncGenerator<StreamEvent> {
   const body: { question: string; tags?: string[]; language?: Locale } = {
     question,
@@ -57,9 +62,15 @@ async function* streamAskOnce(
   if (options?.tags && options.tags.length > 0) {
     body.tags = options.tags;
   }
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (options?.humanPass) {
+    headers[HUMAN_PASS_HEADER] = options.humanPass;
+  }
   const response = await fetch(`${baseUrl}/api/v1/ask/stream`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
   if (!response.ok) {
@@ -107,6 +118,8 @@ async function* streamAskOnce(
 export type StreamAskOptions = {
   tags?: string[] | undefined;
   language?: Locale | undefined;
+  /** F-HUMAN pass sent as `X-Human-Pass` when the check is enabled. */
+  humanPass?: string | undefined;
   onRetry?: ((attempt: number, maxAttempts: number) => void) | undefined;
 };
 
@@ -123,6 +136,7 @@ export async function* streamAsk(
       yield* streamAskOnce(question, baseUrl, {
         tags: options?.tags,
         language: options?.language,
+        humanPass: options?.humanPass,
       });
       return;
     } catch (err) {

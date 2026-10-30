@@ -621,6 +621,28 @@ button.secondary:hover:not(:disabled) {
   margin: 0 0 0.75rem;
 }
 
+/* ---------- F-HUMAN "are you human?" check ---------- */
+
+.human-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.human-check-prompt,
+.human-check-status {
+  margin: 0;
+}
+
+.human-check-widget {
+  min-height: 65px;
+}
+
 /* ---------- Tag chips ---------- */
 
 .tag-chips {
