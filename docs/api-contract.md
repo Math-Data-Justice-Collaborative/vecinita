@@ -294,6 +294,15 @@ On `faq_bypass`, `energy_estimate` MAY be omitted or zeroed (no GPU wall time).
 
 - **Response** `200`: `{"status": "ok", "dependencies": {"postgres": "ok", "modal_embed": "ok", "modal_llm": "ok"}}`
 
+### F-HUMAN "are you human?" check (Cloudflare Turnstile)
+
+Off unless `VECINITA_HUMAN_VERIFICATION_ENABLED=true` (`docs/config-spec.md`). Guide: `docs/security/F-HUMAN-README.md`.
+
+- **GET `/api/v1/human/config`** → `{ enabled, provider: "turnstile", site_key }`. Public; never returns the secret.
+- **POST `/api/v1/human/verify`** `{ token }` → `{ human_pass, expires_at }`. 403 when Cloudflare rejects or is unreachable (fail closed); 503 when enabled without a secret; 422 on an empty token.
+- **GET `/api/v1/human/stats`** → `{ since, counts }`: outcome counts only (no IP, token, or question).
+- **`X-Human-Pass` header** on `POST /api/v1/ask` and `POST /api/v1/ask/stream` when enabled; missing/invalid/expired → **403** `human_verification_required`. Header only, never a query parameter. Allowed in CORS.
+
 ---
 
 ## Data Management — Modal ASGI

@@ -533,6 +533,7 @@ components:
     HumanVerifyRequest:
       type: object
       required: [token]
+      additionalProperties: false
       properties:
         token:
           type: string
