@@ -36,6 +36,13 @@ const enStrings = {
   "chat.askStillStarting":
     "The assistant is still starting up. Please wait a moment and try again.",
   "chat.askUnauthorized": "You are not authorized to use the assistant.",
+  "chat.humanCheck.label": "Are you human? check",
+  "chat.humanCheck.prompt":
+    "Quick check before your question: please confirm you are a person.",
+  "chat.humanCheck.verifying": "Checking…",
+  "chat.humanCheck.failed": "We could not confirm the check. Please try again.",
+  "chat.humanCheck.unavailable":
+    "The check could not load. Please check your connection and reload the page.",
   "chat.asking": "Asking…",
   "chat.backToChat": "Back to chat",
   "chat.chatPanelLabel": "Community Q&A chat",
@@ -805,6 +812,14 @@ const esStrings = {
   "chat.askStillStarting":
     "El asistente aún se está iniciando. Espera un momento e inténtalo de nuevo.",
   "chat.askUnauthorized": "No tienes autorización para usar el asistente.",
+  "chat.humanCheck.label": "Verificación: ¿eres una persona?",
+  "chat.humanCheck.prompt":
+    "Una verificación rápida antes de tu pregunta: confirma que eres una persona.",
+  "chat.humanCheck.verifying": "Verificando…",
+  "chat.humanCheck.failed":
+    "No pudimos confirmar la verificación. Inténtalo de nuevo.",
+  "chat.humanCheck.unavailable":
+    "La verificación no pudo cargarse. Revisa tu conexión y vuelve a cargar la página.",
   "chat.asking": "Preguntando…",
   "chat.backToChat": "Volver al chat",
   "chat.chatPanelLabel": "Chat de preguntas comunitarias",
