@@ -38,6 +38,11 @@ from vecinita_chat_rag_backend.browse import get_document, list_documents, list_
 from vecinita_chat_rag_backend.config import ChatRagSettings
 from vecinita_chat_rag_backend.db import create_app_engine
 from vecinita_chat_rag_backend.energy import EnergyKnobs, compute_energy_estimate
+from vecinita_chat_rag_backend.human_verification import (
+    HUMAN_PASS_HEADER,
+    HumanVerificationConfig,
+    register_human_verification,
+)
 from vecinita_chat_rag_backend.service import ChatRagService
 
 if TYPE_CHECKING:
@@ -234,10 +239,11 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
     *,
     settings: ChatRagSettings | None = None,
     chat_service: ChatRagService | None = None,
+    human_verification: HumanVerificationConfig | None = None,
 ) -> FastAPI:
     """Build the ChatRAG FastAPI app with health, ask, and streaming routes."""
     app = FastAPI(title="Vecinita ChatRAG", version="0.2.0")
-    _ = configure_cors(app)
+    _ = configure_cors(app, extra_allow_headers=[HUMAN_PASS_HEADER])
     resolved_settings = settings
     resolved_service = chat_service
     resolved_engine: Engine | None = None
@@ -263,6 +269,17 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         if resolved_service is None:
             resolved_service = ChatRagService.from_settings(get_settings())
         return resolved_service
+
+    resolved_human = human_verification
+
+    def get_human_config() -> HumanVerificationConfig:
+        nonlocal resolved_human
+        if resolved_human is None:
+            resolved_human = HumanVerificationConfig.from_env()
+        return resolved_human
+
+    # F-HUMAN: no-op unless VECINITA_HUMAN_VERIFICATION_ENABLED=true.
+    require_human_pass = register_human_verification(app, get_human_config)
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:  # pyright: ignore[reportUnusedFunction]  # FastAPI route
@@ -312,6 +329,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         openapi_extra=_ask_request_openapi_extra(),
     )
     async def ask(request: Request) -> AskResponse:  # pyright: ignore[reportUnusedFunction]
+        require_human_pass(request)
         body = await parse_ask_body(request)
         cfg = get_settings()
         started = time.perf_counter()
@@ -347,6 +365,7 @@ def create_app(  # noqa: C901, PLR0915  # FastAPI factory registers many route h
         openapi_extra=_ask_request_openapi_extra(),
     )
     async def ask_stream(request: Request) -> StreamingResponse:  # pyright: ignore[reportUnusedFunction]
+        require_human_pass(request)
         body = await parse_ask_body(request)
         cfg = get_settings()
         started = time.perf_counter()

@@ -16,6 +16,8 @@ paths:
   /ask:
     post:
       operationId: ask
+      parameters:
+        - $ref: "#/components/parameters/HumanPass"
       summary: Non-streaming bilingual Q&A
       requestBody:
         required: true
@@ -32,11 +34,15 @@ paths:
                 $ref: "#/components/schemas/AskResponse"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "403":
+          $ref: "#/components/responses/HumanVerificationRequired"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
   /ask/stream:
     post:
       operationId: askStream
+      parameters:
+        - $ref: "#/components/parameters/HumanPass"
       summary: Streaming answer (SSE)
       requestBody:
         required: true
@@ -56,6 +62,8 @@ paths:
                 type: string
         "400":
           $ref: "#/components/responses/ValidationError"
+        "403":
+          $ref: "#/components/responses/HumanVerificationRequired"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
   /documents:
@@ -162,7 +170,63 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /human/config:
+    get:
+      operationId: getHumanVerificationConfig
+      summary: F-HUMAN public config (is the Turnstile check on; site key)
+      responses:
+        "200":
+          description: Whether the chat UI must show the check
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HumanVerificationPublicConfig"
+  /human/verify:
+    post:
+      operationId: verifyHuman
+      summary: Exchange a Turnstile widget token for a short-lived human pass (F-HUMAN)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HumanVerifyRequest"
+      responses:
+        "200":
+          description: Human pass for X-Human-Pass
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HumanVerifyResponse"
+        "403":
+          $ref: "#/components/responses/HumanVerificationRequired"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /human/stats:
+    get:
+      operationId: getHumanVerificationStats
+      summary: F-HUMAN outcome counters (no PII; per instance, reset on restart)
+      responses:
+        "200":
+          description: Outcome counts since `since` (epoch seconds)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
 components:
+  parameters:
+    HumanPass:
+      name: X-Human-Pass
+      in: header
+      required: false
+      description: >
+        F-HUMAN pass from POST /human/verify. Required only when
+        VECINITA_HUMAN_VERIFICATION_ENABLED=true.
+      schema:
+        type: string
   # Documented for OpenAPI completeness; ChatRAG remains public (security: []).
   securitySchemes:
     publicUnauthenticated:
@@ -455,6 +519,34 @@ components:
             postgres: ok
             modal_embed: ok
             modal_llm: ok
+    HumanVerificationPublicConfig:
+      type: object
+      required: [enabled, provider, site_key]
+      properties:
+        enabled:
+          type: boolean
+        provider:
+          type: string
+          enum: [turnstile]
+        site_key:
+          type: string
+    HumanVerifyRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 4096
+    HumanVerifyResponse:
+      type: object
+      required: [human_pass, expires_at]
+      properties:
+        human_pass:
+          type: string
+        expires_at:
+          type: integer
+          description: Expiry (epoch seconds)
     ErrorBody:
       type: object
       properties:
@@ -469,6 +561,12 @@ components:
             $ref: "#/components/schemas/ErrorBody"
     ServiceUnavailable:
       description: Upstream dependency unavailable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorBody"
+    HumanVerificationRequired:
+      description: F-HUMAN check missing, expired, or failed
       content:
         application/json:
           schema:
