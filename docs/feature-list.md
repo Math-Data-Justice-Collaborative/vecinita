@@ -2,7 +2,7 @@
 
 > **Project**: Vecinita  
 > **Repository**: `/root/GitHub/VECINA/vecinita`  
-> **Last updated**: 2026-09-02 (EV-320 F85 FAQ fast-path Layer D #320 / #79)
+> **Last updated**: 2026-11-24 (F87 / F88 security recipes F-HUMAN and F-FLOOD added; F87 in review as PR #394, F88 planned)
 > **Source**: Standing product specs + evolve deltas; cite [ADR index](adr/README.md) and session decision logs for cycle history.
 
 ## Summary
@@ -87,6 +87,8 @@
 | F84 | Admin monitoring dashboard + staging Grafana/Loki/alerts | Planned | Data Management / infra | internal-write-api, chat-rag-backend, DM frontend, database, `infra/observability/` | EV-036 #114; ADR-055 |
 | F85 | FAQ fast-path (canned answers; skip LLM) | Implemented | ChatRAG | chat-rag-backend, shared-schemas | EV-320 #320 / #79; ADR-022 Layer D |
 | F86 | Beta feature labeling + feedback link (admin) | Implemented | Data Management / Cross-cutting | data-management-frontend, frontend-i18n, README, GH About, `.cursor/rules` | EV-beta-feature-labeling #374 |
+| F87 | Are-you-human verification (security recipe F-HUMAN) | In review (PR #394) | Cross-cutting (security) | chat-rag-backend, chat-rag-frontend, frontend-i18n, openapi | PR #394 (base `stage`); [docs/security/F-HUMAN.md](security/F-HUMAN.md); origin: gateway PR 39 |
+| F88 | Flood control (security recipe F-FLOOD) | Planned | Cross-cutting (security) | chat-rag-backend (target), chat-rag-frontend (429 message) | [docs/security/F-FLOOD.md](security/F-FLOOD.md); reference: gateway PR 40; next after F87 |
 
 **Status key**: Implemented = production-ready / shipped in tree, In progress = actively building this cycle, Planned = not yet built, Experimental = works but not validated
 
@@ -1685,6 +1687,56 @@ remain `/models/ollama*` and `/internal/v1/models/ollama*`. `OllamaModelsClient`
 - **Out of scope**: ChatRAG public Beta banner; Automations/Freshness/Rebuild Beta this
   cycle; changing FT/playground runtime behavior; duplicating #352 WRWC ops beta loop.
 - **Source**: EV-beta-feature-labeling; context brief `beta-feature-labeling.md`.
+
+### F87: Are-you-human verification (security recipe F-HUMAN)
+
+- **What it does**: Checks that a requester is a person, not a bot, **before** a question
+  reaches retrieval and the Modal LLM, so scripted traffic cannot run up GPU cost. Uses
+  Cloudflare Turnstile (usually invisible, EN/ES) and a 1-hour HMAC-signed pass kept in
+  memory. No account, no identity created. **Off by default.**
+- **Inputs**: Turnstile token from the browser; pass in the `X-Human-Pass` header (header
+  only, never in a URL); settings `VECINITA_HUMAN_VERIFICATION_ENABLED` (default false),
+  `VECINITA_TURNSTILE_SITE_KEY`, `VECINITA_TURNSTILE_SECRET_KEY`,
+  `VECINITA_HUMAN_PASS_SIGNING_KEY`, `VECINITA_HUMAN_PASS_TTL_S`,
+  `VECINITA_TURNSTILE_SEND_REMOTE_IP`.
+- **Outputs**: `GET /api/v1/human/config`, `POST /api/v1/human/verify`,
+  `GET /api/v1/human/stats` (outcome counts only); `403 human_verification_required` for
+  `/api/v1/ask` and `/api/v1/ask/stream` without a valid pass; fails closed (503 if enabled
+  without a secret; no pass if Cloudflare is unreachable).
+- **Acceptance**: Formal AC / TC numbers not yet allocated. PR #394 ships 24 backend tests
+  (`tests/unit/chat_rag/test_human_verification.py`) and 5 frontend tests; the contract is
+  documented per ADR-011 (`openapi/chat-rag.yaml`, `docs/api-contract.md`).
+- **Status**: **In review**, PR #394 (`feat/F-HUMAN-turnstile` into `stage`), review requested
+  from the tech team. Ported from the reference gateway (`acadiagit/vecinita` PR 39).
+  Rollout steps are in the PR's `docs/security/F-HUMAN-README.md`.
+- **Out of scope**: Accounts or staff login (F-STAFF-AUTH); rate limits (F88); gating routes
+  other than the two ask routes (open item on the recipe page).
+- **Naming**: **F-HUMAN** is the security-recipe id; **F87** is the work item.
+- **Source**: Security Guide recipe 1; [docs/security/F-HUMAN.md](security/F-HUMAN.md);
+  PR #394; GitHub issue to be created.
+
+### F88: Flood control (security recipe F-FLOOD)
+
+- **What it does**: Caps request volume per anonymous visitor so a flood cannot spike cost
+  or take the RAG path down. Sliding-window limits per visitor in two tiers by endpoint
+  cost (reference defaults: ask 10/min and 60/hr per visitor, 300/min global; light 60/min
+  per visitor, 600/min global), with a global ceiling per tier. Visitor keys are a salted
+  HMAC held in memory only; the address is never stored or logged.
+- **Inputs**: Client address (in memory only, `X-Forwarded-For` read from the right with a
+  trusted-proxy-hops setting); limit settings; an enable flag, off by default.
+- **Outputs**: Bilingual `429` with `Retry-After` for a visitor over a limit (denied requests
+  are not counted, question never read or echoed); outcome-count-only audit stats.
+- **Acceptance**: Formal AC / TC numbers not yet allocated. The reference gateway has 37 unit
+  tests and live QA cases RATE-01 to RATE-05, all passing.
+- **Status**: **Planned.** Coded and tested only in the reference gateway
+  (`acadiagit/vecinita` PR 40, stacked on PR 39). Not yet in this repo. It is the next
+  security feature after F87 (named as such in PR #394). A port to `apps/chat-rag-backend`,
+  stacked on #394, waits for the team's go-ahead and the review of #394.
+- **Out of scope**: Human verification (F87); a shared counter store across instances
+  (recipe open item 2); accounts or per-account limits.
+- **Naming**: **F-FLOOD** is the security-recipe id; **F88** is the work item.
+- **Source**: Security Guide recipe 2; [docs/security/F-FLOOD.md](security/F-FLOOD.md);
+  GitHub issue to be created.
 
 ## Planned / Deferred (post-v1)
 

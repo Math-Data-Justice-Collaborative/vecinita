@@ -62,7 +62,7 @@ These admin surfaces are available for early use but may be incomplete or flaky
 [issue #374 — Beta feature feedback](https://github.com/Math-Data-Justice-Collaborative/vecinita/issues/374)
 (label `beta-feedback`). Do not paste secrets or personal data.
 
-See [docs/feature-list.md](docs/feature-list.md) for the full feature catalog (F1–F86).
+See [docs/feature-list.md](docs/feature-list.md) for the full feature catalog (F1–F88).
 
 ## Docs
 
@@ -73,7 +73,8 @@ See [docs/feature-list.md](docs/feature-list.md) for the full feature catalog (F
 - [OSCAR feasibility (Carlos review)](docs/oscar-hosting-feasibility.md)
 - [Data management dev guide](docs/runbooks/data-management-dev-guide.md)
 - [Corpus operator guide](docs/runbooks/corpus-operator-guide.md)
-- [Feature list](docs/feature-list.md) — F1–F77
+- [Feature list](docs/feature-list.md) — F1–F88
+- [Security: method and inventory](docs/security/README.md) — F-HUMAN (F87), F-FLOOD (F88), static analysis
 - [API contract](docs/api-contract.md)
 - [Config spec](docs/config-spec.md)
 - [ADR index](docs/adr/README.md)

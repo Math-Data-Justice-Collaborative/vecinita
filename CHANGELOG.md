@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Security recipes F-HUMAN and F-FLOOD (F87–F88) — docs only
+
+- **F87**: Are-you-human verification (Cloudflare Turnstile, signed 1-hour pass). **In review** as PR #394 (base `stage`), off by default; this change only records it in the feature list and security docs
+- **F88**: Flood control (per-visitor sliding windows, bilingual 429). **Planned**, next after F87; coded and tested only in the reference gateway (`acadiagit/vecinita` PR 40), not yet in this repo
+- **Docs:** new `docs/security/README.md` (method and inventory), `F-HUMAN.md`, `F-FLOOD.md`; feature-list rows and detail sections. No runtime change.
+
 ### EV-027: Corpus automations + LoRA FT (F75–F77) — S030 / #73 #219 #72
 
 - **F75**: Catch-up enqueue for failed/partial/missing embeddings (`job_type=automation_catchup`); kill-switch + run history
