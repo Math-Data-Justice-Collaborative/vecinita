@@ -6,7 +6,7 @@
 
 - **F87**: Are-you-human verification (Cloudflare Turnstile, signed 1-hour pass). **In review** as PR #394 (base `stage`), off by default; this change only records it in the feature list and security docs
 - **F88**: Flood control (per-visitor sliding windows, bilingual 429). **Planned**, next after F87; coded and tested only in the reference gateway (`acadiagit/vecinita` PR 40), not yet in this repo
-- **Docs:** new `docs/security/README.md` (method and inventory), `F-HUMAN.md`, `F-FLOOD.md`; feature-list rows and detail sections. No runtime change.
+- **Docs:** new `docs/security/README.md` (method and inventory), `security-guide.md` (the Security Guide), `F-HUMAN.md`, `F-FLOOD.md`; feature-list rows and detail sections. No runtime change.
 
 ### EV-027: Corpus automations + LoRA FT (F75–F77) — S030 / #73 #219 #72
 

@@ -16,13 +16,13 @@ number (for example **F87**) names the *work item* in this repo.
 |---|---|---|
 | 1. Concepts | *Vecinita Security and Privacy White Paper* | Plain-language foundations, for example authentication ("who, if anyone, is asking?") vs. authorization ("what may they do?"). |
 | 2. Every option | *Vecinita Security Cookbook* (book one) | Every security feature we might add, written as a **dish** with a stable id (F-HUMAN, F-FLOOD, ...), options, and tradeoffs. No dish is chosen here. House rules bind every dish. |
-| 3. Chosen and prioritized | *Vecinita Security Guide* (book two) | Only the dishes the team selected, in priority order, each with a decision sentence. |
+| 3. Chosen and prioritized | *Vecinita Security Guide* (book two), repo copy: [security-guide.md](security-guide.md) | Only the dishes the team selected, in priority order, each with a decision sentence. |
 | 4. Recipe in the repo | `docs/security/F-*.md` | The decision, how each house rule is kept, the tests, and open items. |
 | 5. Work item | A feature entry in [docs/feature-list.md](../feature-list.md) and a GitHub issue | Starts the implementation and testing workflow. |
 | 6. Code | A PR named after the dish | The implementation. |
 | 7. Proof | Security QA cases, each naming the dish it proves (`dish:`) | The runner reports results by dish. |
 
-The White Paper, Cookbook, and Guide live in the team's shared Drive.
+The White Paper and Cookbook live in the team's shared Drive. The Guide is kept in this repo as [security-guide.md](security-guide.md) and in the Drive; the Drive copy is the working worksheet where the team fills in decisions.
 
 **House rules** (from the Cookbook, binding on every dish):
 
